@@ -1,0 +1,9 @@
+./node_modules/**
+README.md
+LICENSE
+./.github/**
+package-lock.json
+package.json
+.eslintrc.cjs
+.eslintrc.json
+.prettierrc
