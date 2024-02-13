@@ -1,11 +1,6 @@
 const tf = require('@tensorflow/tfjs');
-const { readFile, writeFile } = require('./utils/utils');
+const { readFile, writeFile, constructDataFiles } = require('./utils/utils');
 
-function returnUniqueArray(data, property) {
-    const allProperty = data.flatMap((d) => d[property]);
-    const uniqueProperty = Array.from(new Set(allProperty)).filter((a) => a !== '');
-    return uniqueProperty;
-}
 
 function jaccardSimilarity(setA, setB) {
     const intersection = new Set([...setA].filter((x) => setB.has(x)));
@@ -50,39 +45,39 @@ function normalizeEpisodes(data) {
 
 async function main() {
     try {
-        //const data = await readFile('./anime-dataset-2023.csv', 'csv');
-        //await writeFile('entries.json', data);
-        const data = await readFile('./entries.json', 'json');
-        const excludedTypes = ['ONA', 'OVA', 'Special', 'Music', 'Unknown'];
-        const filteredData = data.filter((d) => !d.genres.includes('Hentai') && !excludedTypes.includes(d.type));
-        const uniqueGenres = returnUniqueArray(filteredData, 'genres');
+        const filteredData = await constructDataFiles();
         const normalizedScores = filteredData.map((d) => parseFloat(d.score) / 10);
-        const encodedGenres = filteredData.map((d) => normalizeGenres(d, uniqueGenres));
+       // const encodedGenres = filteredData.map((d) => normalizeGenres(d, uniqueGenres));
         const encodedTypes = filteredData.map((d) => (d.type === 'TV' ? 1 : 0));
         const normalizedRanks = normalizeOrder(filteredData, 'rank');
         const normalizedPopularities = normalizeOrder(filteredData, 'popularity');
         const normalizedEpisodes = normalizeEpisodes(filteredData);
         const combinedFeatures = filteredData.map((d, index) => {
-            console.log(d.title);
-            console.log(encodedTypes[index]);
-            console.log(...encodedGenres[index]);
             return [
                 normalizedScores[index],
                 encodedTypes[index],
-                ...encodedGenres[index],
+              //  ...encodedGenres[index],
                 normalizedRanks[index],
                 normalizedPopularities[index],
                 normalizedEpisodes[index],
             ];
         });
         const featuresTensor = tf.tensor2d(combinedFeatures);
-        console.log(featuresTensor);
-        return data;
+       // return data;
     } catch (err) {
         console.error('Failed to read JSON file:', err);
     }
 }
 main();
+
+
+
+
+
+
+
+
+
 
 // initially content based filtering, then allow for collaborative approach based on user input
 // normalize certain properties, one hot encode genres, etc..

@@ -1,7 +1,10 @@
 const fs = require('fs');
-const fastcsv = require('fast-csv');
-const { AnimeEntry } = require('./AnimeEntry');
-const { UserInteraction } = require('./UserInteraction');
+const path = require('path');
+
+const { parse } = require("csv-parse");
+
+const { AnimeEntry } = require('../models/AnimeEntry');
+const { UserInteraction } = require('../models/UserInteraction');
 
 function findMax(data, property) {
     const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
@@ -13,49 +16,68 @@ function findMin(data, property) {
     return Math.min(...propArr);
 }
 
-async function processAnimeData(data) {
-    const animeEntries = [];
+function cleanRating(text){
+    if (text === 'UNKNOWN'){
+        return text.replace(text, 'Unknown');
+    }
+    else {
+        return text.split(" ")[0];
+    }
+}
 
-    for (const row of data) {
-        const animeID = row[0];
-        const name = row[1];
-        const englishName = row[2].replace('UNKNOWN', 'Unknown');
-        const otherName = row[3].replace('UNKNOWN', 'Unknown');
-        const score = row[4].replace('UNKNOWN', 'Unknown');
-        const genres = row[5]
-            .split(',')
-            .map((genre) => genre.replace('UNKNOWN', '').trim())
-            .filter((a) => a !== '');
-        const synopsis = row[6];
-        const type = row[7].replace('UNKNOWN', 'Unknown');
-        const episodes = parseInt(row[8], 10) || 0;
-        const aired = row[9];
-        const premiered = row[10].replace('UNKNOWN', 'Unknown');
-        const status = row[11];
-        const producers = row[12]
-            .split(',')
-            .map((producer) => producer.replace('UNKNOWN', '').trim())
-            .filter((a) => a !== '');
-        const licensors = row[13]
-            .split(',')
-            .map((licensor) => licensor.replace('UNKNOWN', '').trim())
-            .filter((a) => a !== '');
-        const studios = row[14]
-            .split(',')
-            .map((studio) => studio.replace('UNKNOWN', '').trim())
-            .filter((a) => a !== '');
-        const source = row[15].replace('UNKNOWN', 'Unknown');
-        const duration = row[16];
-        const rating = row[17].replace('UNKNOWN', 'Unknown');
-        const rank = parseInt(row[18], 10) || 0;
-        const popularity = parseInt(row[19], 10);
-        const favourites = parseInt(row[20], 10) || 0;
-        const scoredBy = parseInt(row[21], 10) || 0;
-        const members = parseInt(row[22], 10) || 0;
-        const imageURL = row[23];
+function cleanDuration(text) {
+    const regex = /(\d+)\s*(hr|min|sec)(?:\s*per ep)?/gi;
+    let match;
+    let hours =  0;
+    let minutes =  0;
+    let seconds = 0;
+
+    while ((match = regex.exec(text)) !== null) {
+        const value = parseInt(match[1],  10);
+        const unit = match[2];
+        if (unit === 'hr') {
+            hours += value;
+        } else if (unit === 'min') {
+            minutes += value;
+        } else if (unit === 'sec') {
+            seconds += value;
+        }
+    }
+    const totalMinutes = hours *  60 + minutes + Math.round(seconds / 60);
+    return totalMinutes || text;
+}
+
+
+function cleanArray(array){
+    const cleanedArray = array.split(',').map((arr) => arr.replace("UNKNOWN", '').trim()).filter((a) => a !== '');
+    cleanedArray.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    return cleanedArray;
+}
+
+async function processAnimeData(data){
+    const animeEntries = data.map((row) => {
+        let [animeID, name, englishName, otherName, score, genres, synopsis, type, episodes, aired, premiered, status, producers, licensors, studios, source, duration, rating, rank, popularity, favourites, scoredBy, members, imageURL] = row;
+        englishName = englishName.replace('UNKNOWN', 'Unknown');
+        otherName = otherName.replace("Unknown", 'Unknown');
+        score = parseFloat(score) || 0;
+        genres = cleanArray(genres);
+        type = type.replace("UNKNOWN", 'Unknown');
+        episodes = parseInt(episodes, 10) || 0;
+        premiered = premiered.replace("UNKNOWN", "Unknown");
+        producers = cleanArray(producers);
+        licensors = cleanArray(licensors);
+        studios = cleanArray(studios);
+        source = source.replace("UNKNOWN", 'Unknown');
+        duration = cleanDuration(duration);
+        rating = cleanRating(rating);
+        rank = parseInt(rank, 10) || 0;
+        popularity = parseInt(popularity, 10) || 0;
+        favourites = parseInt(favourites, 10) || 0;
+        scoredBy = parseInt(scoredBy, 10) || 0;
+        members = parseInt(members, 10) || 0;
         const pageURL = `https://myanimelist.net/anime/${animeID}/${name.replace(' ', '_')}`;
 
-        const animeEntry = new AnimeEntry(
+        return new AnimeEntry(
             animeID,
             name,
             englishName,
@@ -82,10 +104,10 @@ async function processAnimeData(data) {
             imageURL,
             pageURL,
         );
-        animeEntries.push(animeEntry);
-    }
+    })
     return animeEntries;
 }
+
 
 async function processUserInteractionData(data) {
     const users = [];
@@ -116,8 +138,8 @@ async function readCSVFile(filePath) {
     const data = [];
     await new Promise((resolve, reject) => {
         fs.createReadStream(filePath)
-            .pipe(fastcsv.parse())
-            .on('data', (row) => {
+        .pipe(parse({ delimiter: ",", from_line: 2 }))
+        .on('data', (row) => {
                 data.push(row);
                 console.log(data.length);
             })
@@ -127,7 +149,8 @@ async function readCSVFile(filePath) {
     return data;
 }
 
-async function readFile(filePath, fileType, type) {
+async function readFile(fileName, fileType, type) {
+    const filePath = path.resolve(__dirname, `../data/${fileName}`);
     try {
         if (fileType === 'json') {
             return readJSONFile(filePath);
@@ -146,7 +169,9 @@ async function readFile(filePath, fileType, type) {
         throw err;
     }
 }
-async function writeFile(filePath, data) {
+
+async function writeFile(fileName, data) {
+    const filePath = path.resolve(__dirname, `../data/${fileName}`);
     try {
         const dataString = JSON.stringify(data, null, 2);
         await fs.promises.writeFile(filePath, dataString, 'utf8');
@@ -157,9 +182,53 @@ async function writeFile(filePath, data) {
     }
 }
 
+
+
+function sortData(data){
+    const firstElement = data[0];
+    const type = typeof firstElement;
+    if (type === 'string'){
+        data.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    }
+    else if (type === 'number'){
+        data.sort((a,b) => a - b);
+    }
+    return data;
+}
+
+function returnUniqueArray(data, property, filter = []) {
+    const allPropertyValues = data.flatMap((d) => d[property]).filter((value) => !filter.includes(value));
+    const uniquePropertyValues = Array.from(new Set(allPropertyValues)).filter((a) => a !== '');
+    return uniquePropertyValues;
+}
+
+function filterAnimeData(data) {
+    const excludedTypes = ['ONA', 'OVA', 'Special', 'Music', 'Unknown'];
+    const filteredData = data.filter((d) => !d.genres.includes('Hentai') && !excludedTypes.includes(d.type));
+    return filteredData;
+}
+async function constructDataFiles() {
+    const animeData = await readFile('../data/anime-dataset-2023.csv', 'csv', 'AnimeEntry');
+    //const animeData = await readFile('entries.json', 'json', 'AnimeEntry');
+    const filteredData = filterAnimeData(animeData);
+    await writeFile('entries.json', filteredData);
+    const allowedKeys = ['genres', 'type', 'episodes', 'premiered', 'status', 'producers', 'licensors', 'studios', 'source', 'duration', 'rating'];
+    const specialKeys = ['duration', 'rating', 'source', 'premiered'];
+
+    for (const key of allowedKeys){
+        const fileName = `${key}.json`;
+        const data = specialKeys.includes(key) ? returnUniqueArray(filteredData, key, ['Unknown']) : returnUniqueArray(filteredData, key);
+        await writeFile(fileName, sortData(data));
+    }
+    return filteredData;
+}
+
+
+
 module.exports = {
-    readFile: readFile,
-    writeFile: writeFile,
-    findMax: findMax,
-    findMin: findMin,
+    readFile,
+    writeFile,
+    findMax,
+    findMin,
+    constructDataFiles,
 };
