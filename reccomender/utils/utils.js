@@ -16,6 +16,22 @@ function findMin(data, property) {
     return Math.min(...propArr);
 }
 
+function cleanPremiered(text){
+    if (text.toLowerCase() === 'unknown'){
+        return {
+            season: 'Unknown',
+            year: 'Unknown'
+        };
+    }
+    else {
+        const splitText = text.split(" ");
+        const [season , year] = splitText;
+        return {
+            season, year: parseInt(year, 10)
+        }
+    }
+}
+
 function cleanRating(text){
     if (text === 'UNKNOWN'){
         return text.replace(text, 'Unknown');
@@ -64,6 +80,7 @@ async function processAnimeData(data){
         type = type.replace("UNKNOWN", 'Unknown');
         episodes = parseInt(episodes, 10) || 0;
         premiered = premiered.replace("UNKNOWN", "Unknown");
+        const {season, year} = cleanPremiered(premiered);
         producers = cleanArray(producers);
         licensors = cleanArray(licensors);
         studios = cleanArray(studios);
@@ -89,6 +106,8 @@ async function processAnimeData(data){
             episodes,
             aired,
             premiered,
+            season,
+            year,
             status,
             producers,
             licensors,
@@ -212,8 +231,8 @@ async function constructDataFiles() {
     //const animeData = await readFile('entries.json', 'json', 'AnimeEntry');
     const filteredData = filterAnimeData(animeData);
     await writeFile('entries.json', filteredData);
-    const allowedKeys = ['genres', 'type', 'episodes', 'premiered', 'status', 'producers', 'licensors', 'studios', 'source', 'duration', 'rating'];
-    const specialKeys = ['duration', 'rating', 'source', 'premiered'];
+    const allowedKeys = ['genres', 'type', 'episodes', 'season', 'year', 'status', 'producers', 'licensors', 'studios', 'source', 'duration', 'rating'];
+    const specialKeys = ['duration', 'rating', 'season', 'year', 'source', 'premiered'];
 
     for (const key of allowedKeys){
         const fileName = `${key}.json`;

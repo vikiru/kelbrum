@@ -11,6 +11,8 @@ class AnimeEntry {
         episodes,
         aired,
         premiered,
+        season,
+        year,
         status,
         producers,
         licensors,
@@ -37,6 +39,8 @@ class AnimeEntry {
         this.episodes = episodes;
         this.aired = aired;
         this.premiered = premiered;
+        this.season = season;
+        this.year = year;
         this.status = status;
         this.producers = producers;
         this.licensors = licensors;
