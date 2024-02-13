@@ -1,5 +1,31 @@
 class AnimeEntry {
-    constructor(id, title, englishName, otherName, score, genres, synopsis, type, episodes, aired, premiered, status, producers, licensors, studios, source, duration, rating, rank, popularity, favourites, scoredBy, members, imageURL, pageURL) {
+    constructor(
+        id,
+        title,
+        englishName,
+        otherName,
+        score,
+        genres,
+        synopsis,
+        type,
+        episodes,
+        aired,
+        premiered,
+        status,
+        producers,
+        licensors,
+        studios,
+        source,
+        duration,
+        rating,
+        rank,
+        popularity,
+        favourites,
+        scoredBy,
+        members,
+        imageURL,
+        pageURL,
+    ) {
         this.id = id;
         this.title = title;
         this.englishName = englishName;
@@ -29,5 +55,5 @@ class AnimeEntry {
 }
 
 module.exports = {
-    AnimeEntry
-}
+    AnimeEntry,
+};
