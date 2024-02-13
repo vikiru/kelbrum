@@ -1,5 +1,5 @@
 const tf = require('@tensorflow/tfjs');
-const { readFile, writeFile } = require('./utils');
+const { readFile, writeFile } = require('./utils/utils');
 
 function returnUniqueArray(data, property) {
     const allProperty = data.flatMap((d) => d[property]);
