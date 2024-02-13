@@ -1,45 +1,87 @@
-const fs = require("fs");
 const tf = require('@tensorflow/tfjs');
-const { parse } = require("csv-parse");
-const { AnimeEntry } = require("./AnimeEntry");
+const { readFile, writeFile } = require("./utils");
+
+function returnUniqueArray(data, property){
+  const allProperty = data.flatMap(d => d[property]);
+  const uniqueProperty = Array.from(new Set(allProperty)).filter(a => a !== '');
+  return uniqueProperty;
+}
 
 
-const entries = [];
+function jaccardSimilarity(setA, setB){
+  const intersection = new Set([...setA].filter(x => setB.has(x)));
+  const union = new Set([...setA, ...setB]);
+  return intersection.size / union.size;
+}
 
-const readAndParseCSV = () => {
-  return new Promise((resolve, reject) => {
-    fs.createReadStream("./data.csv")
-      .pipe(parse({ delimiter: ",", from_line:  2 }))
-      .on("data", function (row) {
-         const id = row[0];
-         const title = row[1];
-         const rank = row[2];
-         const type = row[3];
-         const episodeCount = row[4];
-         const aired = row[5];
-         const members = row[6];
-         const malURL = row[7];
-         const imageURL = row[8];
-         const score = row[9];
-         const animeEntry = new AnimeEntry(id, title, rank, type, episodeCount, aired, members, malURL, imageURL, score);
-         if (type === 'TV'){
-            entries.push(animeEntry);
-         }
-      })
-      .on("end", resolve)
-      .on("error", reject);
+function normalizeGenres(anime, uniqueGenres){
+  const inputGenres = anime.genres;
+  return uniqueGenres.map(genre => inputGenres.includes(genre) ? 1 : 0);
+}
+
+function normalizeOrder(data, property){
+  const orders = data.map(d => d[property]);
+  const orderMapping = {};
+  let currentOrder =  1;
+  const defaultValue = Math.max(...orders) + 1;
+  orders.forEach(order => {
+    if (!orderMapping[order] && order >= 1) {
+      orderMapping[order] = currentOrder++;
+    } else if (order === 0) {
+      orderMapping[order] = defaultValue;
+    }
   });
-};
+  return data.map(d => orderMapping[d[property]]);
+}
 
-readAndParseCSV()
-  .then(() => {
-    console.log(entries.length);
-  })
-  .catch((error) => {
-    console.error("Error reading and parsing CSV:", error);
+function normalizeStatus(data) {
+  const uniqueStatus = returnUniqueArray(data, 'status');
+  const normalizedStatus = data.map(entry => {
+    return uniqueStatus.map(status => entry.status === status ?  1 :  0);
   });
+  return normalizedStatus;
+}
+
+function normalizeEpisodes(data) {
+  const episodes = data.map(d => d.episodes >= 1 ? d.episodes : 0.001);
+  const minEpisodes = Math.min(...episodes);
+  const maxEpisodes = Math.max(...episodes);
+  return episodes.map(ep => (ep - minEpisodes) / (maxEpisodes - minEpisodes));
+}
 
 
+  async function main() {
+    try {
+      //const data = await readFile('./anime-dataset-2023.csv', 'csv');
+      //await writeFile('entries.json', data);
+      const data = await readFile('./entries.json', 'json');
+      const excludedTypes = ['ONA', 'OVA', 'Special', 'Music', 'Unknown'];
+      const filteredData = data.filter(d => !d.genres.includes('Hentai') && !excludedTypes.includes(d.type));
+      const uniqueGenres = returnUniqueArray(filteredData, 'genres');
+      const normalizedScores = filteredData.map(d => parseFloat(d.score) / 10);
+      const encodedGenres = filteredData.map(d => normalizeGenres(d, uniqueGenres));
+      const encodedTypes = filteredData.map(d => d.type === 'TV' ? 1 : 0);
+      const normalizedRanks = normalizeOrder(filteredData, 'rank');
+      const normalizedPopularities = normalizeOrder(filteredData, 'popularity');
+      const normalizedEpisodes = normalizeEpisodes(filteredData);
+      const combinedFeatures = filteredData.map((d, index) => {
+        return [
+          normalizedScores[index],
+          encodedTypes[index],
+          ...encodedGenres[index],
+          normalizedRanks[index],
+          normalizedPopularities[index],
+          normalizedEpisodes[index]
+        ];
+      });
+      const featuresTensor = tf.tensor2d(combinedFeatures);
+      console.log(featuresTensor);
+      return data;
+    } catch (err) {
+      console.error('Failed to read JSON file:', err);
+    }
+  }
+main();
 
   // initially content based filtering, then allow for collaborative approach based on user input
   // normalize certain properties, one hot encode genres, etc..
