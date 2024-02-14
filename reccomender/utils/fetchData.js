@@ -1,15 +1,32 @@
-const { writeFile } = require('./utils');
+const { cleanDuration, cleanRating } = require('./clean');
+
+const RATE_LIMIT_STATUS = 429;
+async function fetchWithRetry(url, retries = 1) {
+    try {
+        const response = await fetch(url);
+        if (response.status === RATE_LIMIT_STATUS && retries > 0) {
+            console.log('Rate limit reached. Attempting to retry request after delay.');
+            await delay();
+            return await fetchWithRetry(url, retries - 1);
+        }
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+}
 
 async function fetchData(url) {
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
+        return await fetchWithRetry(url);
     } catch (error) {
         console.error('Error fetching data:', error);
+        return {
+            data: [],
+        };
     }
 }
 
@@ -19,40 +36,81 @@ function delay() {
     });
 }
 
-async function fetchMissingData(data) {
-    const length = data.length;
+function compareArrays(inputArray, fetchedArray) {
+    let array = inputArray;
+    if (inputArray.length === 0 && fetchedArray.length > 0) {
+        inputArray = fetchedArray.map((a) => a.name).join(',');
+    }
+    return array;
+}
+
+function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
+    let premiered = inputPremiered;
+    if (inputPremiered === 'Unknown') {
+        const season = fetchedSeason !== null ? fetchedSeason : '';
+        const year = fetchedYear !== null ? fetchedYear : '';
+        premiered = `${season} ${year}`;
+    }
+    return premiered;
+}
+
+function compareInputToFetched(inputProperty, fetchedProperty) {
+    let property = inputProperty;
+    const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
+    const fetchedDefaults = ['Unknown', null, '', ' '];
+    if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
+        property = fetchedProperty;
+    }
+    return property;
+}
+
+async function handleMissingData(data) {
+    const indexes = data.filter((d) => d.status !== 'Finished Airing').map((d) => data.indexOf(d));
+    const total = indexes.length;
     const baseQuery = 'https://api.jikan.moe/v4/anime?q=';
-    for (const entry of data) {
-        if (!('japaneseTitle' in entry)) {
-            const index = data.indexOf(entry) + 1;
-            console.log(`Retrieving missing data for entry (${index} / ${length})`);
-            const title = entry.title;
-            const url = baseQuery + `${title}&limit=1`;
-            const result = await fetchData(url);
-            const resultData = result.data[0];
-            entry.malID = resultData.mal_id;
-            entry.trailer = resultData.trailer.url || '';
-            entry.englishTitle = resultData.title_english || '';
-            entry.japaneseTitle = resultData.title_japanese || '';
-            entry.synonyms = resultData.title_synonyms || [];
-            entry.source = resultData.source || '';
-            entry.airedFrom = resultData.aired.from || '';
-            entry.airedTo = resultData.aired.to || '';
-            entry.scoredBy = resultData.scored_by || '';
-            entry.popularity = resultData.popularity || '0';
-            entry.favourites = resultData.favorites || '';
-            entry.synopsis = resultData.synopsis || '';
-            entry.season = resultData.season || '';
-            entry.year = resultData.year || '';
-            entry.producers = resultData.producers.map((producer) => producer.name) || [];
-            entry.studios = resultData.studios.map((studio) => studio.name) || [];
-            const explicit_genres = resultData.explicit_genres.map((genre) => genre.name) || [];
-            const genres = resultData.genres.map((genre) => genre.name) || [];
-            const demographics = resultData.demographics.map((demographic) => demographic.name) || [];
-            const themes = resultData.themes.map((theme) => theme.name) || [];
-            entry.genres = [...explicit_genres, ...genres, ...demographics, ...themes];
+    for (const index of indexes) {
+        const entry = data[index];
+        const title = entry.title;
+        const url = baseQuery + `${title}`;
+        console.log(`Fetching data for missing data entry #${indexes.indexOf(index) + 1} / ${total}`);
+        const result = await fetchData(url);
+        const resultData = result.data.length > 0 ? result.data.find((d) => d.title === entry.title) : undefined;
+        if (resultData) {
+            entry.title = resultData.title;
+            entry.englishName = resultData.title_english;
+            entry.otherName = resultData.title_japanese;
+            entry.type = compareInputToFetched(entry.type, resultData.type);
+            entry.source = resultData.source;
+            entry.episodes = compareInputToFetched(entry.episodes, resultData.episodes);
+            entry.status = resultData.status;
+            entry.aired = resultData.aired.string;
+            entry.duration = cleanDuration(compareInputToFetched(entry.duration, resultData.duration));
+            entry.rating = cleanRating(compareInputToFetched(entry.rating, resultData.rating));
+            entry.score = compareInputToFetched(entry.score, resultData.score);
+            entry.scoredBy = compareInputToFetched(entry.score, resultData.scored_by);
+            entry.rank = compareInputToFetched(entry.rank, resultData.rank);
+            entry.popularity = compareInputToFetched(entry.popularity, resultData.popularity);
+            entry.members = compareInputToFetched(entry.members, resultData.members);
+            entry.favourites = compareInputToFetched(entry.favourites, resultData.favorites);
+            entry.synopsis = compareInputToFetched(entry.synopsis, resultData.synopsis);
+            entry.season = compareInputToFetched(entry.season, resultData.season);
+            entry.year = compareInputToFetched(entry.year, resultData.year);
+            entry.premiered = comparePremiered(entry.premiered, resultData.season, resultData.year);
+            entry.producers = compareArrays(entry.producers, resultData.producers);
+            entry.licensors = compareArrays(entry.licensors, resultData.licensors);
+            entry.studios = compareArrays(entry.studios, resultData.studios);
+            entry.genres = compareArrays(entry.genres, resultData.genres);
+            entry.pageURL = resultData.url;
             await delay();
-            await writeFile('updatedEntries.json', data);
         }
     }
 }
+
+module.exports = {
+    fetchData,
+    delay,
+    compareArrays,
+    compareInputToFetched,
+    comparePremiered,
+    handleMissingData,
+};

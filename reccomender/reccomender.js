@@ -1,6 +1,5 @@
 const tf = require('@tensorflow/tfjs');
-const { readFile, writeFile, constructDataFiles } = require('./utils/utils');
-
+const { returnUniqueArray, constructDataFiles } = require('./utils/utils');
 
 function jaccardSimilarity(setA, setB) {
     const intersection = new Set([...setA].filter((x) => setB.has(x)));
@@ -47,7 +46,7 @@ async function main() {
     try {
         const filteredData = await constructDataFiles();
         const normalizedScores = filteredData.map((d) => parseFloat(d.score) / 10);
-       // const encodedGenres = filteredData.map((d) => normalizeGenres(d, uniqueGenres));
+        // const encodedGenres = filteredData.map((d) => normalizeGenres(d, uniqueGenres));
         const encodedTypes = filteredData.map((d) => (d.type === 'TV' ? 1 : 0));
         const normalizedRanks = normalizeOrder(filteredData, 'rank');
         const normalizedPopularities = normalizeOrder(filteredData, 'popularity');
@@ -56,31 +55,16 @@ async function main() {
             return [
                 normalizedScores[index],
                 encodedTypes[index],
-              //  ...encodedGenres[index],
+                //  ...encodedGenres[index],
                 normalizedRanks[index],
                 normalizedPopularities[index],
                 normalizedEpisodes[index],
             ];
         });
         const featuresTensor = tf.tensor2d(combinedFeatures);
-       // return data;
+        // return data;
     } catch (err) {
         console.error('Failed to read JSON file:', err);
     }
 }
 main();
-
-
-
-
-
-
-
-
-
-
-// initially content based filtering, then allow for collaborative approach based on user input
-// normalize certain properties, one hot encode genres, etc..
-// overlap similarity, jaccard similarity, cosine similarity,
-// k means, cosine similarity, unsupervised learning, content, collaborative filter, hybrid, get missing data from JikanAPI.
-// missing data: trailer, english/japanese title, source?, aired (update to use timestamp), scoredBy, popularity, favorites, studios, season, year, genres,
