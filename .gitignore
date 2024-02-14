@@ -1,4 +1,4 @@
-reccomender/*.json
+*/data/*.json
 .history/
 *.csv
 
