@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 
 const { parse } = require('csv-parse');
-const { processUserInteractionData, processAnimeData } = require('./utils');
+const { processUserInteractionData, processAnimeData } = require('./processData');
 
 async function readJSONFile(filePath) {
     try {
