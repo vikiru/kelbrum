@@ -57,9 +57,12 @@ function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
 function compareInputToFetched(inputProperty, fetchedProperty) {
     let property = inputProperty;
     const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
-    const fetchedDefaults = ['Unknown', null, '', ' '];
+    const fetchedDefaults = ['Unknown', null];
     if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
         property = fetchedProperty;
+    }
+    if (property === undefined || property === null){
+        property = inputProperty;
     }
     return property;
 }
@@ -72,18 +75,18 @@ async function handleMissingData(data) {
         const entry = data[index];
         const title = entry.title;
         const url = baseQuery + `${title}`;
-        console.log(`Fetching data for missing data entry #${indexes.indexOf(index) + 1} / ${total}`);
+        console.log(`Fetching data for missing data entry ${indexes.indexOf(index) + 1} / ${total}`);
         const result = await fetchData(url);
         const resultData = result.data.length > 0 ? result.data.find((d) => d.title === entry.title) : undefined;
         if (resultData) {
-            entry.title = resultData.title;
-            entry.englishName = resultData.title_english;
-            entry.otherName = resultData.title_japanese;
+            entry.title = compareInputToFetched(entry.title, resultData.title);
+            entry.englishName = compareInputToFetched(entry.englishName, resultData.title_english);
+            entry.otherName = compareInputToFetched(entry.otherName, resultData.title_japanese);
             entry.type = compareInputToFetched(entry.type, resultData.type);
-            entry.source = resultData.source;
+            entry.source = compareInputToFetched(entry.source, resultData.source);
             entry.episodes = compareInputToFetched(entry.episodes, resultData.episodes);
-            entry.status = resultData.status;
-            entry.aired = resultData.aired.string;
+            entry.status = compareInputToFetched(entry.status, resultData.status);
+            entry.aired = compareInputToFetched(entry.aired, resultData.aired.string);
             entry.duration = cleanDuration(compareInputToFetched(entry.duration, resultData.duration));
             entry.rating = cleanRating(compareInputToFetched(entry.rating, resultData.rating));
             entry.score = compareInputToFetched(entry.score, resultData.score);

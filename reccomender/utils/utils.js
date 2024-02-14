@@ -1,5 +1,5 @@
 const { parse } = require('csv-parse');
-const { cleanArray, findSeasonalYear, cleanDuration, cleanRating } = require('./clean');
+const { cleanArray, findSeasonalYear, cleanDuration, cleanRating, cleanPremiered } = require('./clean');
 const { AnimeEntry } = require('../models/AnimeEntry');
 const { UserInteraction } = require('../models/UserInteraction');
 const { readFile } = require('./readFile');
@@ -20,6 +20,7 @@ function sortData(data) {
     const firstElement = data[0];
     const type = typeof firstElement;
     if (type === 'string') {
+        console.log(data);
         data.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     } else if (type === 'number') {
         data.sort((a, b) => a - b);
@@ -41,10 +42,13 @@ function filterAnimeData(data) {
 
 async function constructDataFiles() {
     console.log('Starting to construct data files by reading input csv file.');
-    //const animeData = await readFile('../data/anime-dataset-2023.csv', 'csv', 'AnimeEntry');
-    const animeData = await readFile('../data/entries.json', 'json', 'AnimeEntry');
+    const animeData = await readFile('../data/anime-dataset-2023.csv', 'csv', 'AnimeEntry');
+    //const animeData = await readFile('../data/entries.json', 'json', 'AnimeEntry');
     const filteredData = filterAnimeData(animeData);
     await handleMissingData(filteredData);
+    filteredData.forEach(d => {
+        d.premiered = cleanPremiered(d.premiered, d.season, d.year);
+    });
     await writeFile('entries.json', filteredData);
     const allowedKeys = [
         'aired',

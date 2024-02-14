@@ -5,7 +5,7 @@ const seasons = [
     { name: 'winter', months: ['Jan', 'Feb', 'Mar'] },
 ];
 
-function cleanAired(text) {
+function findSeasonalYearByAired(text) {
     if (text === 'Not available') {
         return {
             season: 'Unknown',
@@ -42,7 +42,7 @@ function cleanAired(text) {
     }
 }
 
-function cleanPremiered(text) {
+function findSeasonalYearByPremiered(text) {
     if (text.toLowerCase() === 'unknown') {
         return {
             season: 'Unknown',
@@ -63,9 +63,9 @@ function findSeasonalYear(premiered, aired) {
     let year = 'Unknown';
     let result = {};
     if (premiered !== 'Unknown') {
-        result = cleanPremiered(premiered);
+        result = findSeasonalYearByPremiered(premiered);
     } else if (premiered === 'Unknown' && aired !== 'Unknown') {
-        result = cleanAired(aired);
+        result = findSeasonalYearByAired(aired);
     }
     return result || { season, year };
 }
@@ -100,7 +100,6 @@ function cleanDuration(text) {
             seconds += value;
         }
     }
-
     const totalMinutes = hours * 60 + minutes + Math.round(seconds / 60);
     return totalMinutes;
 }
@@ -114,12 +113,23 @@ function cleanArray(array) {
     return cleanedArray;
 }
 
+function cleanPremiered(premiered, season, year){
+    if (premiered === 'Unknown' && season !== 'Unknown' && year !== 'Unknown'){
+        console.log('HMM', season, year);
+        return `${season} ${year}`;
+    }
+    else {
+        return premiered;
+    }
+}
+
 module.exports = {
-    cleanAired,
+    findSeasonalYearByAired,
     seasons,
-    cleanPremiered,
+    findSeasonalYearByPremiered,
     findSeasonalYear,
     cleanRating,
     cleanDuration,
     cleanArray,
+    cleanPremiered
 };
