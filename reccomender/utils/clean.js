@@ -11,35 +11,33 @@ function findSeasonalYearByAired(text) {
             season: 'Unknown',
             year: 'Unknown',
         };
-    } else {
-        const regex = /([a-zA-z]+)\s+(\d+),?\s+(\d+)/im;
-        const matches = text.match(regex);
-        if (matches) {
-            const matchLength = matches.length;
-            if (matchLength >= 2) {
-                const month = matches[1];
-                const seasonMatch = seasons.find((season) => season.months.includes(month));
-                let season = 'Unknown';
-                if (seasonMatch) {
-                    season = seasonMatch.name;
-                }
-                const year = parseInt(matches[3], 10) || 'Unknown';
-                return {
-                    season,
-                    year,
-                };
-            }
-        } else {
-            const standAloneYear = /^(\d+)$/im;
-            const matches = text.match(standAloneYear);
-            if (matches) {
-                return {
-                    season: 'Unknown',
-                    year: parseInt(matches[0], 10),
-                };
-            }
-        }
     }
+
+    // Updated regex to include optional day and month format
+    const regex = /(?:([a-zA-Z]+)\s*(\d{4})|(\d{4})\s*to\s*(\d{4})?|(\d{4})|([a-zA-Z]{3})\s*(\d{1,2}),\s*(\d{4}))/i;
+    const matches = text.match(regex);
+    if (!matches) {
+        return {
+            season: 'Unknown',
+            year: 'Unknown',
+        };
+    }
+
+    // Extract season and year from matches
+    const season = matches[1] || null;
+    const year = matches[2] || matches[3] || matches[4] || matches[5] || matches[8];
+
+    // If a season is not provided, infer it from the month
+    const seasonMatch = season ? seasons.find((seasonObj) => seasonObj.months.includes(season)) : null;
+    const seasonName = seasonMatch ? seasonMatch.name : (matches[6] ? seasons.find(seasonObj => seasonObj.months.includes(matches[6])).name : 'Unknown');
+
+    // Parse the year and handle cases where it's not provided
+    const yearValue = year ? parseInt(year,   10) : 'Unknown';
+
+    return {
+        season: seasonName,
+        year: yearValue,
+    };
 }
 
 function findSeasonalYearByPremiered(text) {
@@ -49,25 +47,23 @@ function findSeasonalYearByPremiered(text) {
             year: 'Unknown',
         };
     } else {
-        const splitText = text.split(' ');
+        const splitText = text.includes(' ') ? text.split(' ') : [text];
         const [season, year] = splitText;
         return {
-            season,
-            year: parseInt(year, 10),
+            season: season || 'Unknown',
+            year: parseInt(year, 10) || 'Unknown',
         };
     }
 }
 
 function findSeasonalYear(premiered, aired) {
-    let season = 'Unknown';
-    let year = 'Unknown';
-    let result = {};
     if (premiered !== 'Unknown') {
-        result = findSeasonalYearByPremiered(premiered);
-    } else if (premiered === 'Unknown' && aired !== 'Unknown') {
-        result = findSeasonalYearByAired(aired);
+        return findSeasonalYearByPremiered(premiered);
     }
-    return result || { season, year };
+    if (aired !== 'Unknown') {
+        return findSeasonalYearByAired(aired);
+    }
+    return { season: 'Unknown', year: 'Unknown' };
 }
 
 function cleanRating(text) {
@@ -79,28 +75,30 @@ function cleanRating(text) {
 }
 
 function cleanDuration(text) {
-    if (text === 'Unknown') {
+    if (text === 'Unknown' || typeof text !== 'string') {
         return text;
     }
 
     const regex = /(\d+)\s*(hr|min|sec)(?:\s*per ep)?/gi;
     let match;
-    let hours = 0;
-    let minutes = 0;
-    let seconds = 0;
+    let hours =  0;
+    let minutes =  0;
+    let seconds =  0;
 
     while ((match = regex.exec(text)) !== null) {
-        const value = parseInt(match[1], 10);
+        const value = parseInt(match[1],  10);
         const unit = match[2];
-        if (unit === 'hr') {
-            hours += value;
-        } else if (unit === 'min') {
-            minutes += value;
-        } else if (unit === 'sec') {
-            seconds += value;
+        if (!isNaN(value)) { // Check if value is a valid number
+            if (unit === 'hr') {
+                hours += value;
+            } else if (unit === 'min') {
+                minutes += value;
+            } else if (unit === 'sec') {
+                seconds += value;
+            }
         }
     }
-    const totalMinutes = hours * 60 + minutes + Math.round(seconds / 60);
+    const totalMinutes = hours *  60 + minutes + Math.round(seconds /  60); // Keep precision down to the second
     return totalMinutes;
 }
 
@@ -113,19 +111,16 @@ function cleanArray(array) {
     return cleanedArray;
 }
 
-function cleanPremiered(premiered, season, year){
-    if (premiered === 'Unknown' && season !== 'Unknown' && year !== 'Unknown'){
-        console.log('HMM', season, year);
+function cleanPremiered(premiered, season, year) {
+    if (season !== undefined && season !== 'Unknown' && year !== undefined && year !== 'Unknown') {
         return `${season} ${year}`;
     }
-    else {
-        return premiered;
-    }
+    return premiered;
 }
 
 module.exports = {
-    findSeasonalYearByAired,
     seasons,
+    findSeasonalYearByAired,
     findSeasonalYearByPremiered,
     findSeasonalYear,
     cleanRating,

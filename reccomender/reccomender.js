@@ -1,30 +1,23 @@
 const tf = require('@tensorflow/tfjs');
-const { returnUniqueArray, constructDataFiles } = require('./utils/utils');
+const { returnUniqueArray, constructDataFiles, initializeDataFiles } = require('./utils/utils');
 const { normalizeOrder, normalizeEpisodes } = require('./utils/normalize');
 
 async function main() {
     try {
-        const filteredData = await constructDataFiles();
-        const normalizedScores = filteredData.map((d) => parseFloat(d.score) / 10);
-        // const encodedGenres = filteredData.map((d) => normalizeGenres(d, uniqueGenres));
-        // const encodedTypes = filteredData.map((d) => (d.type === 'TV' ? 1 : 0));
-        // const normalizedRanks = normalizeOrder(filteredData, 'rank');
-        // const normalizedPopularities = normalizeOrder(filteredData, 'popularity');
-        // const normalizedEpisodes = normalizeEpisodes(filteredData);
-        // const combinedFeatures = filteredData.map((d, index) => {
-          //  return [
-           //     normalizedScores[index],
-            //    encodedTypes[index],
-                //  ...encodedGenres[index],
-            //    normalizedRanks[index],
-             //   normalizedPopularities[index],
-             //   normalizedEpisodes[index],
-          //  ];
-        //});
-        //const featuresTensor = tf.tensor2d(combinedFeatures);
-        // return data;
+         const data = await initializeDataFiles();
+         console.log(data.length);
+
     } catch (err) {
         console.error('Failed to read JSON file:', err);
     }
 }
 main();
+
+
+// TODO: finish cleanup of data retrieval (Ensure props that should be int/float are not string)
+// Check if entries.json exists, if not read csv, fetch missing data and write to file
+// Add function to check if an entry needs updating.
+// TODO: Normalize all properties as much as possible
+// TODO: Use unsupersived learning via knn or some other algorithm
+// TODO: Experiment with different weights and see how reccomendations are, experiment with different similarity measures. Add
+// functions to preprocess user input / add a class for it or use existing userinteraction and modify.

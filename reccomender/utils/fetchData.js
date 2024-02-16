@@ -1,4 +1,5 @@
 const { cleanDuration, cleanRating } = require('./clean');
+const { writeFile } = require('./writeFile');
 
 const RATE_LIMIT_STATUS = 429;
 async function fetchWithRetry(url, retries = 1) {
@@ -67,53 +68,173 @@ function compareInputToFetched(inputProperty, fetchedProperty) {
     return property;
 }
 
-async function handleMissingData(data) {
-    const indexes = data.filter((d) => d.status !== 'Finished Airing').map((d) => data.indexOf(d));
-    const total = indexes.length;
+  function cleanTitle(title){
+    const normalizedTitle = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return normalizedTitle.replace(/[^a-zA-Z0-9\s]/g, '');
+ }
+
+ function identifyMissingProperties(entry) {
+    return Object.keys(entry).filter(key =>
+        entry[key] === 'Unknown' ||
+        entry[key] ===   0 ||
+        (Array.isArray(entry[key]) && entry[key].length ===   0)
+    );
+}
+
+function constructUrl(title) {
+    const searchTitle = cleanTitle(title);
     const baseQuery = 'https://api.jikan.moe/v4/anime?q=';
-    for (const index of indexes) {
-        const entry = data[index];
-        const title = entry.title;
-        const url = baseQuery + `${title}`;
-        console.log(`Fetching data for missing data entry ${indexes.indexOf(index) + 1} / ${total}`);
-        const result = await fetchData(url);
-        const resultData = result.data.length > 0 ? result.data.find((d) => d.title === entry.title) : undefined;
-        if (resultData) {
-            entry.title = compareInputToFetched(entry.title, resultData.title);
-            entry.englishName = compareInputToFetched(entry.englishName, resultData.title_english);
-            entry.otherName = compareInputToFetched(entry.otherName, resultData.title_japanese);
-            entry.type = compareInputToFetched(entry.type, resultData.type);
-            entry.source = compareInputToFetched(entry.source, resultData.source);
-            entry.episodes = compareInputToFetched(entry.episodes, resultData.episodes);
-            entry.status = compareInputToFetched(entry.status, resultData.status);
-            entry.aired = compareInputToFetched(entry.aired, resultData.aired.string);
-            entry.duration = cleanDuration(compareInputToFetched(entry.duration, resultData.duration));
-            entry.rating = cleanRating(compareInputToFetched(entry.rating, resultData.rating));
-            entry.score = compareInputToFetched(entry.score, resultData.score);
-            entry.scoredBy = compareInputToFetched(entry.score, resultData.scored_by);
-            entry.rank = compareInputToFetched(entry.rank, resultData.rank);
-            entry.popularity = compareInputToFetched(entry.popularity, resultData.popularity);
-            entry.members = compareInputToFetched(entry.members, resultData.members);
-            entry.favourites = compareInputToFetched(entry.favourites, resultData.favorites);
-            entry.synopsis = compareInputToFetched(entry.synopsis, resultData.synopsis);
-            entry.season = compareInputToFetched(entry.season, resultData.season);
-            entry.year = compareInputToFetched(entry.year, resultData.year);
-            entry.premiered = comparePremiered(entry.premiered, resultData.season, resultData.year);
-            entry.producers = compareArrays(entry.producers, resultData.producers);
-            entry.licensors = compareArrays(entry.licensors, resultData.licensors);
-            entry.studios = compareArrays(entry.studios, resultData.studios);
-            entry.genres = compareArrays(entry.genres, resultData.genres);
-            entry.pageURL = resultData.url;
-            await delay();
+    const url = baseQuery + encodeURIComponent(searchTitle);
+    return url;
+}
+
+async function constructUrls(data) {
+    const urls = [];
+    for (const entry of data) {
+        const title = entry.englishName !== 'Unknown' ? entry.englishName : entry.title;
+        const url = await constructUrl(title);
+        urls.push(url);
+    }
+
+    return urls;
+}
+
+
+function findMatchingAnime(entry, fetchedData) {
+    const searchTitle = cleanTitle(entry.title);
+    const possibleTitles = [
+        entry.englishName,
+        entry.otherName,
+        entry.title,
+        searchTitle,
+    ].filter(t => t !== 'Unknown');
+    const uniquePossibleTitles = Array.from(new Set(possibleTitles));
+    return fetchedData.data.find(a => {
+        const titlesToCheck = [a.title, a.title_english, a.title_japanese];
+        return titlesToCheck.some(title => uniquePossibleTitles.includes(title)) ||
+               a.title_synonyms.some(synonym => uniquePossibleTitles.includes(synonym)) ||
+               a.titles.some(t => uniquePossibleTitles.includes(t.title));
+    });
+}
+
+const propertyMapping = {
+    malID: 'mal_id',
+    pageURL: 'url',
+    title: 'title',
+    englishName: 'title_english',
+    otherName: 'title_japanese',
+    type: 'type',
+    source: 'source',
+    episodes: 'episodes',
+    status: 'status',
+    aired: 'aired',
+    durationText: 'duration',
+    rating: 'rating',
+    score: 'score',
+    scoredBy: 'scored_by',
+    rank: 'rank',
+    popularity: 'popularity',
+    members: 'members',
+    favourites: 'favorites',
+    synopsis: 'synopsis',
+    season: 'season',
+    year: 'year',
+    producers: 'producers',
+    licensors: 'licensors',
+    studios: 'studios',
+    genres: 'genres',
+  };
+
+  function updateEntry(entry, animeResult) {
+    const propertiesToUpdate = identifyMissingProperties(entry);
+    for (const key of propertiesToUpdate) {
+        const type = Array.isArray(entry[key]) ? 'array' : 'singleValue';
+        if (type === 'singleValue') {
+            entry[key] = compareInputToFetched(entry[key], animeResult[propertyMapping[key]]);
+        } else if (type === 'array') {
+            entry[key] = compareArrays(entry[key], animeResult[propertyMapping[key]]);
         }
     }
+    return entry;
+}
+
+async function handleMissingData(data) {
+    const missing = [];
+    const issues = [];
+    const total = data.length;
+    const startTime = process.hrtime();
+
+    console.log(`Starting to process ${total} entries.`);
+
+    const urls = await constructUrls(data);
+    const entriesToUpdate = data.filter(entry => identifyMissingProperties(entry).length >= 2 && entry.status !== 'Finished Airing');
+    const totalBatches = Math.ceil(entriesToUpdate.length /   2);
+
+    console.log(`Processing ${entriesToUpdate.length} entries with missing data into ${totalBatches} batches.`);
+
+    for (let i =   0; i < entriesToUpdate.length; i +=   2) {
+        const batchNumber = i /   2 +   1;
+        const remainingBatches = totalBatches - (i /   2);
+
+        console.log(`Processing batch ${batchNumber} of ${totalBatches}. ${remainingBatches} batches remaining.`);
+
+        const batch = entriesToUpdate.slice(i, i +   2);
+        const batchUrls = batch.map(entry => urls[data.indexOf(entry)]);
+
+        console.log(`URLs for batch ${batchNumber}:`, batchUrls);
+
+        try {
+            const results = await Promise.all(batchUrls.map(url => fetchData(url)));
+
+            for (let j =   0; j < batch.length; j++) {
+                const entry = batch[j];
+                const result = results[j];
+
+                if (result.data.length ===   0) {
+                    console.warn(`Entry for '${entry.title}' not found. Adding to missing list for exclusion.`);
+                    missing.push(entry);
+                } else {
+                    const animeResult = findMatchingAnime(entry, result);
+                    if (animeResult) {
+                        const updatedEntry = updateEntry(entry, animeResult);
+                        const entryIndex = data.indexOf(entry);
+                        data[entryIndex] = updatedEntry;
+                        console.info(`Entry for '${entry.title}' updated successfully.`);
+                    } else {
+                        console.warn(`Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`);
+                        issues.push(entry);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error processing batch ${batchNumber}:`, error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve,   500));
+    }
+
+    const elapsedTime = process.hrtime(startTime);
+    const elapsedSeconds = elapsedTime[0] + elapsedTime[1] /   1e9;
+    console.log(`Total time for processing all entries: ${elapsedSeconds.toFixed(2)} seconds`);
+
+    const remainingEntries = data.filter(d => !missing.includes(d) && !issues.includes(d));
+    console.log(`Processed ${remainingEntries.length} entries successfully.`);
+
+    return remainingEntries;
 }
 
 module.exports = {
+    fetchWithRetry,
     fetchData,
     delay,
     compareArrays,
-    compareInputToFetched,
     comparePremiered,
+    compareInputToFetched,
+    cleanTitle,
+    identifyMissingProperties,
+    constructUrl,
+    constructUrls,
+    findMatchingAnime,
+    updateEntry,
     handleMissingData,
 };

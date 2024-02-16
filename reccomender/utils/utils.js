@@ -2,7 +2,7 @@ const { parse } = require('csv-parse');
 const { cleanArray, findSeasonalYear, cleanDuration, cleanRating, cleanPremiered } = require('./clean');
 const { AnimeEntry } = require('../models/AnimeEntry');
 const { UserInteraction } = require('../models/UserInteraction');
-const { readFile } = require('./readFile');
+const { readFile, readJSONFile, checkFileExists } = require('./readFile');
 const { handleMissingData } = require('./fetchData');
 const { writeFile } = require('./writeFile');
 
@@ -20,7 +20,6 @@ function sortData(data) {
     const firstElement = data[0];
     const type = typeof firstElement;
     if (type === 'string') {
-        console.log(data);
         data.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     } else if (type === 'number') {
         data.sort((a, b) => a - b);
@@ -42,40 +41,34 @@ function filterAnimeData(data) {
 
 async function constructDataFiles() {
     console.log('Starting to construct data files by reading input csv file.');
-    const animeData = await readFile('../data/anime-dataset-2023.csv', 'csv', 'AnimeEntry');
-    //const animeData = await readFile('../data/entries.json', 'json', 'AnimeEntry');
-    const filteredData = filterAnimeData(animeData);
-    await handleMissingData(filteredData);
-    filteredData.forEach(d => {
-        d.premiered = cleanPremiered(d.premiered, d.season, d.year);
+    const animeCSV = await readFile('../data/anime-dataset-2023.csv', 'AnimeEntry');
+    let filteredData = filterAnimeData(animeCSV);
+    filteredData = await handleMissingData(filteredData);
+    filteredData.sort((a, b) => a.title.localeCompare(b.title));
+    filteredData.forEach((entry, index) => {
+        entry.id = index;
+        entry.durationMinutes = cleanDuration(entry.durationText);
+        entry.premiered = cleanPremiered(entry.premiered, entry.season, entry.year);
+        entry.rating = cleanRating(entry.rating);
     });
     await writeFile('entries.json', filteredData);
-    const allowedKeys = [
-        'aired',
-        'genres',
-        'type',
-        'episodes',
-        'season',
-        'year',
-        'status',
-        'producers',
-        'licensors',
-        'studios',
-        'source',
-        'duration',
-        'rating',
-    ];
-    const specialKeys = ['duration', 'rating', 'season', 'year', 'source', 'premiered'];
-
-    for (const key of allowedKeys) {
-        const fileName = `${key}.json`;
-        const data = specialKeys.includes(key)
-            ? returnUniqueArray(filteredData, key, ['Unknown'])
-            : returnUniqueArray(filteredData, key);
-        await writeFile(fileName, sortData(data));
-    }
     return filteredData;
 }
+
+async function initializeDataFiles() {
+    const fileName = 'entries.json';
+    const fileExists = await checkFileExists(fileName);
+
+    if (!fileExists) {
+        console.log(`The file '${fileName}' does not exist. Constructing data files...`);
+        const data = await constructDataFiles();
+        return data;
+    } else {
+        console.log(`The file '${fileName}' already exists. Reading data...`);
+        return await readFile(fileName,  'AnimeEntry');
+    }
+}
+
 
 module.exports = {
     writeFile,
@@ -85,4 +78,5 @@ module.exports = {
     sortData,
     returnUniqueArray,
     constructDataFiles,
+    initializeDataFiles,
 };

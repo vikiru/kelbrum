@@ -1,11 +1,26 @@
 const { AnimeEntry } = require("../models/AnimeEntry");
 const { UserInteraction } = require("../models/UserInteraction");
-const { cleanRating, cleanDuration, cleanArray, findSeasonalYear } = require("./clean");
+const { cleanRating, cleanDuration, cleanArray, findSeasonalYear, cleanPremiered } = require("./clean");
+
+function parseOrDefault(value, defaultValue =  0, type = 'int') {
+    if (type === 'int') {
+        return parseInt(value,  10) || defaultValue;
+    } else if (type === 'float') {
+        return parseFloat(value) || defaultValue;
+    } else {
+        throw new Error('Invalid type specified for parseOrDefault. Use "int" or "float".');
+    }
+}
+
+function cleanString(value) {
+    return value.replace('UNKNOWN', 'Unknown');
+}
+
 
 async function processAnimeData(data) {
     const animeEntries = data.map((row) => {
-        let [
-            animeID,
+        const [
+            malID,
             name,
             englishName,
             otherName,
@@ -21,7 +36,7 @@ async function processAnimeData(data) {
             licensors,
             studios,
             source,
-            duration,
+            durationText,
             rating,
             rank,
             popularity,
@@ -30,58 +45,52 @@ async function processAnimeData(data) {
             members,
             imageURL,
         ] = row;
-        animeID = parseInt(animeID, 10);
-        englishName = englishName.replace('UNKNOWN', 'Unknown');
-        otherName = otherName.replace('Unknown', 'Unknown');
-        score = parseFloat(score) || 0;
-        genres = cleanArray(genres);
-        type = type.replace('UNKNOWN', 'Unknown');
-        episodes = parseInt(episodes, 10) || 0;
-        premiered = premiered.replace('UNKNOWN', 'Unknown');
-        const { season, year } = findSeasonalYear(premiered, aired);
-        producers = cleanArray(producers);
-        licensors = cleanArray(licensors);
-        studios = cleanArray(studios);
-        source = source.replace('UNKNOWN', 'Unknown');
-        duration = cleanDuration(duration);
-        rating = cleanRating(rating);
-        rank = parseInt(rank, 10) || 0;
-        popularity = parseInt(popularity, 10) || 0;
-        favourites = parseInt(favourites, 10) || 0;
-        scoredBy = parseInt(scoredBy, 10) || 0;
-        members = parseInt(members, 10) || 0;
-        const pageURL = `https://myanimelist.net/anime/${animeID}/${name.replaceAll(' ', '_')}`;
+
+        const cleanedGenres = cleanArray(genres);
+        const cleanedProducers = cleanArray(producers);
+        const cleanedLicensors = cleanArray(licensors);
+        const cleanedStudios = cleanArray(studios);
+
+        const cleanedPremiered = cleanString(premiered);
+        const { season, year } = findSeasonalYear(cleanedPremiered, aired);
+        const cleanedPremieredWithSeason = cleanPremiered(cleanedPremiered, season, year);
+
+        const cleanedType = cleanString(type);
+        const cleanedSource = cleanString(source);
+        const durationMinutes = cleanDuration(durationText);
+        const cleanedRating = cleanRating(rating);
 
         return new AnimeEntry(
-            animeID,
+            malID,
             name,
-            englishName,
-            otherName,
-            score,
-            genres,
+            cleanString(englishName),
+            cleanString(otherName),
+            parseOrDefault(score,  0, 'float'),
+            cleanedGenres,
             synopsis,
-            type,
-            episodes,
+            cleanedType,
+            parseOrDefault(episodes,  0, 'int'),
             aired,
-            premiered,
+            cleanedPremieredWithSeason,
             season,
             year,
             status,
-            producers,
-            licensors,
-            studios,
-            source,
-            duration,
-            rating,
-            rank,
-            popularity,
-            favourites,
-            scoredBy,
-            members,
+            cleanedProducers,
+            cleanedLicensors,
+            cleanedStudios,
+            cleanedSource,
+            durationText,
+            durationMinutes,
+            cleanedRating,
+            parseOrDefault(rank,  0, 'int'),
+            parseOrDefault(popularity,  0, 'int'),
+            parseOrDefault(favourites,  0, 'int'),
+            parseOrDefault(scoredBy,  0, 'int'),
+            parseOrDefault(members,  0, 'int'),
             imageURL,
-            pageURL,
         );
     });
+
     return animeEntries;
 }
 

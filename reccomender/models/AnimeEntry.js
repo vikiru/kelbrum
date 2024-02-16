@@ -1,6 +1,6 @@
 class AnimeEntry {
     constructor(
-        id,
+        malID,
         title,
         englishName,
         otherName,
@@ -18,7 +18,8 @@ class AnimeEntry {
         licensors,
         studios,
         source,
-        duration,
+        durationText,
+        durationMinutes,
         rating,
         rank,
         popularity,
@@ -26,9 +27,9 @@ class AnimeEntry {
         scoredBy,
         members,
         imageURL,
-        pageURL,
     ) {
-        this.id = id;
+        this.id = -1;
+        this.malID = malID;
         this.title = title;
         this.englishName = englishName;
         this.otherName = otherName;
@@ -46,7 +47,8 @@ class AnimeEntry {
         this.licensors = licensors;
         this.studios = studios;
         this.source = source;
-        this.duration = duration;
+        this.durationText = durationText;
+        this.durationMinutes = durationMinutes;
         this.rating = rating;
         this.rank = rank;
         this.popularity = popularity;
@@ -54,7 +56,7 @@ class AnimeEntry {
         this.scoredBy = scoredBy;
         this.members = members;
         this.imageURL = imageURL;
-        this.pageURL = pageURL;
+        this.pageURL = `https://myanimelist.net/anime/${malID}/${title}`;
     }
 }
 
