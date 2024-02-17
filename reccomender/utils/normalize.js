@@ -9,8 +9,10 @@ function jaccardSimilarity(setA, setB) {
 
 function normalizeGenres(anime) {
     const uniqueGenres = returnUniqueArray(anime, 'genres');
-    const inputGenres = anime.genres;
-    return uniqueGenres.map((genre) => (inputGenres.includes(genre) ?  1 :  0));
+    const normalizedGenres = anime.map((entry) => {
+        return uniqueGenres.map((genre) => (entry.genres.includes(genre) ?  1 :  0));
+    });
+    return normalizedGenres;
 }
 
 function normalizeSeason(data) {
@@ -18,21 +20,6 @@ function normalizeSeason(data) {
     return data.map(entry => {
         return seasons.map(season => (entry.season === season ?  1 :  0));
     });
-}
-
-function normalizeOrder(data, property) {
-    const orders = data.map((d) => d[property]);
-    const orderMapping = {};
-    let currentOrder = 1;
-    const defaultValue = Math.max(...orders) + 1;
-    orders.forEach((order) => {
-        if (!orderMapping[order] && order >= 1) {
-            orderMapping[order] = currentOrder++;
-        } else if (order === 0) {
-            orderMapping[order] = defaultValue;
-        }
-    });
-    return data.map((d) => orderMapping[d[property]]);
 }
 
 function normalizeLicensor(data) {
@@ -49,6 +36,14 @@ function normalizeProducer(data) {
         return uniqueProducers.map((producer) => (entry.producer === producer ?  1 :  0));
     });
     return normalizedProducers;
+}
+
+function normalizeStudio(data) {
+    const uniqueStudios = returnUniqueArray(data, 'studio');
+    const normalizedStudios = data.map((entry) => {
+        return uniqueStudios.map((studio) => (entry.studio === studio ?   1 :   0));
+    });
+    return normalizedStudios;
 }
 
 function normalizeRating(data) {
@@ -83,33 +78,31 @@ function normalizeStatus(data) {
     return normalizedStatus;
 }
 
-function normalizeStudio(data) {
-    const uniqueStudios = returnUniqueArray(data, 'studio');
-    const normalizedStudios = data.map((entry) => {
-        return uniqueStudios.map((studio) => (entry.studio === studio ?  1 :  0));
-    });
-    return normalizedStudios;
-}
-
 function normalizeEpisodes(data) {
-    const uniqueEpisodes = returnUniqueArray(data, 'episodes');
-    const episodes = data.map((d) => d.episodes);
+    const uniqueEpisodes = returnUniqueArray(data, 'episodes', ['Unknown']);
+    const episodes = data.map((d) => (d.episodes === 'Unknown' ? -1 : d.episodes));
     const minEpisodes = Math.min(...uniqueEpisodes);
     const maxEpisodes = Math.max(...uniqueEpisodes);
-    return episodes.map((ep) => (ep - minEpisodes) / (maxEpisodes - minEpisodes));
+
+    return episodes.map((ep) => {
+        return (ep === -1 || maxEpisodes === minEpisodes) ?   0 : (ep - minEpisodes) / (maxEpisodes - minEpisodes);
+    });
 }
 
 function normalizeDurationMinutes(data) {
-    const uniqueDurations = returnUniqueArray(data, 'durationMinutes');
-    const durations = data.map((d) => d.durationMinutes);
+    const uniqueDurations = returnUniqueArray(data, 'durationMinutes', ['Unknown']);
+    const durations = data.map((d) => (d.durationMinutes === 'Unknown' ? -1 : d.durationMinutes));
     const minDuration = Math.min(...uniqueDurations);
     const maxDuration = Math.max(...uniqueDurations);
-    return durations.map((duration) => (duration - minDuration) / (maxDuration - minDuration));
+
+    return durations.map((duration) => {
+        return (duration === -1 || maxDuration === minDuration) ?  0 : (duration - minDuration) / (maxDuration - minDuration);
+    });
 }
 
 function normalizeYear(data) {
-    const uniqueYears = returnUniqueArray(data, 'year', ['unknown']);
-    const years = data.map((d) => (d.year === 'unknown' ? -1 : d.year));
+    const uniqueYears = returnUniqueArray(data, 'year', ['Unknown']);
+    const years = data.map((d) => (d.year === 'Unknown' ? -1 : d.year));
     const minYear = Math.min(...uniqueYears);
     const maxYear = Math.max(...uniqueYears);
     return years.map((year) => (year === -1 ?   0 : (year - minYear) / (maxYear - minYear)));
@@ -156,47 +149,77 @@ function normalizeMembers(data) {
 }
 
 function createFeatureTensor(data) {
-    const normalizedGenres = normalizeGenres(data);
-    const normalizedSeasons = normalizeSeason(data);
-    const normalizedLicensors = normalizeLicensor(data);
-    const normalizedProducers = normalizeProducer(data);
-    const normalizedRatings = normalizeRating(data);
-    const normalizedSources = normalizeSource(data);
-    const normalizedTypes = normalizeType(data);
-    const normalizedStatuses = normalizeStatus(data);
-    const normalizedStudios = normalizeStudio(data);
-    const normalizedEpisodes = normalizeEpisodes(data);
-    const normalizedDurationMinutes = normalizeDurationMinutes(data);
-    const normalizedYears = normalizeYear(data);
-    const normalizedScores = normalizeScore(data);
-    const normalizedRanks = normalizeRank(data);
-    const normalizedPopularities = normalizePopularity(data);
-    const normalizedScoredBy = normalizeScoredBy(data);
-    const normalizedMembers = normalizeMembers(data);
+    const normalizationFunctions = [
+        { func: normalizeGenres, is1D: false }, 
+        { func: normalizeType, is1D: false }, 
+        { func: normalizeSource, is1D: false }, 
+        { func: normalizeProducer, is1D: false },
+        { func: normalizeStudio, is1D: false }, 
+        { func: normalizeSeason, is1D: false }, 
+        { func: normalizeYear, is1D: true },
+        { func: normalizeScore, is1D: true }, 
+        { func: normalizeEpisodes, is1D: true },
+        { func: normalizeDurationMinutes, is1D: true }, 
+        { func: normalizeRank, is1D: true }, 
+        { func: normalizePopularity, is1D: true }, 
+        { func: normalizeScoredBy, is1D: true },
+        { func: normalizeMembers, is1D: true },
+    ];
 
-    const featureTensor = tf.tensor2d([
-        ...normalizedGenres,
-        ...normalizedSeasons,
-        ...normalizedLicensors,
-        ...normalizedProducers,
-        ...normalizedRatings,
-        ...normalizedSources,
-        ...normalizedTypes,
-        ...normalizedStatuses,
-        ...normalizedStudios,
-        ...normalizedEpisodes,
-        ...normalizedDurationMinutes,
-        ...normalizedYears,
-        ...normalizedScores,
-        ...normalizedRanks,
-        ...normalizedPopularities,
-        ...normalizedScoredBy,
-        ...normalizedMembers
-    ]);
-
-    return featureTensor;
+    const allTensors = normalizationFunctions.map(({ func, is1D }) => {
+        const normalizedData = func(data);
+        let tensor;
+        if (is1D) {
+            tensor = tf.tensor1d(normalizedData);
+            tensor = tensor.expandDims(1);
+        } else {
+            tensor = tf.tensor2d(normalizedData);
+        }
+        return tensor;
+    });
+    const concatenatedTensor = tf.concat(allTensors,   1);
+    return concatenatedTensor;
 }
 
+function calculateFeatureVariance(data) {
+    const length =  11925;
+    const numFeatures = data[0].length;
+    const featureVariances = Array(numFeatures).fill(0);
+    const sums = Array(numFeatures).fill(0);
+    const squaredSums = Array(numFeatures).fill(0);
+
+    data.forEach(tensor => {
+        tensor.forEach((featureValue, index) => {
+            sums[index] += featureValue;
+            squaredSums[index] += Math.pow(featureValue,  2);
+        })
+    });
+
+    const averages = sums.map(s => s / length);
+    const variances = squaredSums.map((squaredSum, index) => {
+        const variance = squaredSum / length - Math.pow(averages[index],  2);
+        return variance >  0 ? variance :  0; // Ensure variance is non-negative
+    });
+    console.log(variances);
+
+    return variances;
+}
+
+
+function validateTensors(tensors) {
+    tensors.forEach((tensor, index) => {
+        const hasNaN = tf.tidy(() => {
+            return tf.logicalNot(tf.isNaN(tensor)).all().logicalNot();
+        });
+
+        if (hasNaN.dataSync()[0]) {
+            console.error(`Tensor at index ${index} contains NaN values.`);
+            console.error(tensor);
+        } else {
+            console.log(`Tensor at index ${index} does not contain NaN values.`);
+        }
+    });
+}
 
 module.exports = {
     normalizeGenres,
@@ -215,7 +238,9 @@ module.exports = {
     normalizeRank,
     normalizePopularity,
     normalizeScoredBy,
-    normalizeMembers
+    normalizeMembers,
+    createFeatureTensor,
+    calculateFeatureVariance,
 };
 
 // pearson correlation, matrix multiplication/factorization

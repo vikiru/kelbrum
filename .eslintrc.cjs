@@ -51,7 +51,7 @@ module.exports = {
         'jsdoc/require-returns': 'off',
         'jsdoc/require-returns-check': 'off',
         'jsdoc/require-returns-type': 'off',
-        'max-depth': ['warn', 4],
+        'max-depth': ['warn', 5],
         'mocha/no-setup-in-describe': 'off',
         'no-await-in-loop': 'off',
         'no-console': 'warn',

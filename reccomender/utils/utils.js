@@ -2,9 +2,9 @@ const { parse } = require('csv-parse');
 const { cleanArray, findSeasonalYear, cleanDuration, cleanRating, cleanPremiered } = require('./clean');
 const { AnimeEntry } = require('../models/AnimeEntry');
 const { UserInteraction } = require('../models/UserInteraction');
-const { readFile, readJSONFile, checkFileExists } = require('./readFile');
+const { checkFileExists, readAndProcessFile } = require('./readFile');
 const { handleMissingData } = require('./fetchData');
-const { writeFile } = require('./writeFile');
+const { writeData } = require('./writeFile');
 
 function findMax(data, property) {
     const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
@@ -39,9 +39,9 @@ function filterAnimeData(data) {
     return filteredData;
 }
 
-async function constructDataFiles() {
+async function constructDataFile() {
     console.log('Starting to construct data files by reading input csv file.');
-    const animeCSV = await readFile('../data/anime-dataset-2023.csv', 'AnimeEntry');
+    const animeCSV = await readAndProcessFile('../data/anime-dataset-2023.csv', 'AnimeEntry');
     let filteredData = filterAnimeData(animeCSV);
     filteredData = await handleMissingData(filteredData);
     filteredData.sort((a, b) => a.title.localeCompare(b.title));
@@ -51,32 +51,32 @@ async function constructDataFiles() {
         entry.premiered = cleanPremiered(entry.premiered, entry.season, entry.year);
         entry.rating = cleanRating(entry.rating);
     });
-    await writeFile('entries.json', filteredData);
+    await writeData('entries.json', filteredData);
     return filteredData;
 }
 
-async function initializeDataFiles() {
+async function initializeDataFile() {
     const fileName = 'entries.json';
     const fileExists = await checkFileExists(fileName);
 
     if (!fileExists) {
         console.log(`The file '${fileName}' does not exist. Constructing data files...`);
-        const data = await constructDataFiles();
+        const data = await constructDataFile();
         return data;
     } else {
         console.log(`The file '${fileName}' already exists. Reading data...`);
-        return await readFile(fileName,  'AnimeEntry');
+        return await readAndProcessFile(fileName,  'AnimeEntry');
     }
 }
 
 
 module.exports = {
-    writeFile,
+    writeData,
     findMax,
     findMin,
     filterAnimeData,
     sortData,
     returnUniqueArray,
-    constructDataFiles,
-    initializeDataFiles,
+    constructDataFile,
+    initializeDataFile,
 };

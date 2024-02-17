@@ -1,5 +1,5 @@
 const { cleanDuration, cleanRating } = require('./clean');
-const { writeFile } = require('./writeFile');
+const { writeData } = require('./writeFile');
 
 const RATE_LIMIT_STATUS = 429;
 async function fetchWithRetry(url, retries = 1) {

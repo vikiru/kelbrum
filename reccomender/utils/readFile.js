@@ -32,8 +32,8 @@ async function readJSONFile(filePath) {
 }
 
 async function readCSVFile(filePath) {
-    const data = [];
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
+        const data = [];
         fs.createReadStream(filePath)
             .pipe(parse({ delimiter: ',', from_line:  2 }))
             .on('data', (row) => {
@@ -41,15 +41,17 @@ async function readCSVFile(filePath) {
             })
             .on('end', () => {
                 console.log(`Successfully read CSV file at path "${filePath}".`);
-                resolve();
+                resolve(data);
             })
-            .on('error', reject);
+            .on('error', (error) => {
+                console.error(`Error reading CSV file at path "${filePath}":`, error);
+                reject(error);
+            });
     });
-    return data;
 }
 
 
-async function readFile(fileName, type) {
+async function readAndProcessFile(fileName, type) {
     const filePath = path.resolve(__dirname, `../data/${fileName}`);
     const fileExtension = path.extname(fileName).toLowerCase();
 
@@ -82,6 +84,6 @@ async function readFile(fileName, type) {
 module.exports = {
     readCSVFile,
     readJSONFile,
-    readFile,
+    readAndProcessFile,
     checkFileExists,
 };

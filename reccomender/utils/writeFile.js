@@ -15,7 +15,7 @@ function formatFileSize(bytes) {
     return `${formatNumber(size)} ${unit}`;
 }
 
-async function writeFile(fileName, data) {
+async function writeData(fileName, data) {
     const filePath = path.resolve(__dirname, `../data/${fileName}`);
     try {
         const dataString = JSON.stringify(data, null);
@@ -29,5 +29,5 @@ async function writeFile(fileName, data) {
     }
 }
 module.exports = {
-    writeFile,
+    writeData,
 };

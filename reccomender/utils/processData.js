@@ -16,7 +16,6 @@ function cleanString(value) {
     return value.replace('UNKNOWN', 'Unknown');
 }
 
-
 async function processAnimeData(data) {
     const animeEntries = data.map((row) => {
         const [
