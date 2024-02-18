@@ -1,4 +1,5 @@
-const { returnUniqueArray } = require("./utils");
+const { calculateStatistics, createMapping } = require("./stats");
+const { returnUniqueArray, writeData } = require("./utils");
 const tf = require('@tensorflow/tfjs');
 
 function jaccardSimilarity(setA, setB) {
@@ -6,170 +7,103 @@ function jaccardSimilarity(setA, setB) {
     const union = new Set([...setA, ...setB]);
     return intersection.size / union.size;
 }
-
-function normalizeGenres(anime) {
-    const uniqueGenres = returnUniqueArray(anime, 'genres');
-    const normalizedGenres = anime.map((entry) => {
-        return uniqueGenres.map((genre) => (entry.genres.includes(genre) ?  1 :  0));
-    });
-    return normalizedGenres;
-}
-
-function normalizeSeason(data) {
-    const seasons = ['spring', 'summer', 'fall', 'winter'];
-    return data.map(entry => {
-        return seasons.map(season => (entry.season === season ?  1 :  0));
-    });
-}
-
-function normalizeLicensor(data) {
-    const uniqueLicensors = returnUniqueArray(data, 'licensor');
-    const normalizedLicensors = data.map((entry) => {
-        return uniqueLicensors.map((licensor) => (entry.licensor === licensor ?  1 :  0));
-    });
-    return normalizedLicensors;
-}
-
-function normalizeProducer(data) {
-    const uniqueProducers = returnUniqueArray(data, 'producer');
-    const normalizedProducers = data.map((entry) => {
-        return uniqueProducers.map((producer) => (entry.producer === producer ?  1 :  0));
-    });
-    return normalizedProducers;
-}
-
-function normalizeStudio(data) {
-    const uniqueStudios = returnUniqueArray(data, 'studio');
-    const normalizedStudios = data.map((entry) => {
-        return uniqueStudios.map((studio) => (entry.studio === studio ?   1 :   0));
-    });
-    return normalizedStudios;
-}
-
-function normalizeRating(data) {
-    const uniqueRatings = returnUniqueArray(data, 'rating');
-    const normalizedRatings = data.map((entry) => {
-        return uniqueRatings.map((rating) => (entry.rating === rating ?   1 :   0));
-    });
-    return normalizedRatings;
-}
-
-function normalizeSource(data) {
-    const uniqueSources = returnUniqueArray(data, 'source');
-    const normalizedSources = data.map((entry) => {
-        return uniqueSources.map((source) => (entry.source === source ?   1 :   0));
-    });
-    return normalizedSources;
-}
-
-function normalizeType(data) {
-    const uniqueTypes = returnUniqueArray(data, 'type');
-    const normalizedTypes = data.map((entry) => {
-        return uniqueTypes.map((type) => (entry.type === type ?   1 :   0));
-    });
-    return normalizedTypes;
-}
-
-function normalizeStatus(data) {
-    const uniqueStatus = returnUniqueArray(data, 'status');
-    const normalizedStatus = data.map((entry) => {
-        return uniqueStatus.map((status) => (entry.status === status ?   1 :   0));
-    });
-    return normalizedStatus;
-}
-
-function normalizeEpisodes(data) {
-    const uniqueEpisodes = returnUniqueArray(data, 'episodes', ['Unknown']);
-    const episodes = data.map((d) => (d.episodes === 'Unknown' ? -1 : d.episodes));
-    const minEpisodes = Math.min(...uniqueEpisodes);
-    const maxEpisodes = Math.max(...uniqueEpisodes);
-
-    return episodes.map((ep) => {
-        return (ep === -1 || maxEpisodes === minEpisodes) ?   0 : (ep - minEpisodes) / (maxEpisodes - minEpisodes);
+function encodeCategorical(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    return data.map((entry) => {
+        const propertyValue = entry[property];
+        const propertyString = propertyValue.toString();
+        return uniqueValues.map((value) => {
+            const valueString = value.toString();
+            if (Array.isArray(propertyValue)) {
+                return propertyValue.includes(value) ?   1 :   0;
+            } else {
+                return valueString === propertyString ?   1 :   0;
+            }
+        });
     });
 }
 
-function normalizeDurationMinutes(data) {
-    const uniqueDurations = returnUniqueArray(data, 'durationMinutes', ['Unknown']);
-    const durations = data.map((d) => (d.durationMinutes === 'Unknown' ? -1 : d.durationMinutes));
-    const minDuration = Math.min(...uniqueDurations);
-    const maxDuration = Math.max(...uniqueDurations);
+function ordinalEncode(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    return data.map((entry) => {
+        return uniqueValues.indexOf(entry[property]);
+    });
 
-    return durations.map((duration) => {
-        return (duration === -1 || maxDuration === minDuration) ?  0 : (duration - minDuration) / (maxDuration - minDuration);
+}
+
+function minMaxScale(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    const minValue = Math.min(...uniqueValues);
+    const maxValue = Math.max(...uniqueValues);
+    return data.map((entry) => {
+        return (entry[property] - minValue) / (maxValue - minValue);
     });
 }
 
-function normalizeYear(data) {
-    const uniqueYears = returnUniqueArray(data, 'year', ['Unknown']);
-    const years = data.map((d) => (d.year === 'Unknown' ? -1 : d.year));
-    const minYear = Math.min(...uniqueYears);
-    const maxYear = Math.max(...uniqueYears);
-    return years.map((year) => (year === -1 ?   0 : (year - minYear) / (maxYear - minYear)));
+function robustScale(data, property, stats) {
+    const values = data.map((d) => d[property]);
+    const valueStats = stats.find((s) => s.property === property);
+    const median = valueStats.median;
+    const iqr = valueStats.iqr;
+
+    return values.map((value) => {
+        if (value === 'Unknown') {
+            return   0;
+        } else {
+            return (value - median) / iqr;
+        }
+    });
 }
 
-function normalizeScore(data) {
-    const uniqueScores = returnUniqueArray(data, 'score');
-    const scores = data.map((d) => d.score);
-    const minScore = Math.min(...uniqueScores);
-    const maxScore = Math.max(...uniqueScores);
-    return scores.map((score) => (score - minScore) / (maxScore - minScore));
+function multiHotEncode(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    return data.map((entry) => {
+        return uniqueValues.map((value) => (entry[property].includes(value) ?   1 :   0));
+    });
 }
 
-function normalizeRank(data) {
-    const uniqueRanks = returnUniqueArray(data, 'rank');
-    const ranks = data.map((d) => d.rank);
-    const minRank = Math.min(...uniqueRanks);
-    const maxRank = Math.max(...uniqueRanks);
-    return ranks.map((rank) => (rank - minRank) / (maxRank - minRank));
+function checkArrayDimension(arr) {
+    if (arr.some(item => Array.isArray(item))) {
+        return '2D';
+    } else {
+        return '1D';
+    }
 }
 
-function normalizePopularity(data) {
-    const uniquePopularities = returnUniqueArray(data, 'popularity');
-    const popularities = data.map((d) => d.popularity);
-    const minPopularity = Math.min(...uniquePopularities);
-    const maxPopularity = Math.max(...uniquePopularities);
-    return popularities.map((popularity) => (popularity - minPopularity) / (maxPopularity - minPopularity));
-}
-
-function normalizeScoredBy(data) {
-    const uniqueScoredBy = returnUniqueArray(data, 'scoredBy');
-    const scoredBy = data.map((d) => d.scoredBy);
-    const minScoredBy = Math.min(...uniqueScoredBy);
-    const maxScoredBy = Math.max(...uniqueScoredBy);
-    return scoredBy.map((scored) => (scored - minScoredBy) / (maxScoredBy - minScoredBy));
-}
-
-function normalizeMembers(data) {
-    const uniqueMembers = returnUniqueArray(data, 'members');
-    const members = data.map((d) => d.members);
-    const minMembers = Math.min(...uniqueMembers);
-    const maxMembers = Math.max(...uniqueMembers);
-    return members.map((member) => (member - minMembers) / (maxMembers - minMembers));
-}
-
-function createFeatureTensor(data) {
+async function createFeatureTensor(data) {
+    const stats = await calculateStatistics(data);
     const normalizationFunctions = [
-        { func: normalizeGenres, is1D: false }, 
-        { func: normalizeType, is1D: false }, 
-        { func: normalizeSource, is1D: false }, 
-        { func: normalizeProducer, is1D: false },
-        { func: normalizeStudio, is1D: false }, 
-        { func: normalizeSeason, is1D: false }, 
-        { func: normalizeYear, is1D: true },
-        { func: normalizeScore, is1D: true }, 
-        { func: normalizeEpisodes, is1D: true },
-        { func: normalizeDurationMinutes, is1D: true }, 
-        { func: normalizeRank, is1D: true }, 
-        { func: normalizePopularity, is1D: true }, 
-        { func: normalizeScoredBy, is1D: true },
-        { func: normalizeMembers, is1D: true },
+        { func: encodeCategorical, isCategorical: true, property: 'genres' },
+        { func: encodeCategorical, isCategorical: true, property: 'type' },
+        { func: encodeCategorical, isCategorical: true, property: 'status' },
+        { func: encodeCategorical, isCategorical: true, property: 'source' },
+        { func: encodeCategorical, isCategorical: true, property: 'producers' },
+        { func: encodeCategorical, isCategorical: true, property: 'studios' },
+        { func: encodeCategorical, isCategorical: true, property: 'licensors' },
+        { func: encodeCategorical, isCategorical: true, property: 'rating' },
+        { func: encodeCategorical, isCategorical: true, property: 'season' },
+        { func: encodeCategorical, isCategorical: true, property: 'year' },
+        { func: encodeCategorical, isCategorical: true, property: 'durationMinutes' },
+        { func: encodeCategorical, isCategorical: true, property: 'episodes' },
+        { func: robustScale, isCategorical: false, property: 'score' },
+        { func: minMaxScale, isCategorical: false, property: 'rank' },
+        { func: minMaxScale, isCategorical: false, property: 'popularity' },
+        { func: minMaxScale, isCategorical: false, property: 'scoredBy' },
+        { func: minMaxScale, isCategorical: false, property: 'members' },
     ];
 
-    const allTensors = normalizationFunctions.map(({ func, is1D }) => {
-        const normalizedData = func(data);
+    const allTensors = normalizationFunctions.map(({ func, isCategorical, property }) => {
+        let normalizedData;
+        if (isCategorical) {
+            normalizedData = func(data, property);
+        } else {
+            normalizedData = func(data, property, stats);
+        }
+
+        const dimension = checkArrayDimension(normalizedData);
+
         let tensor;
-        if (is1D) {
+        if (dimension === '1D') {
             tensor = tf.tensor1d(normalizedData);
             tensor = tensor.expandDims(1);
         } else {
@@ -177,6 +111,8 @@ function createFeatureTensor(data) {
         }
         return tensor;
     });
+
+    validateTensors(allTensors);
     const concatenatedTensor = tf.concat(allTensors,   1);
     return concatenatedTensor;
 }
@@ -198,10 +134,8 @@ function calculateFeatureVariance(data) {
     const averages = sums.map(s => s / length);
     const variances = squaredSums.map((squaredSum, index) => {
         const variance = squaredSum / length - Math.pow(averages[index],  2);
-        return variance >  0 ? variance :  0; // Ensure variance is non-negative
+        return variance >  0 ? variance :  0; 
     });
-    console.log(variances);
-
     return variances;
 }
 
@@ -222,24 +156,15 @@ function validateTensors(tensors) {
 }
 
 module.exports = {
-    normalizeGenres,
-    normalizeStatus,
-    normalizeEpisodes,
     jaccardSimilarity,
-    normalizeLicensor,
-    normalizeProducer,
-    normalizeRating,
-    normalizeSource,
-    normalizeType,
-    normalizeStudio,
-    normalizeYear,
-    normalizeScore,
-    normalizeRank,
-    normalizePopularity,
-    normalizeScoredBy,
-    normalizeMembers,
+    ordinalEncode,
+    minMaxScale,
+    robustScale,
+    multiHotEncode,
+    checkArrayDimension,
     createFeatureTensor,
     calculateFeatureVariance,
+    validateTensors
 };
 
 // pearson correlation, matrix multiplication/factorization
