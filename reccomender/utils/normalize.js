@@ -223,7 +223,6 @@ function validateTensors(tensors) {
 
 module.exports = {
     normalizeGenres,
-    normalizeOrder,
     normalizeStatus,
     normalizeEpisodes,
     jaccardSimilarity,
