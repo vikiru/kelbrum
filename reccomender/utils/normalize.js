@@ -7,6 +7,33 @@ function jaccardSimilarity(setA, setB) {
     const union = new Set([...setA, ...setB]);
     return intersection.size / union.size;
 }
+
+function encodeCombination(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    const mapping = createMapping(uniqueValues);
+
+    return data.map((entry) => {
+        const propertyValues = entry[property];
+        let combinationSum =  0;
+
+        if (Array.isArray(propertyValues)) {
+            propertyValues.forEach(value => {
+                const valueInt = mapping[value];
+                if (valueInt !== undefined) {
+                    combinationSum += valueInt;
+                }
+            });
+        } else {
+            const valueInt = mapping[propertyValues];
+            if (valueInt !== undefined) {
+                combinationSum = valueInt;
+            }
+        }
+
+        return combinationSum;
+    });
+}
+
 function encodeCategorical(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
     return data.map((entry) => {
@@ -50,7 +77,8 @@ function robustScale(data, property, stats) {
         if (value === 'Unknown') {
             return   0;
         } else {
-            return (value - median) / iqr;
+            const roundedValue = Math.round(value);
+            return (roundedValue - median) / iqr;
         }
     });
 }
@@ -73,18 +101,18 @@ function checkArrayDimension(arr) {
 async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const normalizationFunctions = [
-        { func: encodeCategorical, isCategorical: true, property: 'genres' },
         { func: encodeCategorical, isCategorical: true, property: 'type' },
         { func: encodeCategorical, isCategorical: true, property: 'status' },
-        { func: encodeCategorical, isCategorical: true, property: 'source' },
-        { func: encodeCategorical, isCategorical: true, property: 'producers' },
-        { func: encodeCategorical, isCategorical: true, property: 'studios' },
-        { func: encodeCategorical, isCategorical: true, property: 'licensors' },
         { func: encodeCategorical, isCategorical: true, property: 'rating' },
         { func: encodeCategorical, isCategorical: true, property: 'season' },
-        { func: encodeCategorical, isCategorical: true, property: 'year' },
-        { func: encodeCategorical, isCategorical: true, property: 'durationMinutes' },
-        { func: encodeCategorical, isCategorical: true, property: 'episodes' },
+        { func: encodeCombination, isCategorical: true, property: 'source' },
+        { func: encodeCombination, isCategorical: true, property: 'genres' },
+        { func: encodeCombination, isCategorical: true, property: 'producers' },
+        { func: encodeCombination, isCategorical: true, property: 'studios' },
+        { func: encodeCombination, isCategorical: true, property: 'licensors' },
+        { func: encodeCombination, isCategorical: true, property: 'durationMinutes' },
+        { func: encodeCombination, isCategorical: true, property: 'year' },
+        { func: encodeCombination, isCategorical: true, property: 'episodes' },
         { func: robustScale, isCategorical: false, property: 'score' },
         { func: minMaxScale, isCategorical: false, property: 'rank' },
         { func: minMaxScale, isCategorical: false, property: 'popularity' },
@@ -149,8 +177,6 @@ function validateTensors(tensors) {
         if (hasNaN.dataSync()[0]) {
             console.error(`Tensor at index ${index} contains NaN values.`);
             console.error(tensor);
-        } else {
-            console.log(`Tensor at index ${index} does not contain NaN values.`);
         }
     });
 }
