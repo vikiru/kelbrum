@@ -33,8 +33,11 @@ class AnimeEntry {
         this.title = title;
         this.englishName = englishName;
         this.otherName = otherName;
+        this.titles = [];
         this.score = score;
         this.genres = genres;
+        this.themes = [];
+        this.demographic = "Unknown";
         this.synopsis = synopsis;
         this.type = type;
         this.episodes = episodes;
@@ -56,6 +59,7 @@ class AnimeEntry {
         this.scoredBy = scoredBy;
         this.members = members;
         this.imageURL = imageURL;
+        this.trailerURL = "Unknown";
         this.pageURL = `https://myanimelist.net/anime/${malID}/${title}`;
     }
 }
