@@ -2,8 +2,8 @@ const tf = require('@tensorflow/tfjs');
 const { kmeans } = require('ml-kmeans');
 const { initializeDataFile, returnUniqueArray, writeData, sortData } = require('./utils/utils');
 const { createFeatureTensor, calculateFeatureVariance } = require('./utils/normalize');
-const fs = require('fs');
 const ss = require('simple-statistics');
+const { similarity, distance } = require('ml-distance');
 
 function euclideanDistance(point1, point2) {
     if (point1.length !== point2.length) {
@@ -18,182 +18,56 @@ function euclideanDistance(point1, point2) {
     return Math.sqrt(sum);
   }
 
-  function createMapping(uniqueValues){
-    const unknownCheck = uniqueValues.filter(v => v === 'Unknown').length;
-    const filteredValues = uniqueValues.filter(v => v !== 'Unknown');
-    const mapping = {};
-    let nextInt = 0;
-    if (unknownCheck > 0){
-        mapping['Unknown'] = nextInt;
-        nextInt++;
-    }
-    filteredValues.forEach(val => {
-        if (!Object.prototype.hasOwnProperty.call(mapping, val)) {
-            mapping[val] = nextInt++;
-          }
-        });
-    return mapping;
-  }
-
-  function fillArray(data, mapping, key) {
-    const array = [];
-    data.forEach(entry => {
-      let value = entry[key];
-      if (Array.isArray(value)) {
-        const valueSum = value.reduce((acc, v) => acc + mapping[v],   0);
-        array.push({ value: valueSum, originalValues: value });
-      } else if (typeof value === 'string') {
-        array.push({ value: mapping[value], originalValues: [value] });
-      } else if (typeof value === 'number') {
-        array.push({ value: Math.round(value), originalValues: [value] });
-      }
-    });
-    return array;
-  }
-
-  function returnMedianMode(values, mapping, isCategorical) {
-    let median, mode;
-  
-    if (isCategorical) {
-      const medianValue = ss.median(values.map(v => v.value));
-      const modeValue = ss.mode(values.map(v => v.value));
-  
-      median = {
-        median: medianValue,
-        value: values.find(v => v.value === medianValue)?.originalValues || 'Not found'
-      };
-  
-      mode = {
-        mode: modeValue,
-        value: Array.isArray(modeValue)
-          ? modeValue.map(value => values.find(v => v.value === value)?.originalValues || 'Not found')
-          : [values.find(v => v.value === modeValue)?.originalValues || 'Not found']
-      };
-  
-      console.log(median, mode);
-    } else {
-      median = ss.median(values.map(v => v.value));
-      mode = ss.mode(values.map(v => v.value));
-    }
-  
-    return { median, mode };
-  }
-
-  function constructFrequencyMap(data, mapping, key) {
-    const valuesArray = fillArray(data, mapping, key);
-    const frequencyMap = [];
-    let invalidCount =  0;
-  
-    const valueCounts = valuesArray.reduce((counts, value) => {
-      counts[value] = (counts[value] ||  0) +  1;
-      return counts;
-    }, {});
-  
-    Object.entries(valueCounts).forEach(([value, occurences]) => {
-      if (value === mapping['Unknown'] || value === mapping[0]) {
-        invalidCount += occurences;
-      }
-      frequencyMap.push({
-        value,
-        occurences,
-      });
-    });
-  
-    frequencyMap.invalidCount = invalidCount;
-    return frequencyMap;
-  }
-
-  async function calculateStatistics(data) {
-    try {
-      const firstElement = data[0];
-      const excludedKeys = ['id', 'malID', 'title', 'englishName', 'otherName', 'imageURL', 'pageURL', 'aired', 'premiered', 'synopsis', 'durationText'];
-      const keys = Object.keys(firstElement).filter(key => !excludedKeys.includes(key));
-      const valuesMap = [];
-  
-      const propertyMap = keys.map(key => {
-        const isCategorical = Array.isArray(firstElement[key]) || typeof firstElement[key] === 'string';
-        const uniqueValues = returnUniqueArray(data, key);
-        const mapping = createMapping(uniqueValues);
-        const frequencyMap = constructFrequencyMap(data, mapping, key);
-        const values = fillArray(data, mapping, key);
-  
-        const processedValues = values.map(valueObj => valueObj.value);
-        if (values.length ===   0) {
-          throw new Error(`No values found for property ${key}`);
+  async function returnOptimalK(featureArray, max) {
+    const results = [];
+    const fileName = 'manhattan.json';
+    for (let k =  2; k <= max; k++) {
+        try {
+            const result = await kmeans(featureArray, k, {initialization: 'kmeans++', distanceFunction: distance.manhattan });
+            const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error,  0);
+            const assignments = result.clusters;
+            const silhouetteScore = ss.silhouetteMetric(featureArray, assignments);
+            console.log(k, wcss, silhouetteScore);
+            results.push({ k, wcss, silhouetteScore});
+        } catch (error) {
+            console.error(`Error computing KMeans for k=${k}:`, error);
+            await writeData(fileName, results);
+            throw error;
         }
-  
-        const mean = ss.mean(processedValues);
-        const {median, mode} = returnMedianMode(values, processedValues, mapping, isCategorical);
-        const variance = ss.variance(processedValues);
-        const standardDeviation = ss.standardDeviation(processedValues);
-        const min = ss.min(processedValues);
-        const max = ss.max(processedValues);
-        const q1 = ss.quantile(processedValues,   0.25);
-        const q3 = ss.quantile(processedValues,   0.75);
-        const iqr = ss.iqr(processedValues);
-        const invalidCount = frequencyMap.invalidCount;
-        const skewness = ss.sampleSkewness(processedValues);
-        const kurtosis = ss.sampleKurtosis(processedValues);
-        valuesMap[key] = processedValues;
-
-        return {
-          property: key,
-          mean,
-          median,
-          mode,
-          variance,
-          standardDeviation,
-          min,
-          max,
-          q1,
-          q3,
-          iqr,
-          skewness,
-          kurtosis,
-          invalidCount,
-        };
-      });
-  
-      propertyMap.forEach(prop => {
-        const values = valuesMap[prop.property];
-        const filteredProps = propertyMap.filter(otherProp => otherProp.property !== prop.property);
-        prop.covariance = [];
-        prop.correlation = [];
-  
-        filteredProps.forEach(p => {
-          const otherValues = valuesMap[p.property];
-          const covariance = ss.sampleCovariance(values, otherValues);
-          const correlation = ss.sampleCorrelation(values, otherValues);
-          prop.covariance.push({
-            comparedProperty: p.property,
-            covariance,
-          });
-          prop.correlation.push({
-            comparedProperty: p.property,
-            correlation,
-          });
-        });
-      });
-  
-      await writeData('statistics.json', propertyMap);
-      return propertyMap;
-    } catch (error) {
-      console.error('Error in calculateStatistics:', error);
-      throw error;
     }
-  }
 
+    const optimalK = results.reduce((prev, curr) => (curr.wcss < prev.wcss ? curr : prev)).k;
+    const optimalS = results.reduce((prev, curr) => Math.abs(curr.silhouetteScore -  1) < Math.abs(prev.silhouetteScore -  1) ? curr : prev).silhouetteScore;
+
+    console.log(`Optimal number of clusters: ${optimalK}`);
+    console.log(`Greatest silhouette score: ${optimalS}`);
+
+    results.optimalK = optimalK;
+    await writeData(fileName, results);
+    return { optimalK, optimalS };
+}
+
+// create custom distance function takes tensorA, tensorB
+// use jaccard cosine and other measures together.
+
+
+  // k = 12,14  24, 99, 100
  async function kmeansTrain(featureArray, data){
     let wcssValues = [];
-    const titles = [];
-        const max = 200;
-        for (let k =   99; k <= max; k++) {
-            let result = kmeans(featureArray, k, {maxIterations:   10000});
+    let sScores = [];
+    const titles = new Set();
+        const max = 100;
+        for (let k = 2; k <= max; k++) {
+            let result = kmeans(featureArray, k, {initialization: 'kmeans++', distanceFunction: distance.jaccard });
             let wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error,   0);
             wcssValues.push({ k, wcss });
             console.log(k, wcss);
 
             const assignments = result.clusters; 
+            const silhouetteScore = ss.silhouetteMetric(featureArray, assignments);
+            sScores.push(silhouetteScore);
+
+            console.log(`Silhouette score: ${silhouetteScore}`);
 
             const clusteredAnime = assignments.map((clusterIndex, dataIndex) => {
                 return {
@@ -205,7 +79,7 @@ function euclideanDistance(point1, point2) {
          const animeId =   25013; // 30276 - one punch man, 25013 - aka yona. // cowboy bebop, trigun, black lagoon. hellsing ultimate, drifters, vampire hunter d. nge serial experiments lain akira.
          const animeIndex = data.findIndex(anime => anime.malID === animeId);
          const animeCluster = assignments[animeIndex];
-        // console.log(`The anime with ID ${animeId} belongs to cluster ${animeCluster +   1}`);
+         console.log(`The anime with ID ${animeId} belongs to cluster ${animeCluster +   1}`);
 
          const topAnimeByCluster = assignments.reduce((acc, clusterIndex, dataIndex) => {
              if (!acc[clusterIndex]) {
@@ -216,25 +90,29 @@ function euclideanDistance(point1, point2) {
          }, {});
 
          const topAnime = topAnimeByCluster[animeCluster];
-         console.log(`Anime within ${animeCluster +   1}:`);
+         console.log(`Anime within ${animeCluster +   1}: ${topAnime.length}`);
          topAnime.forEach((anime, index) => {
-             console.log(`Anime ${index +   1}:`, anime.title);
-             titles.push(anime.title);
+           // console.log(`Anime ${index +   1}:`, anime.title);
+             titles.add(anime.title);
          });
         }
 
         let optimalK = wcssValues.reduce((prev, curr) => (curr.wcss < prev.wcss ? curr : prev)).k;
+        let optimalS = sScores.reduce((prev, curr) => (curr < prev ? curr : prev));
         console.log(`Optimal number of clusters: ${optimalK}`);
-        await writeData('titles.json', titles);
+        console.log(`Optimal number of S: ${optimalS}`);
+        await writeData('titles.json', Array.from(titles));
  }
 
 async function main() {
     try {
         const data = await initializeDataFile();
-        //const featureTensor = createFeatureTensor(data);
-        //const featureArray = featureTensor.arraySync();
+        const featureTensor = await createFeatureTensor(data);
+        const featureArray = featureTensor.arraySync();
+        //console.log(featureArray);
         //const featureVariances = calculateFeatureVariance(featureArray);
-        await calculateStatistics(data);
+        await returnOptimalK(featureArray, 100);
+        //await kmeansTrain(featureArray, data);
     } catch (err) {
         console.error('Error occured:', err);
     }
@@ -248,3 +126,28 @@ main();
 // save centroids and clusters, commit to repo, read it and reccomend based on that.
 
 // try kmeans++, dbscan, knn, 
+
+
+// TODO: revisit normalization try diff funcs, identify good # of clusters, use silhouette metric.
+// once satisfied, commit to main.
+// k 25 /31?
+
+// IMAGEURL: cleanup https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png -> ''
+
+// season, year, status, producers, licensors, studios, type, source, rating as one/multi-hot encode.
+// rank, popularity as ordinal encode
+// favourites, scoredBy, members min max or robust scale
+// duration minutes either robust or multi-hot encode
+// combine features with high covariance?
+
+
+// experiment with custom distances using ml-distance
+
+// TODO: go through each distance/similarity until k = 100 or as high as possible without error and save to file
+// select best distance algorithm with highest silhouette and lowest wcss, use k value.
+// cleanup, commit results to branch and update statistics file to save covariance and correlation of features (add handling to
+// output which features are related and not based on values)
+// experiment with predict and also see which anime are in which clusters
+// store statistics and cluster distance functions results in data/statistics
+
+//  cosine, pearson, hamming, mahalanobis, euclid, manhattan, chebyshev, minkowski (p = 1, p = 2)
