@@ -53,7 +53,7 @@ function encodeCategorical(data, property) {
 function ordinalEncode(data, property) {
     const uniqueValues = sortData(returnUniqueArray(data, property, ['Unknown']));
     return data.map((entry) => {
-        if (entry[property] ===  0 || entry[property] === 'Unknown') {
+        if (entry[property] === 0 || entry[property] === 'Unknown') {
             return -1;
         }
         return uniqueValues.indexOf(entry[property]);
@@ -67,7 +67,7 @@ function minMaxScale(data, property) {
     const range = maxValue - minValue;
 
     return data.map((entry) => {
-        if (entry[property] ===  0 || entry[property] === 'Unknown') {
+        if (entry[property] === 0 || entry[property] === 'Unknown') {
             return (minValue - minValue) / range;
         } else {
             return (entry[property] - minValue) / range;
@@ -121,18 +121,17 @@ async function createFeatureTensor(data) {
         { func: encodeCategorical, isCategorical: true, property: 'producers' },
         { func: encodeCategorical, isCategorical: true, property: 'studios' },
         { func: encodeCategorical, isCategorical: true, property: 'licensors' },
-    
-      //  { func: ordinalEncode, isCategorical: false, property: 'rank' },
-       // { func: ordinalEncode, isCategorical: false, property: 'popularity' },
-    
+
+        { func: ordinalEncode, isCategorical: false, property: 'rank' },
+        { func: ordinalEncode, isCategorical: false, property: 'popularity' },
+
         { func: robustScale, isCategorical: false, property: 'score' },
-       // { func: robustScale, isCategorical: false, property: 'scoredBy' },
+        { func: robustScale, isCategorical: false, property: 'scoredBy' },
         { func: robustScale, isCategorical: false, property: 'favourites' },
-      //  { func: robustScale, isCategorical: false, property: 'members' },
-    
+        { func: robustScale, isCategorical: false, property: 'members' },
+
         { func: minMaxScale, isCategorical: false, property: 'durationMinutes' },
         { func: minMaxScale, isCategorical: false, property: 'episodes' },
-    
     ];
 
     const allTensors = normalizationFunctions.map(({ func, isCategorical, property }) => {
@@ -142,8 +141,6 @@ async function createFeatureTensor(data) {
         } else {
             normalizedData = func(data, property, stats);
         }
-//        console.log(property, normalizedData);
-
         const dimension = checkArrayDimension(normalizedData);
 
         let tensor;
