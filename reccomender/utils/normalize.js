@@ -61,11 +61,17 @@ function ordinalEncode(data, property) {
 }
 
 function minMaxScale(data, property) {
-    const uniqueValues = returnUniqueArray(data, property);
+    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
     const minValue = Math.min(...uniqueValues);
     const maxValue = Math.max(...uniqueValues);
+    const range = maxValue - minValue;
+
     return data.map((entry) => {
-        return (entry[property] - minValue) / (maxValue - minValue);
+        if (entry[property] ===  0 || entry[property] === 'Unknown') {
+            return (minValue - minValue) / range;
+        } else {
+            return (entry[property] - minValue) / range;
+        }
     });
 }
 
@@ -104,29 +110,29 @@ async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const normalizationFunctions = [
         { func: encodeCategorical, isCategorical: true, property: 'type' },
+        { func: encodeCategorical, isCategorical: true, property: 'source' },
         { func: encodeCategorical, isCategorical: true, property: 'status' },
         { func: encodeCategorical, isCategorical: true, property: 'rating' },
         { func: encodeCategorical, isCategorical: true, property: 'season' },
+        { func: encodeCategorical, isCategorical: true, property: 'year' },
+        { func: encodeCategorical, isCategorical: true, property: 'genres' },
         { func: encodeCategorical, isCategorical: true, property: 'demographics' },
-
-        { func: encodeCombination, isCategorical: true, property: 'source' },
-        { func: encodeCombination, isCategorical: true, property: 'genres' },
-        { func: encodeCombination, isCategorical: true, property: 'themes' },
-        { func: encodeCombination, isCategorical: true, property: 'producers' },
-        { func: encodeCombination, isCategorical: true, property: 'studios' },
-        { func: encodeCombination, isCategorical: true, property: 'licensors' },
-        { func: encodeCombination, isCategorical: true, property: 'durationMinutes' },
-        { func: encodeCombination, isCategorical: true, property: 'year' },
-        { func: encodeCombination, isCategorical: true, property: 'episodes' },
-
+        { func: encodeCategorical, isCategorical: true, property: 'themes' },
+        { func: encodeCategorical, isCategorical: true, property: 'producers' },
+        { func: encodeCategorical, isCategorical: true, property: 'studios' },
+        { func: encodeCategorical, isCategorical: true, property: 'licensors' },
+    
+      //  { func: ordinalEncode, isCategorical: false, property: 'rank' },
+       // { func: ordinalEncode, isCategorical: false, property: 'popularity' },
+    
         { func: robustScale, isCategorical: false, property: 'score' },
-
-        { func: minMaxScale, isCategorical: false, property: 'scoredBy' },
-        { func: minMaxScale, isCategorical: false, property: 'favourites' },
-        { func: minMaxScale, isCategorical: false, property: 'members' },
-
-        { func: ordinalEncode, isCategorical: false, property: 'rank' },
-        { func: ordinalEncode, isCategorical: false, property: 'popularity' },
+       // { func: robustScale, isCategorical: false, property: 'scoredBy' },
+        { func: robustScale, isCategorical: false, property: 'favourites' },
+      //  { func: robustScale, isCategorical: false, property: 'members' },
+    
+        { func: minMaxScale, isCategorical: false, property: 'durationMinutes' },
+        { func: minMaxScale, isCategorical: false, property: 'episodes' },
+    
     ];
 
     const allTensors = normalizationFunctions.map(({ func, isCategorical, property }) => {
@@ -136,6 +142,7 @@ async function createFeatureTensor(data) {
         } else {
             normalizedData = func(data, property, stats);
         }
+//        console.log(property, normalizedData);
 
         const dimension = checkArrayDimension(normalizedData);
 
