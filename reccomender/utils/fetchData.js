@@ -39,8 +39,8 @@ function delay() {
 
 function compareArrays(inputArray, fetchedArray) {
     let array = inputArray;
-    if (inputArray.length === 0 && fetchedArray.length > 0) {
-        inputArray = fetchedArray.map((a) => a.name).join(',');
+    if (inputArray.length ===  0 && fetchedArray.length >  0) {
+        inputArray = fetchedArray.map((a) => a.title || a.name).join(',');
     }
     return array;
 }
@@ -57,11 +57,21 @@ function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
 
 function compareInputToFetched(inputProperty, fetchedProperty) {
     let property = inputProperty;
-    const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
+    const inputDefaults = ['Unknown',  0, 'No description available for this anime.', 'Not available'];
     const fetchedDefaults = ['Unknown', null];
-    if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
+
+    const isNumber = (value) => !isNaN(parseFloat(value)) && isFinite(value);
+    const inputIsNumber = isNumber(inputProperty);
+    const fetchedIsNumber = isNumber(fetchedProperty);
+
+    if (inputIsNumber && fetchedIsNumber) {
+        if (inputProperty !== fetchedProperty) {
+            property = fetchedProperty;
+        }
+    } else if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
         property = fetchedProperty;
     }
+
     if (property === undefined || property === null){
         property = inputProperty;
     }
@@ -120,7 +130,9 @@ function findMatchingAnime(entry, fetchedData) {
 const propertyMapping = {
     malID: 'mal_id',
     pageURL: 'url',
+    trailerURL: 'trailer',
     title: 'title',
+    titles: 'titles',
     englishName: 'title_english',
     otherName: 'title_japanese',
     type: 'type',
@@ -143,6 +155,8 @@ const propertyMapping = {
     licensors: 'licensors',
     studios: 'studios',
     genres: 'genres',
+    themes: 'themes',
+    demographics: 'demographics',
   };
 
   function updateEntry(entry, animeResult) {
@@ -155,7 +169,11 @@ const propertyMapping = {
             entry[key] = compareArrays(entry[key], animeResult[propertyMapping[key]]);
         }
     }
-    return entry;
+    const titles = Array.from(new Set([entry.title, entry.englishName, entry.otherName].filter(title => title !== 'Unknown')));
+    entry.titles = animeResult.titles.length > 0 ? animeResult.titles.map(t => t.title) : titles;
+    entry.themes = animeResult.themes.map(theme => theme.name);
+    entry.demographics = animeResult.demographics.map(demo => demo.name);
+    entry.trailerURL = animeResult.trailer.url !== null ? animeResult.trailer.url : 'Unknown';
 }
 
 async function handleMissingData(data) {
@@ -167,7 +185,7 @@ async function handleMissingData(data) {
     console.log(`Starting to process ${total} entries.`);
 
     const urls = await constructUrls(data);
-    const entriesToUpdate = data.filter(entry => identifyMissingProperties(entry).length >= 2 && entry.status !== 'Finished Airing');
+    const entriesToUpdate = data.filter(entry => identifyMissingProperties(entry).length >= 2);
     const totalBatches = Math.ceil(entriesToUpdate.length /   2);
 
     console.log(`Processing ${entriesToUpdate.length} entries with missing data into ${totalBatches} batches.`);
@@ -196,9 +214,7 @@ async function handleMissingData(data) {
                 } else {
                     const animeResult = findMatchingAnime(entry, result);
                     if (animeResult) {
-                        const updatedEntry = updateEntry(entry, animeResult);
-                        const entryIndex = data.indexOf(entry);
-                        data[entryIndex] = updatedEntry;
+                        updateEntry(entry, animeResult);
                         console.info(`Entry for '${entry.title}' updated successfully.`);
                     } else {
                         console.warn(`Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`);

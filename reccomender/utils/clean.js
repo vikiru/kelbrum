@@ -23,15 +23,12 @@ function findSeasonalYearByAired(text) {
         };
     }
 
-    // Extract season and year from matches
     const season = matches[1] || null;
     const year = matches[2] || matches[3] || matches[4] || matches[5] || matches[8];
 
-    // If a season is not provided, infer it from the month
     const seasonMatch = season ? seasons.find((seasonObj) => seasonObj.months.includes(season)) : null;
     const seasonName = seasonMatch ? seasonMatch.name : (matches[6] ? seasons.find(seasonObj => seasonObj.months.includes(matches[6])).name : 'Unknown');
 
-    // Parse the year and handle cases where it's not provided
     const yearValue = year ? parseInt(year,   10) : 'Unknown';
 
     return {
@@ -88,7 +85,7 @@ function cleanDuration(text) {
     while ((match = regex.exec(text)) !== null) {
         const value = parseInt(match[1],  10);
         const unit = match[2];
-        if (!isNaN(value)) { // Check if value is a valid number
+        if (!isNaN(value)) {
             if (unit === 'hr') {
                 hours += value;
             } else if (unit === 'min') {
