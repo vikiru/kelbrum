@@ -37,7 +37,7 @@ class AnimeEntry {
         this.score = score;
         this.genres = genres;
         this.themes = [];
-        this.demographic = "Unknown";
+        this.demographics = [];
         this.synopsis = synopsis;
         this.type = type;
         this.episodes = episodes;
