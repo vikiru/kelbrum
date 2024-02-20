@@ -1,5 +1,5 @@
 const { calculateStatistics, createMapping } = require('./stats');
-const { returnUniqueArray } = require('./utils');
+const { sortData, returnUniqueArray } = require('./utils');
 const tf = require('@tensorflow/tfjs');
 
 function jaccardSimilarity(setA, setB) {
@@ -51,8 +51,11 @@ function encodeCategorical(data, property) {
 }
 
 function ordinalEncode(data, property) {
-    const uniqueValues = returnUniqueArray(data, property);
+    const uniqueValues = sortData(returnUniqueArray(data, property, ['Unknown']));
     return data.map((entry) => {
+        if (entry[property] ===  0 || entry[property] === 'Unknown') {
+            return -1;
+        }
         return uniqueValues.indexOf(entry[property]);
     });
 }
@@ -104,22 +107,26 @@ async function createFeatureTensor(data) {
         { func: encodeCategorical, isCategorical: true, property: 'status' },
         { func: encodeCategorical, isCategorical: true, property: 'rating' },
         { func: encodeCategorical, isCategorical: true, property: 'season' },
+        { func: encodeCategorical, isCategorical: true, property: 'demographics' },
+
         { func: encodeCombination, isCategorical: true, property: 'source' },
         { func: encodeCombination, isCategorical: true, property: 'genres' },
         { func: encodeCombination, isCategorical: true, property: 'themes' },
-        { func: encodeCombination, isCategorical: true, property: 'demographics' },
         { func: encodeCombination, isCategorical: true, property: 'producers' },
         { func: encodeCombination, isCategorical: true, property: 'studios' },
         { func: encodeCombination, isCategorical: true, property: 'licensors' },
         { func: encodeCombination, isCategorical: true, property: 'durationMinutes' },
         { func: encodeCombination, isCategorical: true, property: 'year' },
         { func: encodeCombination, isCategorical: true, property: 'episodes' },
+
         { func: robustScale, isCategorical: false, property: 'score' },
+
         { func: minMaxScale, isCategorical: false, property: 'scoredBy' },
-        { func: minMaxScale, isCategorical: false, property: 'rank' },
         { func: minMaxScale, isCategorical: false, property: 'favourites' },
         { func: minMaxScale, isCategorical: false, property: 'members' },
-        { func: minMaxScale, isCategorical: false, property: 'popularity' },
+
+        { func: ordinalEncode, isCategorical: false, property: 'rank' },
+        { func: ordinalEncode, isCategorical: false, property: 'popularity' },
     ];
 
     const allTensors = normalizationFunctions.map(({ func, isCategorical, property }) => {
