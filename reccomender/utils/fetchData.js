@@ -39,7 +39,7 @@ function delay() {
 
 function compareArrays(inputArray, fetchedArray) {
     let array = inputArray;
-    if (inputArray.length ===  0 && fetchedArray.length >  0) {
+    if (inputArray.length === 0 && fetchedArray.length > 0) {
         inputArray = fetchedArray.map((a) => a.title || a.name).join(',');
     }
     return array;
@@ -57,7 +57,7 @@ function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
 
 function compareInputToFetched(inputProperty, fetchedProperty) {
     let property = inputProperty;
-    const inputDefaults = ['Unknown',  0, 'No description available for this anime.', 'Not available'];
+    const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
     const fetchedDefaults = ['Unknown', null];
 
     const isNumber = (value) => !isNaN(parseFloat(value)) && isFinite(value);
@@ -72,22 +72,20 @@ function compareInputToFetched(inputProperty, fetchedProperty) {
         property = fetchedProperty;
     }
 
-    if (property === undefined || property === null){
+    if (property === undefined || property === null) {
         property = inputProperty;
     }
     return property;
 }
 
-  function cleanTitle(title){
+function cleanTitle(title) {
     const normalizedTitle = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     return normalizedTitle.replace(/[^a-zA-Z0-9\s]/g, '');
- }
+}
 
- function identifyMissingProperties(entry) {
-    return Object.keys(entry).filter(key =>
-        entry[key] === 'Unknown' ||
-        entry[key] ===   0 ||
-        (Array.isArray(entry[key]) && entry[key].length ===   0)
+function identifyMissingProperties(entry) {
+    return Object.keys(entry).filter(
+        (key) => entry[key] === 'Unknown' || entry[key] === 0 || (Array.isArray(entry[key]) && entry[key].length === 0),
     );
 }
 
@@ -109,21 +107,19 @@ async function constructUrls(data) {
     return urls;
 }
 
-
 function findMatchingAnime(entry, fetchedData) {
     const searchTitle = cleanTitle(entry.title);
-    const possibleTitles = [
-        entry.englishName,
-        entry.otherName,
-        entry.title,
-        searchTitle,
-    ].filter(t => t !== 'Unknown');
+    const possibleTitles = [entry.englishName, entry.otherName, entry.title, searchTitle].filter(
+        (t) => t !== 'Unknown',
+    );
     const uniquePossibleTitles = Array.from(new Set(possibleTitles));
-    return fetchedData.data.find(a => {
+    return fetchedData.data.find((a) => {
         const titlesToCheck = [a.title, a.title_english, a.title_japanese];
-        return titlesToCheck.some(title => uniquePossibleTitles.includes(title)) ||
-               a.title_synonyms.some(synonym => uniquePossibleTitles.includes(synonym)) ||
-               a.titles.some(t => uniquePossibleTitles.includes(t.title));
+        return (
+            titlesToCheck.some((title) => uniquePossibleTitles.includes(title)) ||
+            a.title_synonyms.some((synonym) => uniquePossibleTitles.includes(synonym)) ||
+            a.titles.some((t) => uniquePossibleTitles.includes(t.title))
+        );
     });
 }
 
@@ -157,9 +153,9 @@ const propertyMapping = {
     genres: 'genres',
     themes: 'themes',
     demographics: 'demographics',
-  };
+};
 
-  function updateEntry(entry, animeResult) {
+function updateEntry(entry, animeResult) {
     const propertiesToUpdate = identifyMissingProperties(entry);
     for (const key of propertiesToUpdate) {
         const type = Array.isArray(entry[key]) ? 'array' : 'singleValue';
@@ -169,10 +165,12 @@ const propertyMapping = {
             entry[key] = compareArrays(entry[key], animeResult[propertyMapping[key]]);
         }
     }
-    const titles = Array.from(new Set([entry.title, entry.englishName, entry.otherName].filter(title => title !== 'Unknown')));
-    entry.titles = animeResult.titles.length > 0 ? animeResult.titles.map(t => t.title) : titles;
-    entry.themes = animeResult.themes.map(theme => theme.name);
-    entry.demographics = animeResult.demographics.map(demo => demo.name);
+    const titles = Array.from(
+        new Set([entry.title, entry.englishName, entry.otherName].filter((title) => title !== 'Unknown')),
+    );
+    entry.titles = animeResult.titles.length > 0 ? animeResult.titles.map((t) => t.title) : titles;
+    entry.themes = animeResult.themes.map((theme) => theme.name);
+    entry.demographics = animeResult.demographics.map((demo) => demo.name);
     entry.trailerURL = animeResult.trailer.url !== null ? animeResult.trailer.url : 'Unknown';
 }
 
@@ -185,30 +183,30 @@ async function handleMissingData(data) {
     console.log(`Starting to process ${total} entries.`);
 
     const urls = await constructUrls(data);
-    const entriesToUpdate = data.filter(entry => identifyMissingProperties(entry).length >= 2);
-    const totalBatches = Math.ceil(entriesToUpdate.length /   2);
+    const entriesToUpdate = data.filter((entry) => identifyMissingProperties(entry).length >= 2);
+    const totalBatches = Math.ceil(entriesToUpdate.length / 2);
 
     console.log(`Processing ${entriesToUpdate.length} entries with missing data into ${totalBatches} batches.`);
 
-    for (let i =   0; i < entriesToUpdate.length; i +=   2) {
-        const batchNumber = i /   2 +   1;
-        const remainingBatches = totalBatches - (i /   2);
+    for (let i = 0; i < entriesToUpdate.length; i += 2) {
+        const batchNumber = i / 2 + 1;
+        const remainingBatches = totalBatches - i / 2;
 
         console.log(`Processing batch ${batchNumber} of ${totalBatches}. ${remainingBatches} batches remaining.`);
 
-        const batch = entriesToUpdate.slice(i, i +   2);
-        const batchUrls = batch.map(entry => urls[data.indexOf(entry)]);
+        const batch = entriesToUpdate.slice(i, i + 2);
+        const batchUrls = batch.map((entry) => urls[data.indexOf(entry)]);
 
         console.log(`URLs for batch ${batchNumber}:`, batchUrls);
 
         try {
-            const results = await Promise.all(batchUrls.map(url => fetchData(url)));
+            const results = await Promise.all(batchUrls.map((url) => fetchData(url)));
 
-            for (let j =   0; j < batch.length; j++) {
+            for (let j = 0; j < batch.length; j++) {
                 const entry = batch[j];
                 const result = results[j];
 
-                if (result.data.length ===   0) {
+                if (result.data.length === 0) {
                     console.warn(`Entry for '${entry.title}' not found. Adding to missing list for exclusion.`);
                     missing.push(entry);
                 } else {
@@ -217,7 +215,9 @@ async function handleMissingData(data) {
                         updateEntry(entry, animeResult);
                         console.info(`Entry for '${entry.title}' updated successfully.`);
                     } else {
-                        console.warn(`Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`);
+                        console.warn(
+                            `Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`,
+                        );
                         issues.push(entry);
                     }
                 }
@@ -226,14 +226,14 @@ async function handleMissingData(data) {
             console.error(`Error processing batch ${batchNumber}:`, error);
         }
 
-        await new Promise(resolve => setTimeout(resolve,   500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     const elapsedTime = process.hrtime(startTime);
-    const elapsedSeconds = elapsedTime[0] + elapsedTime[1] /   1e9;
+    const elapsedSeconds = elapsedTime[0] + elapsedTime[1] / 1e9;
     console.log(`Total time for processing all entries: ${elapsedSeconds.toFixed(2)} seconds`);
 
-    const remainingEntries = data.filter(d => !missing.includes(d) && !issues.includes(d));
+    const remainingEntries = data.filter((d) => !missing.includes(d) && !issues.includes(d));
     console.log(`Processed ${remainingEntries.length} entries successfully.`);
 
     return remainingEntries;

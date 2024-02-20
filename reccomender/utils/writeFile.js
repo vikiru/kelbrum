@@ -6,12 +6,12 @@ function formatNumber(num) {
 }
 
 function getFileSizeUnit(bytes) {
-    return bytes <  1024 ? 'B' : bytes <  1048576 ? 'KB' : 'MB';
+    return bytes < 1024 ? 'B' : bytes < 1048576 ? 'KB' : 'MB';
 }
 
 function formatFileSize(bytes) {
     const unit = getFileSizeUnit(bytes);
-    const size = unit === 'B' ? bytes : unit === 'KB' ? bytes /  1024 : bytes /  1048576;
+    const size = unit === 'B' ? bytes : unit === 'KB' ? bytes / 1024 : bytes / 1048576;
     return `${formatNumber(size)} ${unit}`;
 }
 

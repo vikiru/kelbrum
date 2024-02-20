@@ -1,5 +1,5 @@
-const { calculateStatistics, createMapping } = require("./stats");
-const { returnUniqueArray, writeData } = require("./utils");
+const { calculateStatistics, createMapping } = require('./stats');
+const { returnUniqueArray } = require('./utils');
 const tf = require('@tensorflow/tfjs');
 
 function jaccardSimilarity(setA, setB) {
@@ -14,10 +14,10 @@ function encodeCombination(data, property) {
 
     return data.map((entry) => {
         const propertyValues = entry[property];
-        let combinationSum =  0;
+        let combinationSum = 0;
 
         if (Array.isArray(propertyValues)) {
-            propertyValues.forEach(value => {
+            propertyValues.forEach((value) => {
                 const valueInt = mapping[value];
                 if (valueInt !== undefined) {
                     combinationSum += valueInt;
@@ -42,9 +42,9 @@ function encodeCategorical(data, property) {
         return uniqueValues.map((value) => {
             const valueString = value.toString();
             if (Array.isArray(propertyValue)) {
-                return propertyValue.includes(value) ?   1 :   0;
+                return propertyValue.includes(value) ? 1 : 0;
             } else {
-                return valueString === propertyString ?   1 :   0;
+                return valueString === propertyString ? 1 : 0;
             }
         });
     });
@@ -74,7 +74,7 @@ function robustScale(data, property, stats) {
 
     return values.map((value) => {
         if (value === 'Unknown') {
-            return   0;
+            return 0;
         } else {
             const roundedValue = Math.round(value);
             return (roundedValue - median) / iqr;
@@ -85,12 +85,12 @@ function robustScale(data, property, stats) {
 function multiHotEncode(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
     return data.map((entry) => {
-        return uniqueValues.map((value) => (entry[property].includes(value) ?   1 :   0));
+        return uniqueValues.map((value) => (entry[property].includes(value) ? 1 : 0));
     });
 }
 
 function checkArrayDimension(arr) {
-    if (arr.some(item => Array.isArray(item))) {
+    if (arr.some((item) => Array.isArray(item))) {
         return '2D';
     } else {
         return '1D';
@@ -143,32 +143,31 @@ async function createFeatureTensor(data) {
     });
 
     validateTensors(allTensors);
-    const concatenatedTensor = tf.concat(allTensors,   1);
+    const concatenatedTensor = tf.concat(allTensors, 1);
     return concatenatedTensor;
 }
 
 function calculateFeatureVariance(data) {
-    const length =  11925;
+    const length = 11925;
     const numFeatures = data[0].length;
     const featureVariances = Array(numFeatures).fill(0);
     const sums = Array(numFeatures).fill(0);
     const squaredSums = Array(numFeatures).fill(0);
 
-    data.forEach(tensor => {
+    data.forEach((tensor) => {
         tensor.forEach((featureValue, index) => {
             sums[index] += featureValue;
-            squaredSums[index] += Math.pow(featureValue,  2);
-        })
+            squaredSums[index] += Math.pow(featureValue, 2);
+        });
     });
 
-    const averages = sums.map(s => s / length);
+    const averages = sums.map((s) => s / length);
     const variances = squaredSums.map((squaredSum, index) => {
-        const variance = squaredSum / length - Math.pow(averages[index],  2);
-        return variance >  0 ? variance :  0; 
+        const variance = squaredSum / length - Math.pow(averages[index], 2);
+        return variance > 0 ? variance : 0;
     });
     return variances;
 }
-
 
 function validateTensors(tensors) {
     tensors.forEach((tensor, index) => {
@@ -192,8 +191,5 @@ module.exports = {
     checkArrayDimension,
     createFeatureTensor,
     calculateFeatureVariance,
-    validateTensors
+    validateTensors,
 };
-
-// pearson correlation, matrix multiplication/factorization
-// consider combining rank and popularity into one, revisit all normalization and all properties.

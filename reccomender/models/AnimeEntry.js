@@ -59,7 +59,7 @@ class AnimeEntry {
         this.scoredBy = scoredBy;
         this.members = members;
         this.imageURL = imageURL;
-        this.trailerURL = "Unknown";
+        this.trailerURL = 'Unknown';
         this.pageURL = `https://myanimelist.net/anime/${malID}/${title}`;
     }
 }

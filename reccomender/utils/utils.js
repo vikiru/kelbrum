@@ -66,10 +66,9 @@ async function initializeDataFile() {
         return data;
     } else {
         console.log(`The file '${fileName}' already exists. Reading data...`);
-        return await readAndProcessFile(fileName,  'AnimeEntry');
+        return await readAndProcessFile(fileName, 'AnimeEntry');
     }
 }
-
 
 module.exports = {
     writeData,

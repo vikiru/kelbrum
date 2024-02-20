@@ -18,7 +18,6 @@ async function checkFileExists(fileName) {
     }
 }
 
-
 async function readJSONFile(filePath) {
     try {
         const jsonData = await fs.promises.readFile(filePath, 'utf8');
@@ -35,7 +34,7 @@ async function readCSVFile(filePath) {
     return new Promise((resolve, reject) => {
         const data = [];
         fs.createReadStream(filePath)
-            .pipe(parse({ delimiter: ',', from_line:  2 }))
+            .pipe(parse({ delimiter: ',', from_line: 2 }))
             .on('data', (row) => {
                 data.push(row);
             })
@@ -49,7 +48,6 @@ async function readCSVFile(filePath) {
             });
     });
 }
-
 
 async function readAndProcessFile(fileName, type) {
     const filePath = path.resolve(__dirname, `../data/${fileName}`);
@@ -65,7 +63,7 @@ async function readAndProcessFile(fileName, type) {
                 } else if (type === 'UserInteraction') {
                     return processUserInteractionData(data);
                 }
-            }
+            },
         };
 
         const handler = fileTypeHandlers[fileExtension];
@@ -79,7 +77,6 @@ async function readAndProcessFile(fileName, type) {
         throw err;
     }
 }
-
 
 module.exports = {
     readCSVFile,

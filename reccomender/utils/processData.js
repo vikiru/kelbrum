@@ -1,10 +1,10 @@
-const { AnimeEntry } = require("../models/AnimeEntry");
-const { UserInteraction } = require("../models/UserInteraction");
-const { cleanRating, cleanDuration, cleanArray, findSeasonalYear, cleanPremiered } = require("./clean");
+const { AnimeEntry } = require('../models/AnimeEntry');
+const { UserInteraction } = require('../models/UserInteraction');
+const { cleanRating, cleanDuration, cleanArray, findSeasonalYear, cleanPremiered } = require('./clean');
 
-function parseOrDefault(value, defaultValue =  0, type = 'int') {
+function parseOrDefault(value, defaultValue = 0, type = 'int') {
     if (type === 'int') {
-        return parseInt(value,  10) || defaultValue;
+        return parseInt(value, 10) || defaultValue;
     } else if (type === 'float') {
         return parseFloat(value) || defaultValue;
     } else {
@@ -64,11 +64,11 @@ async function processAnimeData(data) {
             name,
             cleanString(englishName),
             cleanString(otherName),
-            parseOrDefault(score,  0, 'float'),
+            parseOrDefault(score, 0, 'float'),
             cleanedGenres,
             synopsis,
             cleanedType,
-            parseOrDefault(episodes,  0, 'int'),
+            parseOrDefault(episodes, 0, 'int'),
             aired,
             cleanedPremieredWithSeason,
             season,
@@ -81,11 +81,11 @@ async function processAnimeData(data) {
             durationText,
             durationMinutes,
             cleanedRating,
-            parseOrDefault(rank,  0, 'int'),
-            parseOrDefault(popularity,  0, 'int'),
-            parseOrDefault(favourites,  0, 'int'),
-            parseOrDefault(scoredBy,  0, 'int'),
-            parseOrDefault(members,  0, 'int'),
+            parseOrDefault(rank, 0, 'int'),
+            parseOrDefault(popularity, 0, 'int'),
+            parseOrDefault(favourites, 0, 'int'),
+            parseOrDefault(scoredBy, 0, 'int'),
+            parseOrDefault(members, 0, 'int'),
             imageURL,
         );
     });
@@ -111,5 +111,5 @@ async function processUserInteractionData(data) {
 
 module.exports = {
     processAnimeData,
-    processUserInteractionData
-}
+    processUserInteractionData,
+};

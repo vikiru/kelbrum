@@ -27,9 +27,13 @@ function findSeasonalYearByAired(text) {
     const year = matches[2] || matches[3] || matches[4] || matches[5] || matches[8];
 
     const seasonMatch = season ? seasons.find((seasonObj) => seasonObj.months.includes(season)) : null;
-    const seasonName = seasonMatch ? seasonMatch.name : (matches[6] ? seasons.find(seasonObj => seasonObj.months.includes(matches[6])).name : 'Unknown');
+    const seasonName = seasonMatch
+        ? seasonMatch.name
+        : matches[6]
+          ? seasons.find((seasonObj) => seasonObj.months.includes(matches[6])).name
+          : 'Unknown';
 
-    const yearValue = year ? parseInt(year,   10) : 'Unknown';
+    const yearValue = year ? parseInt(year, 10) : 'Unknown';
 
     return {
         season: seasonName,
@@ -78,12 +82,12 @@ function cleanDuration(text) {
 
     const regex = /(\d+)\s*(hr|min|sec)(?:\s*per ep)?/gi;
     let match;
-    let hours =  0;
-    let minutes =  0;
-    let seconds =  0;
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
 
     while ((match = regex.exec(text)) !== null) {
-        const value = parseInt(match[1],  10);
+        const value = parseInt(match[1], 10);
         const unit = match[2];
         if (!isNaN(value)) {
             if (unit === 'hr') {
@@ -95,7 +99,7 @@ function cleanDuration(text) {
             }
         }
     }
-    const totalMinutes = hours *  60 + minutes + Math.round(seconds /  60); // Keep precision down to the second
+    const totalMinutes = hours * 60 + minutes + Math.round(seconds / 60); // Keep precision down to the second
     return totalMinutes;
 }
 
@@ -123,5 +127,5 @@ module.exports = {
     cleanRating,
     cleanDuration,
     cleanArray,
-    cleanPremiered
+    cleanPremiered,
 };
