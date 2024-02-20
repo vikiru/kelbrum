@@ -36,7 +36,9 @@ function returnUniqueArray(data, property, filter = []) {
 function filterAnimeData(data) {
     const excludedTypes = ['ONA', 'OVA', 'Special', 'Music', 'PV', 'TV Special'];
     const excludedGenres = ['Erotica', 'Hentai'];
-    const filteredData = data.filter((d) => !excludedGenres.includes(d.genres) && !excludedTypes.includes(d.type));
+    const filteredData = data.filter((d) => {
+        return !excludedTypes.includes(d.type) && !d.genres.some(genre => excludedGenres.includes(genre));
+    });
     return filteredData;
 }
 
@@ -48,10 +50,12 @@ async function constructDataFile() {
     filteredData.sort((a, b) => a.title.localeCompare(b.title));
     filteredData.forEach((entry, index) => {
         entry.id = index;
+        entry.malID = parseInt(entry.malID, 10);
         entry.durationMinutes = cleanDuration(entry.durationText);
         entry.premiered = cleanPremiered(entry.premiered, entry.season, entry.year);
         entry.rating = cleanRating(entry.rating);
     });
+    filteredData = filterAnimeData(filteredData);
     await writeData('entries.json', filteredData);
     return filteredData;
 }
@@ -66,7 +70,9 @@ async function initializeDataFile() {
         return data;
     } else {
         console.log(`The file '${fileName}' already exists. Reading data...`);
-        return await readAndProcessFile(fileName, 'AnimeEntry');
+        const data = await readAndProcessFile(fileName, 'AnimeEntry');
+        const filteredData = filterAnimeData(data);
+        return filteredData;
     }
 }
 
