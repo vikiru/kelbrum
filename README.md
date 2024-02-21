@@ -101,6 +101,9 @@ npm run prettier
     -   [Transforming Categorical Data](https://developers.google.com/machine-learning/data-prep/transform/transform-categorical)
 -   [Docusaurus](https://docusaurus.io/)
 -   [GitHub Pages](https://pages.github.com/)
+-   [Shields Badges](https://github.com/badges/shields)
+-   [regex101](https://regex101.com/)
+-   [Favicon Generator](https://favicon.io/favicon-generator/)
 
 Various web articles for research and learning, such as:
 
