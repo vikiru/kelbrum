@@ -168,7 +168,7 @@ function updateEntry(entry, animeResult) {
     const titles = Array.from(
         new Set([entry.title, entry.englishName, entry.otherName].filter((title) => title !== 'Unknown')),
     );
-    entry.titles = animeResult.titles.length > 0 ? animeResult.titles.map((t) => t.title) : titles;
+    entry.titles = animeResult.titles.length > 0 ? Array.from(new Set(animeResult.titles.map((t) => t.title))) : titles;
     entry.themes = animeResult.themes.map((theme) => theme.name);
     entry.demographics = animeResult.demographics.map((demo) => demo.name);
     entry.trailerURL = animeResult.trailer.url !== null ? animeResult.trailer.url : 'Unknown';

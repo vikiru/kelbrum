@@ -18,14 +18,14 @@ async function checkFileExists(fileName) {
     }
 }
 
-async function readJSONFile(filePath) {
+async function readJSONFile(fileName) {
     try {
-        const jsonData = await fs.promises.readFile(filePath, 'utf8');
+        const jsonData = await fs.promises.readFile(fileName, 'utf8');
         const parsedData = JSON.parse(jsonData);
-        console.log(`Successfully read JSON file at path "${filePath}".`);
+        console.log(`Successfully read JSON file at path "${fileName}".`);
         return parsedData;
     } catch (error) {
-        console.error(`Error reading JSON file at path "${filePath}":`, error);
+        console.error(`Error reading JSON file at path "${fileName}":`, error);
         throw error;
     }
 }

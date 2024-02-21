@@ -7,14 +7,13 @@ const { initializeDataFile } = require('./utils');
 const path = require('path');
 const { readJSONFile, checkFileExists } = require('./readFile');
 
-async function returnOptimalK(data, featureArray, max) {
+async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
     const results = [];
-    const fileName = 'jaccard.json';
     for (let k = 2; k <= max; k++) {
         try {
             const result = await kmeans(featureArray, k, {
                 initialization: 'kmeans++',
-                distanceFunction: distance.jaccard,
+                distanceFunction: distanceFunction,
             });
             const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
             const assignments = result.clusters;
@@ -43,7 +42,6 @@ async function returnKmeansModel(featureArray, k, distanceFunction) {
     if (modelExists) {
         console.log('Using existing KMeans model from file.');
         const kmeansModel = await readJSONFile(modelFilePath);
-        console.log(kmeansModel);
         return kmeansModel;
     } else {
         console.log('KMeans model file not found. Training a new model.');
@@ -51,7 +49,7 @@ async function returnKmeansModel(featureArray, k, distanceFunction) {
             initialization: 'kmeans++',
             distanceFunction: distanceFunction,
         });
-        await writeData(modelFilePath, kmeansModel);
+        await writeData(modelFileName, kmeansModel);
         return kmeansModel;
     }
 }

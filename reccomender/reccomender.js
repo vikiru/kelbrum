@@ -15,11 +15,13 @@ async function main() {
         const featureArray = featureTensor.arraySync();
         //console.log(featureArray[0]);
         //console.log(featureArray[1]);
-        const kmeans = await returnKmeansModel(featureArray, 43, distance.dice);
+        //await returnOptimalK(featureArray, 100, customDistance, 'customDistance.json');
+        const kmeans = await returnKmeansModel(featureArray, 10, similarity.cosine);
         const id = data.findIndex(d => d.malID === 1); // 25013 - akayona, 6, 21
         const entry = data[id];
+        console.log(id, entry.id);
         const cluster = kmeans.clusters[entry.id];
-        const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, entry.id, [entry.id]);
+        const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
         console.log(data[id].title);
         const topResults = results.slice(0, 10);
         topResults.forEach(t => {
