@@ -16,25 +16,36 @@ async function main() {
         //console.log(featureArray[0]);
         //console.log(featureArray[1]);
         //await returnOptimalK(featureArray, 100, customDistance, 'customDistance.json');
-        const kmeans = await returnKmeansModel(featureArray, 10, similarity.cosine);
+        const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
         const id = data.findIndex(d => d.malID === 1); // 25013 - akayona, 6, 21
         const entry = data[id];
         console.log(id, entry.id);
         const cluster = kmeans.clusters[entry.id];
         const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
+        const reccs = await returnRandomRecommendations(results);
         console.log(data[id].title);
-        const topResults = results.slice(0, 10);
+        const topResults = reccs;
         topResults.forEach(t => {
             const ind = t.index;
             console.log(data[ind].title);
             console.log(t.similarity);
         })
-       console.log(results);
     } catch (err) {
         console.error('Error occured:', err);
     }
 }
 
+async function returnRandomRecommendations(similarities) {
+    const filteredSimilarities = similarities.filter(s => s.similarity >=  0.94);
+
+    for (let i = filteredSimilarities.length -  1; i >  0; i--) {
+        const j = Math.floor(Math.random() * (i +  1));
+        [filteredSimilarities[i], filteredSimilarities[j]] = [filteredSimilarities[j], filteredSimilarities[i]];
+    }
+
+    const recommendations = filteredSimilarities.slice(0,  10);
+    return recommendations;
+}
 
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
@@ -98,7 +109,5 @@ function compareTensors(tensorA, tensorB) {
 
 main();
 
-// add function to reccomend random 10 unique anime within cluster
-// function for most 10 unique similar anime
+
 // start working on ui (user enters up to 10 titles, auto complete
-// add a list of future improvements 
