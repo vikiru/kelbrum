@@ -106,8 +106,8 @@ function checkArrayDimension(arr) {
     }
 }
 
-function normalizeCategorical(data){
-    const uniqueValues = Array.from(new Set(data.map(d => d)));
+function normalizeCategorical(data) {
+    const uniqueValues = Array.from(new Set(data.map((d) => d)));
     const minValue = Math.min(...uniqueValues);
     const maxValue = Math.max(...uniqueValues);
     const range = maxValue - minValue;
@@ -127,11 +127,11 @@ async function createFeatureTensor(data) {
         { func: encodeCombination, isCategorical: true, property: 'source' },
         { func: encodeCombination, isCategorical: true, property: 'status' },
         { func: encodeCombination, isCategorical: true, property: 'rating' },
-       // { func: encodeCombination, isCategorical: true, property: 'premiered'},
+        // { func: encodeCombination, isCategorical: true, property: 'premiered'},
         { func: encodeCombination, isCategorical: true, property: 'season' },
         { func: encodeCombination, isCategorical: true, property: 'year' },
         { func: encodeCombination, isCategorical: true, property: 'genres' },
-        { func: encodeCombination, isCategorical: true, property: 'demographics'},
+        { func: encodeCombination, isCategorical: true, property: 'demographics' },
         { func: encodeCombination, isCategorical: true, property: 'themes' },
         { func: encodeCombination, isCategorical: true, property: 'producers' },
         { func: encodeCombination, isCategorical: true, property: 'studios' },
