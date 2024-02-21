@@ -137,8 +137,8 @@ async function createFeatureTensor(data) {
         { func: encodeCombination, isCategorical: true, property: 'studios' },
         { func: encodeCombination, isCategorical: true, property: 'licensors' },
 
-        { func: ordinalEncode, isCategorical: false, property: 'rank' },
-      // { func: minMaxScale, isCategorical: false, property: 'popularity' },
+        { func: minMaxScale, isCategorical: false, property: 'rank' },
+        { func: minMaxScale, isCategorical: false, property: 'popularity' },
 
         { func: minMaxScale, isCategorical: false, property: 'score' },
         { func: minMaxScale, isCategorical: false, property: 'scoredBy' },
