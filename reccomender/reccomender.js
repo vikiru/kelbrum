@@ -17,18 +17,17 @@ async function main() {
         //console.log(featureArray[1]);
         //await returnOptimalK(featureArray, 100, customDistance, 'customDistance.json');
         const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
-        const id = data.findIndex(d => d.malID === 1); // 25013 - akayona, 6, 21
+        const id = data.findIndex(d => d.malID === 30); // 25013 - akayona, 6, 21
         const entry = data[id];
-        console.log(id, entry.id);
         const cluster = kmeans.clusters[entry.id];
         const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
         const reccs = await returnRandomRecommendations(results);
-        console.log(data[id].title);
+        console.log(reccs.length);
         const topResults = reccs;
         topResults.forEach(t => {
             const ind = t.index;
             console.log(data[ind].title);
-            console.log(t.similarity);
+           // console.log(t.similarity);
         })
     } catch (err) {
         console.error('Error occured:', err);
@@ -36,18 +35,23 @@ async function main() {
 }
 
 async function returnRandomRecommendations(similarities) {
-    const filteredSimilarities = similarities.filter(s => s.similarity >=   0.94);
+    const MIN_THRESHOLD = 0.8
+    const MAX_ANIME = 100;
+
+    const filteredSimilarities = similarities.filter(s => s.similarity >= MIN_THRESHOLD);
+    filteredSimilarities.sort((a, b) => b.similarity - a.similarity);
 
     for (let i = filteredSimilarities.length -   1; i >   0; i--) {
         const j = Math.floor(Math.random() * (i +   1));
         [filteredSimilarities[i], filteredSimilarities[j]] = [filteredSimilarities[j], filteredSimilarities[i]];
     }
 
+
     const selectedIds = new Set();
     const recommendations = [];
 
     for (const item of filteredSimilarities) {
-        if (recommendations.length ===   10) {
+        if (recommendations.length ===  MAX_ANIME) {
             break;
         }
         if (!selectedIds.has(item.index)) {
@@ -56,7 +60,7 @@ async function returnRandomRecommendations(similarities) {
         }
     }
 
-    return recommendations;
+    return Array.from(recommendations).sort((a, b) => b.similarity - a.similarity);
 }
 
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
