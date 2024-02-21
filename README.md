@@ -12,13 +12,13 @@ This project was bootstraped using [Create React App via Vite.js](https://vitejs
 
 ## 📖 Table of Contents
 
--   [📖 Table of Contents](#-table-of-contents)
--   [🛠️ Tech Stack](#️-tech-stack)
--   [📝 Prerequisites](#-prerequisites)
--   [⚡ Setup Instructions](#-setup-instructions)
--   [📜 Available Scripts](#-available-scripts)
--   [✨ Acknowledgements](#-acknowledgements)
--   [©️ License](#️-license)
+- [📖 Table of Contents](#-table-of-contents)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📝 Prerequisites](#-prerequisites)
+- [⚡ Setup Instructions](#-setup-instructions)
+- [📜 Available Scripts](#-available-scripts)
+- [✨ Acknowledgements](#-acknowledgements)
+- [©️ License](#️-license)
 
 ## 🛠️ Tech Stack
 
@@ -106,8 +106,8 @@ Various web articles for research and learning, such as:
 
 -   [What is unsupervised learning?](https://www.ibm.com/topics/unsupervised-learning)
 -   [17 types of similarity and dissimilarity measures used in data science](https://towardsdatascience.com/17-types-of-similarity-and-dissimilarity-measures-used-in-data-science-3eb914d2681)
--   [Types of Recommendation Systems & Their Use Cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
--   [Introduction to Similarity Metrics](https://medium.com/analytics-vidhya/introduction-to-similarity-metrics-a882361c9be4)
+-   [Types of recommendation systems & their use cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
+-   [Introduction to similarity metrics](https://medium.com/analytics-vidhya/introduction-to-similarity-metrics-a882361c9be4)
 
 ## ©️ License
 
