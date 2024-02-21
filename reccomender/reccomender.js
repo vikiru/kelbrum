@@ -16,7 +16,7 @@ async function main() {
         //console.log(featureArray[0]);
         //console.log(featureArray[1]);
         const kmeans = await returnKmeansModel(featureArray, 43, distance.dice);
-        const id = data.findIndex(d => d.malID === 21); // 25013 - akayona, 6, 21
+        const id = data.findIndex(d => d.malID === 1); // 25013 - akayona, 6, 21
         const entry = data[id];
         const cluster = kmeans.clusters[entry.id];
         const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, entry.id, [entry.id]);
@@ -27,7 +27,7 @@ async function main() {
             console.log(data[ind].title);
             console.log(t.similarity);
         })
-      // console.log(results);
+       console.log(results);
     } catch (err) {
         console.error('Error occured:', err);
     }
@@ -62,10 +62,35 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
     return similarityResults.filter(result => result !== null).sort((a, b) => b.similarity - a.similarity);
 }
 
+function customDistance(tensorA, tensorB) {
+    let tensorDistance =   0;
+    let weightSum =   0;
+
+    const numCategoricalFeatures =   11;
+
+    const categoricalA = tensorA.slice(0, numCategoricalFeatures);
+    const categoricalB = tensorB.slice(0, numCategoricalFeatures);
+    const continuousA = tensorA.slice(numCategoricalFeatures);
+    const continuousB = tensorB.slice(numCategoricalFeatures);
+
+    const categoricalDistance = similarity.cosine(categoricalA, categoricalB) *   0.8;
+    const numericalDistance = (1 - similarity.cosine(continuousA, continuousB)) *   0.2;
+
+    tensorDistance = categoricalDistance + numericalDistance;
+
+    weightSum = numCategoricalFeatures *  0.8  + (tensorA.length - numCategoricalFeatures) *   0.2;
+
+    if (weightSum ===   0) {
+        console.error('Weight sum is zero, cannot divide by zero');
+        return NaN;
+    }
+
+    return  tensorDistance / weightSum;
+}
 
 // dice, gower, jaccard, lorentzian, sorensen
 function compareTensors(tensorA, tensorB) {
-    return similarity.pearson(tensorA, tensorB);
+    return similarity.cosine(tensorA, tensorB);
 }
 
 
