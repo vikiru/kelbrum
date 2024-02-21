@@ -11,5 +11,9 @@
   "importOrder": ["^@?\\w", "^[../]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
-  "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-jsdoc"]
+  "bracketSameLine": false,
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-jsdoc"
+  ]
 }
