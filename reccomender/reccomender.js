@@ -36,14 +36,26 @@ async function main() {
 }
 
 async function returnRandomRecommendations(similarities) {
-    const filteredSimilarities = similarities.filter(s => s.similarity >=  0.94);
+    const filteredSimilarities = similarities.filter(s => s.similarity >=   0.94);
 
-    for (let i = filteredSimilarities.length -  1; i >  0; i--) {
-        const j = Math.floor(Math.random() * (i +  1));
+    for (let i = filteredSimilarities.length -   1; i >   0; i--) {
+        const j = Math.floor(Math.random() * (i +   1));
         [filteredSimilarities[i], filteredSimilarities[j]] = [filteredSimilarities[j], filteredSimilarities[i]];
     }
 
-    const recommendations = filteredSimilarities.slice(0,  10);
+    const selectedIds = new Set();
+    const recommendations = [];
+
+    for (const item of filteredSimilarities) {
+        if (recommendations.length ===   10) {
+            break;
+        }
+        if (!selectedIds.has(item.index)) {
+            selectedIds.add(item.index);
+            recommendations.push(item);
+        }
+    }
+
     return recommendations;
 }
 
