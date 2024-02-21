@@ -35,7 +35,7 @@ function encodeCombination(data, property) {
 }
 
 function encodeCategorical(data, property) {
-    const uniqueValues = returnUniqueArray(data, property);
+    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
     return data.map((entry) => {
         const propertyValue = entry[property];
         const propertyString = propertyValue.toString();
@@ -106,29 +106,44 @@ function checkArrayDimension(arr) {
     }
 }
 
+function normalizeCategorical(data){
+    const uniqueValues = Array.from(new Set(data.map(d => d)));
+    const minValue = Math.min(...uniqueValues);
+    const maxValue = Math.max(...uniqueValues);
+    const range = maxValue - minValue;
+    return data.map((entry) => {
+        if (entry === 0 || entry === 'Unknown') {
+            return (minValue - minValue) / range;
+        } else {
+            return (entry - minValue) / range;
+        }
+    });
+}
+
 async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const normalizationFunctions = [
-        { func: encodeCategorical, isCategorical: true, property: 'type' },
-        { func: encodeCategorical, isCategorical: true, property: 'source' },
-        { func: encodeCategorical, isCategorical: true, property: 'status' },
-        { func: encodeCategorical, isCategorical: true, property: 'rating' },
-        { func: encodeCategorical, isCategorical: true, property: 'season' },
-        { func: encodeCategorical, isCategorical: true, property: 'year' },
-        { func: encodeCategorical, isCategorical: true, property: 'genres' },
-        { func: encodeCategorical, isCategorical: true, property: 'demographics' },
-        { func: encodeCategorical, isCategorical: true, property: 'themes' },
-        { func: encodeCategorical, isCategorical: true, property: 'producers' },
-        { func: encodeCategorical, isCategorical: true, property: 'studios' },
-        { func: encodeCategorical, isCategorical: true, property: 'licensors' },
+        { func: encodeCombination, isCategorical: true, property: 'type' },
+        { func: encodeCombination, isCategorical: true, property: 'source' },
+        { func: encodeCombination, isCategorical: true, property: 'status' },
+        { func: encodeCombination, isCategorical: true, property: 'rating' },
+       // { func: encodeCombination, isCategorical: true, property: 'premiered'},
+        { func: encodeCombination, isCategorical: true, property: 'season' },
+        { func: encodeCombination, isCategorical: true, property: 'year' },
+        { func: encodeCombination, isCategorical: true, property: 'genres' },
+        { func: encodeCombination, isCategorical: true, property: 'demographics'},
+        { func: encodeCombination, isCategorical: true, property: 'themes' },
+        { func: encodeCombination, isCategorical: true, property: 'producers' },
+        { func: encodeCombination, isCategorical: true, property: 'studios' },
+        { func: encodeCombination, isCategorical: true, property: 'licensors' },
 
         { func: ordinalEncode, isCategorical: false, property: 'rank' },
-        { func: ordinalEncode, isCategorical: false, property: 'popularity' },
+      // { func: minMaxScale, isCategorical: false, property: 'popularity' },
 
-        { func: robustScale, isCategorical: false, property: 'score' },
-        { func: robustScale, isCategorical: false, property: 'scoredBy' },
-        { func: robustScale, isCategorical: false, property: 'favourites' },
-        { func: robustScale, isCategorical: false, property: 'members' },
+        { func: minMaxScale, isCategorical: false, property: 'score' },
+        { func: minMaxScale, isCategorical: false, property: 'scoredBy' },
+        { func: minMaxScale, isCategorical: false, property: 'favourites' },
+        { func: minMaxScale, isCategorical: false, property: 'members' },
 
         { func: minMaxScale, isCategorical: false, property: 'durationMinutes' },
         { func: minMaxScale, isCategorical: false, property: 'episodes' },
@@ -138,6 +153,7 @@ async function createFeatureTensor(data) {
         let normalizedData;
         if (isCategorical) {
             normalizedData = func(data, property);
+            if (func !== encodeCategorical) normalizedData = normalizeCategorical(normalizedData);
         } else {
             normalizedData = func(data, property, stats);
         }
