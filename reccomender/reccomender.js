@@ -13,16 +13,16 @@ async function main() {
         const data = await initializeDataFile();
         const featureTensor = await createFeatureTensor(data);
         const featureArray = featureTensor.arraySync();
-        //console.log(featureArray[0]);
-        //console.log(featureArray[1]);
-        //await returnOptimalK(featureArray, 100, customDistance, 'customDistance.json');
         const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
-        const id = data.findIndex(d => d.malID === 30); // 25013 - akayona, 6, 21
+        const id = data.findIndex(d => d.malID === 4898); // 25013 - akayona, 6, 21
         const entry = data[id];
         const cluster = kmeans.clusters[entry.id];
         const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
         const reccs = await returnRandomRecommendations(results);
         const topResults = await retrieveAnimeData(reccs, data);
+        topResults.forEach(d => {
+            console.log(d.title);
+        })
     } catch (err) {
         console.error('Error occured:', err);
     }
