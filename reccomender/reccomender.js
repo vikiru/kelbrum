@@ -22,16 +22,19 @@ async function main() {
         const cluster = kmeans.clusters[entry.id];
         const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
         const reccs = await returnRandomRecommendations(results);
-        console.log(reccs.length);
-        const topResults = reccs;
-        topResults.forEach(t => {
-            const ind = t.index;
-            console.log(data[ind].title);
-           // console.log(t.similarity);
-        })
+        const topResults = await retrieveAnimeData(reccs, data);
     } catch (err) {
         console.error('Error occured:', err);
     }
+}
+
+async function retrieveAnimeData(recommendations, data){
+    const indexes = recommendations.map(r => r.index);
+    const animeData = data.filter(d => indexes.includes(d.id));
+    animeData.forEach(d => {
+        d.similarity = (recommendations.find(r => r.index === d.id).similarity * 100).toFixed(2);
+    });
+    return animeData.sort((a, b) => b.similarity - a.similarity);
 }
 
 async function returnRandomRecommendations(similarities) {
