@@ -24,12 +24,7 @@ module.exports = {
         'jsdoc/require-returns-type': 'off',
         'jsdoc/require-returns-description': 'off',
         'react/no-unknown-property': 'off',
-        complexity: [
-            'off',
-            {
-                max: 10,
-            },
-        ],
+        complexity: ['off', { max: 10 }],
         'consistent-return': 'off',
         'func-names': 'off',
         'global-require': 'off',
@@ -38,10 +33,7 @@ module.exports = {
         'import/order': [
             'error',
             {
-                alphabetize: {
-                    caseInsensitive: true,
-                    order: 'asc',
-                },
+                alphabetize: { caseInsensitive: true, order: 'asc' },
                 groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
                 'newlines-between': 'always',
             },
@@ -50,7 +42,6 @@ module.exports = {
         'jsdoc/require-param-description': 'off',
         'jsdoc/require-returns': 'off',
         'jsdoc/require-returns-check': 'off',
-        'jsdoc/require-returns-type': 'off',
         'max-depth': ['warn', 5],
         'mocha/no-setup-in-describe': 'off',
         'no-await-in-loop': 'off',
@@ -65,7 +56,6 @@ module.exports = {
         'node/no-unpublished-import': 'off',
         'node/no-missing-import': 'off',
         'react/prop-types': 'off',
-        'react-refresh/only-export-components': 'off',
         'no-console': 'off',
         'no-unused-vars': 'off',
         'node/no-unpublished-require': 'off',
@@ -76,7 +66,6 @@ module.exports = {
             },
         ],
         'prefer-destructuring': 'off',
-        'prettier/prettier': 'off',
         'security/detect-non-literal-fs-filename': 'off',
         'security/detect-object-injection': 'off',
         'sort-exports/sort-exports': [
