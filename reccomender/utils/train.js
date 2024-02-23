@@ -1,12 +1,17 @@
-const { kmeans } = require('ml-kmeans');
-const { writeData } = require('./writeFile');
-const { similarity, distance } = require('ml-distance');
-const ss = require('simple-statistics');
-const { createFeatureTensor } = require('./normalize');
-const { initializeDataFile } = require('./utils');
-const path = require('path');
-const { readJSONFile, checkFileExists } = require('./readFile');
+import { distance, similarity } from 'ml-distance';
+import { kmeans } from 'ml-kmeans';
+import { dirname } from 'path';
+import path from 'path';
+import * as ss from 'simple-statistics';
+import { fileURLToPath } from 'url';
 
+import { createFeatureTensor } from './normalize.js';
+import { checkFileExists, readJSONFile } from './readFile.js';
+import { initializeDataFile } from './utils.js';
+import { writeData } from './writeFile.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
     const results = [];
     for (let k = 2; k <= max; k++) {
@@ -53,7 +58,4 @@ async function returnKmeansModel(featureArray, k, distanceFunction) {
         return kmeansModel;
     }
 }
-module.exports = {
-    returnOptimalK,
-    returnKmeansModel,
-};
+export { returnOptimalK, returnKmeansModel };

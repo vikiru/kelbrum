@@ -1,59 +1,64 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ReactSearchAutocomplete } from 'react-search-autocomplete';
+import ReactSearchBox from 'react-search-box';
 
 import './App.css';
 import NavBar from './components/NavBar/NavBar';
+import { useData } from './context/DataProvider';
+
+function normalizeString(str) {
+    return str.replace(/[^a-zA-Z0-9\s]/g, ' ');
+}
 
 function App() {
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState([]);
+    const { titleIDMap } = useData();
 
-    const data = ['Naruto', 'One Piece', 'Attack on Titan', 'My Hero Academia'];
+    const items = titleIDMap.map((item) => ({ id: item.value, name: item.title }));
 
-    const handleInputChange = (event) => {
-        const value = event.target.value;
-        setInputValue(value);
-
-        if (value === '') {
-            setSuggestions([]);
-        } else {
-            const filteredSuggestions = data
-                .filter((item) => item.toLowerCase().includes(value.toLowerCase()))
-                .slice(0, 5);
-
-            setSuggestions(filteredSuggestions);
-        }
+    const handleOnSearch = (selectedItem) => {
+        setInputValue(selectedItem.name);
+        console.log(selectedItem);
+        setSuggestions([]);
     };
 
-    const handleSuggestionClick = (suggestion) => {
-        setInputValue(suggestion); // Update the input value with the selected suggestion
-        setSuggestions([]); // Clear the suggestions list
+    const handleOnSelect = (selectedItem) => {
+        setInputValue(selectedItem.name);
+        setSuggestions([]);
     };
+
+    const formatResult = (item) => (
+        <div className="p-2 hover:bg-gray-200 cursor-pointer">
+            <span>{item.name}</span>
+        </div>
+    );
 
     return (
         <section id="main">
-            <label className="input input-bordered flex items-center gap-2">
-                <input
-                    type="text"
-                    className="grow"
-                    placeholder="Enter an anime title"
-                    value={inputValue}
-                    onChange={handleInputChange}
+            <div className="hero min-h-screen">
+                <div className="hero-overlay bg-opacity-60"></div>
+                <div className="hero-content text-center text-neutral-content">
+                    <div className="max-w-md">
+                        <h1 className="text-5xl font-bold">Placeholder</h1>
+                        <p>Placeholder text.</p>
+                    </div>
+                </div>
+            </div>
+            <div className="container">
+                <ReactSearchAutocomplete
+                    items={items}
+                    onSearch={handleOnSearch}
+                    onSelect={handleOnSelect}
+                    formatResult={formatResult}
+                    maxResults={10}
+                    placeholder="Type to filter titles..."
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                    autocompleteItemClassName="p-2 hover:bg-gray-200 cursor-pointer"
+                    autocompleteItemActiveClassName="bg-blue-500 text-white"
                 />
-            </label>
-            {suggestions.length > 0 && (
-                <ul className="w-full absolute">
-                    {suggestions.map((suggestion, index) => (
-                        <li
-                            key={index}
-                            className="list-none bg-white hover:bg-gray-200 p-2"
-                            onClick={() => handleSuggestionClick(suggestion)}
-                        >
-                            {suggestion}
-                        </li>
-                    ))}
-                </ul>
-            )}
+            </div>
         </section>
     );
 }

@@ -119,7 +119,7 @@ function cleanPremiered(premiered, season, year) {
     return premiered;
 }
 
-module.exports = {
+export {
     seasons,
     findSeasonalYearByAired,
     findSeasonalYearByPremiered,

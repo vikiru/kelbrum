@@ -1,6 +1,7 @@
-const fs = require('fs');
-const ss = require('simple-statistics');
-const { returnUniqueArray, writeData } = require('./utils');
+import fs from 'fs';
+import * as ss from 'simple-statistics';
+
+import { returnUniqueArray, writeData } from './utils.js';
 
 function createMapping(uniqueValues) {
     const unknownCheck = uniqueValues.filter((v) => v === 'Unknown').length;
@@ -175,10 +176,4 @@ async function calculateStatistics(data) {
     }
 }
 
-module.exports = {
-    createMapping,
-    fillArray,
-    returnMedianMode,
-    constructFrequencyMap,
-    calculateStatistics,
-};
+export { createMapping, fillArray, returnMedianMode, constructFrequencyMap, calculateStatistics };

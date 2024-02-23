@@ -5,6 +5,4 @@ class UserInteraction {
     }
 }
 
-module.exports = {
-    UserInteraction,
-};
+export { UserInteraction };

@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
     root: true,
     env: { browser: true, es2020: true },
     extends: [
@@ -69,7 +69,7 @@ module.exports = {
         'security/detect-non-literal-fs-filename': 'off',
         'security/detect-object-injection': 'off',
         'sort-exports/sort-exports': [
-            'error',
+            'off',
             {
                 ignoreCase: true,
                 sortDir: 'asc',
@@ -78,3 +78,5 @@ module.exports = {
         ],
     },
 };
+
+export default config;
