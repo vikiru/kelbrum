@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 
-import data from '../../../reccomender/data/entries';
-import featureArray from '../../../reccomender/data/featureArray';
-import kmeans from '../../../reccomender/data/kmeans';
-import titleIDMap from '../../../reccomender/data/titleIDMap';
+import data from '../../../reccomender/data/entries.json';
+import featureArray from '../../../reccomender/data/featureArray.json';
+import kmeans from '../../../reccomender/data/kmeans.json';
+import titleIDMap from '../../../reccomender/data/titleIDMap.json';
 
 const DataContext = createContext();
 
@@ -23,7 +23,7 @@ export const DataProvider = ({ children }) => {
                     return state;
             }
         },
-        { data: [], featureArray: [], kmeans: [], titleIDMap: [] },
+        { data: data, featureArray: featureArray, kmeans: kmeans, titleIDMap: titleIDMap },
     );
 
     useEffect(() => {

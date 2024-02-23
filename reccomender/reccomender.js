@@ -113,10 +113,8 @@ async function main() {
         const featureTensor = await createFeatureTensor(data);
         const featureArray = featureTensor.arraySync();
         const titleIDMap = data.flatMap((d) => {
-            const filteredTitles = Array.from(new Set([d.title, d.englishName, d.otherName])).filter(
-                (t) => t !== 'Unknown',
-            );
-            return filteredTitles.map((t) => ({ title: t, value: d.id }));
+            const uniqueTitles = Array.from(new Set(d.titles));
+            return { title: d.title, synonyms: uniqueTitles, value: d.id };
         });
         await writeData('titleIDMap.json', titleIDMap);
         await writeData('featureArray.json', featureArray);

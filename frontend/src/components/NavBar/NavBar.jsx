@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 function NavBar() {
     return (
-        <div className="navbar bg-white">
-            <a className="btn text-xl">daisyUI</a>
+        <div className="navbar bg-base-100">
+            <a className="btn btn-ghost text-xl">Anime Reccomendation</a>
         </div>
     );
 }
