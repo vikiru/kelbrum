@@ -1,10 +1,20 @@
 import fs from 'fs/promises';
-import { dirname } from 'path';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+let path;
+let url;
+let fileURLToPath;
+let dirname;
+let __filename, __dirname;
+
+if (typeof window === 'undefined') {
+    path = require('path');
+    url = require('url');
+    fileURLToPath = url.fileURLToPath;
+    dirname = path.dirname;
+    __filename = fileURLToPath(import.meta.url);
+    __dirname= dirname(__filename);
+}
+
 
 function formatNumber(num) {
     return num.toFixed(2);

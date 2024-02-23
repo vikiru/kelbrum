@@ -14,6 +14,13 @@ async function retrieveAnimeData(recommendations, data) {
     return animeData.sort((a, b) => b.similarity - a.similarity);
 }
 
+async function shuffleRandom(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
 async function returnRandomRecommendations(similarities) {
     const MIN_THRESHOLD = 0.8;
     const MAX_ANIME = 100;
@@ -21,10 +28,7 @@ async function returnRandomRecommendations(similarities) {
     const filteredSimilarities = similarities.filter((s) => s.similarity >= MIN_THRESHOLD);
     filteredSimilarities.sort((a, b) => b.similarity - a.similarity);
 
-    for (let i = filteredSimilarities.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [filteredSimilarities[i], filteredSimilarities[j]] = [filteredSimilarities[j], filteredSimilarities[i]];
-    }
+    shuffleRandom(filteredSimilarities);
 
     const selectedIds = new Set();
     const recommendations = [];
@@ -133,7 +137,5 @@ async function main() {
     }
 }
 
-main();
-
-export { customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };
+export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };
 // start working on ui (user enters up to 10 titles, auto complete
