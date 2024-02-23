@@ -39,7 +39,7 @@ const config = {
         logs: true,
         themeRoot: ':root',
     },
-    plugins: [require('daisyui')],
+    plugins: [require('daisyui'), require('tailwind-scrollbar')],
 };
 
 export default config;
