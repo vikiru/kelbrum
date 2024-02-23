@@ -9,13 +9,14 @@ import { Link } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 import StarRatings from 'react-rating-stars-component';
+import TopAnimePage from './pages/TopAnimePage/TopAnimePage';
 import { useData } from './context/DataProvider';
 
 function App() {
     return (
         <section id="main">
             <NavBar />
-            <Home />
+            <TopAnimePage />
             <Footer />
         </section>
     );
