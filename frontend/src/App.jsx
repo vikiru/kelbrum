@@ -5,6 +5,7 @@ import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 
 import './App.css';
 import AnimeCard from './components/AnimeCard/AnimeCard';
+import Footer from './components/Footer/Footer';
 import NavBar from './components/NavBar/NavBar';
 import { useData } from './context/DataProvider';
 
@@ -95,30 +96,9 @@ function App() {
 
     return (
         <section id="main">
-            <NavBar />
-            <div className="p-2 grid xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 3xl:grid-cols-5 gap-y-2">
-                {data
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, 100)
-                    .map((d) => {
-                        return <AnimeCard key={d.title} anime={d} />;
-                    })}
-            </div>
-
-            <div className="container min-h-screen flex-grow">
-                <div className="min-h-[20rem] flex-shrink-0">
-                    <ReactSearchAutocomplete
-                        items={items}
-                        onSearch={handleOnSearch}
-                        onSelect={handleOnSelect}
-                        formatResult={formatResult}
-                        maxResults={6}
-                        placeholder="Type to filter titles..."
-                        className="w-full p-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                        autocompleteItemClassName="p-2 hover:bg-gray-200 cursor-pointer"
-                        autocompleteItemActiveClassName="bg-blue-500 text-white"
-                    />
-                </div>
+            <div className="flex flex-col">
+                <NavBar />
+                <Footer />
             </div>
         </section>
     );
