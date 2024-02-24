@@ -39,37 +39,67 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
     return (
         <div>
             <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">{anime.title}</h2>
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
                 <div className="text-md m-8 text-justify">
                     <div>
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
                             General Information
                         </h2>
-                        <div className="grid grid-cols-3 pb-4">
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Type</h2>
-                                <p>{anime.type}</p>
+                        <div className="card-genres my-4 flex flex-wrap gap-2">
+                            {anime.genres.map((g) => (
+                                <span
+                                    className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
+                                    key={g}
+                                >
+                                    {g}
+                                </span>
+                            ))}
+                            {anime.demographics.map((d) => (
+                                <span
+                                    className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
+                                    key={d}
+                                >
+                                    {d}
+                                </span>
+                            ))}
+                            {anime.themes.map((t) => (
+                                <span
+                                    className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
+                                    key={t}
+                                >
+                                    {t}
+                                </span>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 pb-4">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Type</h2>
+                                <p className="text-base text-gray-700">{anime.type}</p>
                             </div>
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Season</h2>
-                                <p>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Season</h2>
+                                <p className="text-base text-gray-700">
                                     <span className="capitalize">{anime.season === 'Unknown' ? '' : anime.season}</span>
                                     <span className="capitalize">
                                         {anime.year === 'Unknown' ? '' : ` ${anime.year}`}
                                     </span>
                                 </p>
                             </div>
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Rating</h2>
-                                <p>{anime.rating}</p>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Rating</h2>
+                                <p className="text-base text-gray-700">{anime.rating}</p>
                             </div>
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Episodes</h2>
-                                <p>{anime.episodes === '0' ? 'Unknown' : anime.episodes}</p>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Episodes</h2>
+                                <p className="text-base text-gray-700">
+                                    {anime.episodes === '0' ? 'Unknown' : anime.episodes}
+                                </p>
                             </div>
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Score</h2>
-                                <p>{anime.score === '0' ? 'Unknown' : `${anime.score} / 10`}</p>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Score</h2>
+                                <p className="text-base text-gray-700">
+                                    {anime.score === '0' ? 'Unknown' : `${anime.score} /  10`}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -78,18 +108,24 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
                             Additional Information
                         </h2>
-                        <div className="grid grid-cols-2">
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Studios</h2>
-                                <p>{anime.studios.length === 0 ? 'Unknown' : anime.studios.join(', ')}</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Studios</h2>
+                                <p className="text-base text-gray-700">
+                                    {anime.studios.length ===  0 ? 'Unknown' : anime.studios.join(', ')}
+                                </p>
                             </div>
-                            <div className="max-w-md">
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Producers</h2>
-                                <p>{anime.producers.length === 0 ? 'Unknown' : anime.producers.join(', ')}</p>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Producers</h2>
+                                <p className="text-base text-gray-700">
+                                    {anime.producers.length ===  0 ? 'Unknown' : anime.producers.join(', ')}
+                                </p>
                             </div>
-                            <div>
-                                <h2 className="py-4 text-left text-lg font-bold text-secondary">Licensors</h2>
-                                <p>{anime.licensors.length === 0 ? 'Unknown' : anime.licensors.join(', ')}</p>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Licensors</h2>
+                                <p className="text-base text-gray-700">
+                                    {anime.licensors.length ===  0 ? 'Unknown' : anime.licensors.join(', ')}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -119,13 +155,17 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                     </div>
                 </div>
 
-                <div className="lg:m-10">
-                    <figure className="mb-4">
+                <div className="container m-4 mx-auto">
+                    <figure>
                         {!hasError && (
                             <img
                                 src={anime.imageURL}
                                 alt={`${anime.title} image`}
-                                className="h-auto max-h-96 w-full max-w-full rounded-lg object-contain"
+                                className="h-full w-full rounded-lg object-cover"
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '50%',
+                                }}
                             />
                         )}
                     </figure>
