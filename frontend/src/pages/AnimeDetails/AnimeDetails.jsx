@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
-
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
-import { useData } from '../../context/DataProvider';
+
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
-const AnimeDetails = ({ anime }) => {
-    const { data, featureArray, kmeans } = useData();
+const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
     const [hasError, setHasError] = useState(false);
     const [topResults, setTopResults] = useState([]);
 

@@ -5,10 +5,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { debounce } from 'lodash';
 import { useData } from '../../context/DataProvider';
 
-const TopAnimePage = () => {
-    const { data } = useData();
-    const top100Anime = data.sort((a, b) => b.score - a.score).slice(0, 100);
-
+const TopAnimePage = ({ top100Anime }) => {
     const [items, setItems] = useState([]);
     const [hasMore, setHasMore] = useState(true);
 
