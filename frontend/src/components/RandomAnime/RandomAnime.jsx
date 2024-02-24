@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-
-import AnimeCard from '../AnimeCard/AnimeCard';
 import { Link } from 'react-router-dom';
+
 import { shuffleRandom } from '../../../../reccomender/reccomender';
+import AnimeCard from '../AnimeCard/AnimeCard';
 
 const RandomAnime = ({ allAnime }) => {
     shuffleRandom(allAnime);
@@ -54,9 +54,12 @@ const RandomAnime = ({ allAnime }) => {
                                         <span className="ml-2 text-lg">✨</span>
                                     </div>
                                     <div className="card-actions justify-center">
-                                        <button className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white">
+                                        <Link
+                                            to={`/anime/${anime.id}`}
+                                            className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"
+                                        >
                                             Read more
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

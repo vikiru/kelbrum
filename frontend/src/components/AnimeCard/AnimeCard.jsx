@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime }) => {
@@ -12,14 +13,14 @@ const AnimeCard = ({ anime }) => {
     }, [anime.imageURL]);
 
     return (
-        <div className="card w-[95%] p-2 bg-primary cursor-default shadow-lg rounded-lg grid lg:grid-cols-2">
+        <div className="card grid w-[95%] cursor-default rounded-lg bg-primary p-2 shadow-lg lg:grid-cols-2">
             <div className="lg:m-10">
                 <figure className="mb-4">
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="w-full h-full object-fill rounded-lg"
+                            className="h-full w-full rounded-lg object-fill"
                         />
                     )}{' '}
                 </figure>
@@ -28,37 +29,40 @@ const AnimeCard = ({ anime }) => {
                 <h2 className="card-title text-2xl font-semibold text-secondary">{anime.title}</h2>
                 <div>
                     <span className="text-lg font-medium">{anime.type}</span> |{' '}
-                    <span className="text-lg text-accent font-medium">{anime.rating}</span>
+                    <span className="text-lg font-medium text-accent">{anime.rating}</span>
                 </div>
-                <div className="text-sm text-secondary mb-2 flex items-center">
+                <div className="mb-2 flex items-center text-sm text-secondary">
                     <span className="text-lg font-medium">Episodes: </span>
-                    <span className="text-lg text-accent font-semibold ml-2">{anime.episodes}</span>
+                    <span className="ml-2 text-lg font-semibold text-accent">{anime.episodes}</span>
                 </div>
 
-                <div className="text-sm text-secondary mb-2 flex items-center">
+                <div className="mb-2 flex items-center text-sm text-secondary">
                     <span className="text-lg font-medium">Score: </span>
-                    <span className="text-lg text-accent font-semibold ml-2">{anime.score.toFixed(1)}</span>
-                    <span className="text-lg text-secondary font-semibold ml-2"> / 10</span>
-                    <span className="text-lg ml-2">✨</span>
+                    <span className="ml-2 text-lg font-semibold text-accent">{anime.score.toFixed(1)}</span>
+                    <span className="ml-2 text-lg font-semibold text-secondary"> / 10</span>
+                    <span className="ml-2 text-lg">✨</span>
                 </div>
 
-                <div className="card-actions flex flex-wrap gap-2 mb-4">
+                <div className="card-actions mb-4 flex flex-wrap gap-2">
                     {anime.genres.map((g) => (
-                        <span className="badge badge-neutral text-lg py-4 bg-gray-200 text-gray-700" key={g}>
+                        <span className="badge badge-neutral bg-gray-200 py-4 text-lg text-gray-700" key={g}>
                             {g}
                         </span>
                     ))}
                     {anime.demographics.map((d) => (
-                        <span className="badge badge-neutral text-lg py-4 bg-gray-200 text-gray-700" key={d}>
+                        <span className="badge badge-neutral bg-gray-200 py-4 text-lg text-gray-700" key={d}>
                             {d}
                         </span>
                     ))}
                 </div>
 
                 <div className="card-actions">
-                    <button className="btn btn-accent uppercase text-white bg-accent hover:bg-accent-darker rounded-lg px-4 py-2">
+                    <Link
+                        to={`/anime/${anime.id}`}
+                        className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"
+                    >
                         Read more
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>
