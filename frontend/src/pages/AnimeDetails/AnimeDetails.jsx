@@ -39,13 +39,13 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
     return (
         <div>
             <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">{anime.title}</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid lg:grid-cols-2 gap-4">
                 <div className="text-md m-8 text-justify">
                     <div>
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
                             General Information
                         </h2>
-                        <div className="card-genres my-4 flex flex-wrap gap-2">
+                        <div className="card-actions my-4 flex flex-wrap gap-2">
                             {anime.genres.map((g) => (
                                 <span
                                     className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
@@ -71,7 +71,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                                 </span>
                             ))}
                         </div>
-                        <div className="grid grid-cols-2 gap-4 pb-4">
+                        <div className="grid gap-4 pb-4 lg:grid-cols-2">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Type</h2>
                                 <p className="text-base text-gray-700">{anime.type}</p>
@@ -103,28 +103,28 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                             </div>
                         </div>
                     </div>
-                    <p>{anime.synopsis}</p>
+                    <p className='text-left'>{anime.synopsis}</p>
                     <div>
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
                             Additional Information
                         </h2>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid lg:grid-cols-2 gap-4">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Studios</h2>
                                 <p className="text-base text-gray-700">
-                                    {anime.studios.length ===  0 ? 'Unknown' : anime.studios.join(', ')}
+                                    {anime.studios.length === 0 ? 'Unknown' : anime.studios.join(', ')}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Producers</h2>
                                 <p className="text-base text-gray-700">
-                                    {anime.producers.length ===  0 ? 'Unknown' : anime.producers.join(', ')}
+                                    {anime.producers.length === 0 ? 'Unknown' : anime.producers.join(', ')}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Licensors</h2>
                                 <p className="text-base text-gray-700">
-                                    {anime.licensors.length ===  0 ? 'Unknown' : anime.licensors.join(', ')}
+                                    {anime.licensors.length === 0 ? 'Unknown' : anime.licensors.join(', ')}
                                 </p>
                             </div>
                         </div>
