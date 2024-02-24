@@ -19,7 +19,12 @@ const AnimeCard = ({ anime }) => {
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="h-full w-full rounded-lg object-fill"
+                            className="h-full w-full rounded-lg"
+                            style={{
+                                maxWidth: '50%',
+                                maxHeight: '50%',
+                                objectFit: 'cover',
+                            }}
                         />
                     )}{' '}
                 </figure>
@@ -30,6 +35,16 @@ const AnimeCard = ({ anime }) => {
                     {anime.genres.map((g) => (
                         <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={g}>
                             {g}
+                        </span>
+                    ))}
+                    {anime.demographics.map((d) => (
+                        <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={d}>
+                            {d}
+                        </span>
+                    ))}
+                    {anime.themes.map((t) => (
+                        <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={t}>
+                            {t}
                         </span>
                     ))}
                 </div>
