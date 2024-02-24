@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
-import { shuffleRandom } from '../../../../reccomender/reccomender';
 import AnimeCard from '../AnimeCard/AnimeCard';
+import { Link } from 'react-router-dom';
+import { shuffleRandom } from '../../../../reccomender/reccomender';
 
 const RandomAnime = ({ allAnime }) => {
     shuffleRandom(allAnime);
-    const randomAnime = allAnime.slice(0, 10);
+    const randomAnime = allAnime.filter((a) => a.score >= 7).slice(0, 10);
 
     return (
         <div>
-            <div className="carousel carousel-center grid w-full grid-cols-3 gap-4 bg-secondary p-2 pb-6">
+            <div className="carousel carousel-center grid w-full lg:grid-cols-3 gap-4 bg-secondary p-2 pb-6">
                 {randomAnime
                     .sort((a, b) => b.score - a.score)
                     .map((anime, index) => {
@@ -37,21 +37,27 @@ const RandomAnime = ({ allAnime }) => {
                                 </div>
                                 <div className="card-body">
                                     <h2 className="card-title text-2xl font-semibold text-secondary">{anime.title}</h2>
-                                    <div>
-                                        <span className="text-lg font-medium">{anime.type}</span> |{' '}
-                                        <span className="text-lg font-medium text-accent">{anime.rating}</span>
-                                    </div>
-                                    <div className="mb-2 flex items-center text-sm text-secondary">
-                                        <span className="text-lg font-medium">Episodes: </span>
-                                        <span className="ml-2 text-lg font-semibold text-accent">{anime.episodes}</span>
-                                    </div>
-                                    <div className="mb-2 flex items-center text-sm text-secondary">
-                                        <span className="text-lg font-medium">Score: </span>
-                                        <span className="ml-2 text-lg font-semibold text-accent">
-                                            {anime.score.toFixed(1)}
-                                        </span>
-                                        <span className="ml-2 text-lg font-semibold text-secondary"> / 10</span>
-                                        <span className="ml-2 text-lg">✨</span>
+                                    <div className="grid lg:grid-cols-2 gap-4 pb-4">
+                                        <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                            <h2 className="text-lg font-bold text-secondary">Type</h2>
+                                            <p className="text-base text-gray-700">{anime.type}</p>
+                                        </div>
+                                        <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                            <h2 className="text-lg font-bold text-secondary">Rating</h2>
+                                            <p className="text-base text-gray-700">{anime.rating}</p>
+                                        </div>
+                                        <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                            <h2 className="text-lg font-bold text-secondary">Episodes</h2>
+                                            <p className="text-base text-gray-700">
+                                                {anime.episodes === '0' ? 'Unknown' : anime.episodes}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                            <h2 className="text-lg font-bold text-secondary">Score</h2>
+                                            <p className="text-base text-gray-700">
+                                                {anime.score === '0' ? 'Unknown' : `${anime.score} /  10`}
+                                            </p>
+                                        </div>
                                     </div>
                                     <div className="card-actions justify-center">
                                         <Link
