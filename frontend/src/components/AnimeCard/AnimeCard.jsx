@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime }) => {
@@ -12,7 +13,7 @@ const AnimeCard = ({ anime }) => {
     }, [anime.imageURL]);
 
     return (
-        <div key={anime.title} className="card grid w-[90%] cursor-default rounded-lg bg-primary p-2 shadow-lg">
+        <div key={anime.title} className="card grid w-full cursor-default rounded-lg bg-primary p-2 shadow-lg">
             <div className="m-5">
                 <figure>
                     {!hasError && (
@@ -31,19 +32,19 @@ const AnimeCard = ({ anime }) => {
             </div>
             <div className="card-body">
                 <h2 className="card-title text-2xl font-semibold text-secondary">{anime.title}</h2>
-                <div className="card-genres mb-4 flex flex-wrap gap-2">
+                <div className="card-actions mb-4">
                     {anime.genres.map((g) => (
-                        <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={g}>
+                        <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={g}>
                             {g}
                         </span>
                     ))}
                     {anime.demographics.map((d) => (
-                        <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={d}>
+                        <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={d}>
                             {d}
                         </span>
                     ))}
                     {anime.themes.map((t) => (
-                        <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={t}>
+                        <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={t}>
                             {t}
                         </span>
                     ))}
@@ -51,19 +52,19 @@ const AnimeCard = ({ anime }) => {
                 <div className="grid gap-4 pb-4 lg:grid-cols-2">
                     <div className="rounded-lg bg-base-200 p-4 shadow-md">
                         <h2 className="text-lg font-bold text-secondary">Type</h2>
-                        <p className="text-base text-gray-700">{anime.type}</p>
+                        <p className="text-base text-neutral">{anime.type}</p>
                     </div>
                     <div className="rounded-lg bg-base-200 p-4 shadow-md">
                         <h2 className="text-lg font-bold text-secondary">Rating</h2>
-                        <p className="text-base text-gray-700">{anime.rating}</p>
+                        <p className="text-base text-neutral">{anime.rating}</p>
                     </div>
                     <div className="rounded-lg bg-base-200 p-4 shadow-md">
                         <h2 className="text-lg font-bold text-secondary">Episodes</h2>
-                        <p className="text-base text-gray-700">{anime.episodes === 0 ? 'Unknown' : anime.episodes}</p>
+                        <p className="text-base text-neutral">{anime.episodes === 0 ? 'Unknown' : anime.episodes}</p>
                     </div>
                     <div className="rounded-lg bg-base-200 p-4 shadow-md">
                         <h2 className="text-lg font-bold text-secondary">Score</h2>
-                        <p className="text-base text-gray-700">
+                        <p className="text-base text-neutral">
                             {anime.score === 0 ? 'Unknown' : `${anime.score} /   10`}
                         </p>
                     </div>

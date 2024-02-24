@@ -37,7 +37,7 @@ const SearchBar = () => {
     };
 
     const formatResult = (item) => (
-        <div className="p-2 hover:bg-gray-200 cursor-pointer">
+        <div className="cursor-pointer p-2 hover:bg-neutral">
             <span>{item.name}</span>
         </div>
     );
@@ -52,8 +52,8 @@ const SearchBar = () => {
                     formatResult={formatResult}
                     maxResults={6}
                     placeholder="Type to filter titles..."
-                    className="w-full p-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                    autocompleteItemClassName="p-2 hover:bg-gray-200 cursor-pointer"
+                    className="w-full rounded-md border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
+                    autocompleteItemClassName="p-2 hover:bg-neutral cursor-pointer"
                     autocompleteItemActiveClassName="bg-blue-500 text-white"
                 />
             </div>
