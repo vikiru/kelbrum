@@ -12,9 +12,9 @@ const AnimeCard = ({ anime }) => {
     }, [anime.imageURL]);
 
     return (
-        <div className="card grid w-[95%] cursor-default rounded-lg bg-primary p-2 shadow-lg lg:grid-cols-2">
-            <div className="lg:m-10">
-                <figure className="mb-4">
+        <div key={anime.title} className="card grid w-[90%] cursor-default rounded-lg bg-primary p-2 shadow-lg">
+            <div className="m-5">
+                <figure>
                     {!hasError && (
                         <img
                             src={anime.imageURL}
@@ -26,36 +26,34 @@ const AnimeCard = ({ anime }) => {
             </div>
             <div className="card-body">
                 <h2 className="card-title text-2xl font-semibold text-secondary">{anime.title}</h2>
-                <div>
-                    <span className="text-lg font-medium">{anime.type}</span> |{' '}
-                    <span className="text-lg font-medium text-accent">{anime.rating}</span>
-                </div>
-                <div className="mb-2 flex items-center text-sm text-secondary">
-                    <span className="text-lg font-medium">Episodes: </span>
-                    <span className="ml-2 text-lg font-semibold text-accent">{anime.episodes}</span>
-                </div>
-
-                <div className="mb-2 flex items-center text-sm text-secondary">
-                    <span className="text-lg font-medium">Score: </span>
-                    <span className="ml-2 text-lg font-semibold text-accent">{anime.score.toFixed(1)}</span>
-                    <span className="ml-2 text-lg font-semibold text-secondary"> / 10</span>
-                    <span className="ml-2 text-lg">✨</span>
-                </div>
-
-                <div className="card-actions mb-4 flex flex-wrap gap-2">
+                <div className="card-genres mb-4 flex flex-wrap gap-2">
                     {anime.genres.map((g) => (
-                        <span className="badge badge-neutral bg-gray-200 py-4 text-lg text-gray-700" key={g}>
+                        <span className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700" key={g}>
                             {g}
                         </span>
                     ))}
-                    {anime.demographics.map((d) => (
-                        <span className="badge badge-neutral bg-gray-200 py-4 text-lg text-gray-700" key={d}>
-                            {d}
-                        </span>
-                    ))}
                 </div>
-
-                <div className="card-actions">
+                <div className="grid gap-4 pb-4 lg:grid-cols-2">
+                    <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                        <h2 className="text-lg font-bold text-secondary">Type</h2>
+                        <p className="text-base text-gray-700">{anime.type}</p>
+                    </div>
+                    <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                        <h2 className="text-lg font-bold text-secondary">Rating</h2>
+                        <p className="text-base text-gray-700">{anime.rating}</p>
+                    </div>
+                    <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                        <h2 className="text-lg font-bold text-secondary">Episodes</h2>
+                        <p className="text-base text-gray-700">{anime.episodes === 0 ? 'Unknown' : anime.episodes}</p>
+                    </div>
+                    <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                        <h2 className="text-lg font-bold text-secondary">Score</h2>
+                        <p className="text-base text-gray-700">
+                            {anime.score === 0 ? 'Unknown' : `${anime.score} /   10`}
+                        </p>
+                    </div>
+                </div>
+                <div className="card-actions justify-center">
                     <Link
                         to={`/anime/${anime.id}`}
                         target="_blank"
