@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
+import {
+    retrieveAnimeData,
+    returnClusterSimilarities,
+    returnRandomRecommendations,
+} from '../../../../reccomender/reccomender';
+import { useData } from '../../context/DataProvider';
+import RandomAnime from './../../components/RandomAnime/RandomAnime';
+
 const AnimeDetails = ({ anime }) => {
+    const { data, featureArray, kmeans } = useData();
     const [hasError, setHasError] = useState(false);
-    console.log(anime);
+    const [topResults, setTopResults] = useState([]);
 
     useEffect(() => {
         const img = new Image();
@@ -10,6 +19,24 @@ const AnimeDetails = ({ anime }) => {
         img.onerror = () => setHasError(true);
         img.onload = () => setHasError(false);
     }, [anime.imageURL]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const cluster = kmeans.clusters[anime.id];
+                const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id);
+                const reccs = await returnRandomRecommendations(results);
+                const topResultsData = await retrieveAnimeData(reccs, data);
+                setTopResults(topResultsData);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                setTopResults([]);
+                setHasError(true);
+            }
+        };
+
+        fetchData();
+    }, [anime.id, data, featureArray, kmeans.clusters]);
 
     return (
         <div>
@@ -105,6 +132,12 @@ const AnimeDetails = ({ anime }) => {
                         )}
                     </figure>
                 </div>
+            </div>
+            <div>
+                <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">
+                    Unique Random Suggestions
+                </h2>
+                <RandomAnime allAnime={topResults} />
             </div>
         </div>
     );

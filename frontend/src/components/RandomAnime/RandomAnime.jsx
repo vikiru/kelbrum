@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
-import { shuffleRandom } from '../../../../reccomender/reccomender';
 import AnimeCard from '../AnimeCard/AnimeCard';
+import { Link } from 'react-router-dom';
+import { shuffleRandom } from '../../../../reccomender/reccomender';
 
 const RandomAnime = ({ allAnime }) => {
     shuffleRandom(allAnime);
@@ -10,7 +10,6 @@ const RandomAnime = ({ allAnime }) => {
 
     return (
         <div>
-            <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">Random Anime</h2>
             <div className="carousel carousel-center grid w-full grid-cols-3 gap-4 bg-secondary p-2 pb-6">
                 {randomAnime
                     .sort((a, b) => b.score - a.score)

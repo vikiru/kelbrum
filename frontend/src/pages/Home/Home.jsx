@@ -28,6 +28,9 @@ function Home() {
                 </div>
             </div>
             <div>
+                <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">
+                    Random Anime
+                </h2>
                 <RandomAnime allAnime={data} />
             </div>
         </div>
