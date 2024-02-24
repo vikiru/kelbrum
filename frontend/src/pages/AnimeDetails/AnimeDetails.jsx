@@ -193,7 +193,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                             <img
                                 src={anime.imageURL}
                                 alt={`${anime.title} image`}
-                                className="h-full w-full rounded-lg object-cover"
+                                className="w-full rounded-lg object-contain"
                                 style={{
                                     maxWidth: '100%',
                                     maxHeight: '50%',

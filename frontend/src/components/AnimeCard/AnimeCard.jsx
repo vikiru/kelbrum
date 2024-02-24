@@ -14,24 +14,19 @@ const AnimeCard = ({ anime }) => {
 
     return (
         <div key={anime.title} className="card grid w-full cursor-default rounded-lg bg-primary p-2 shadow-lg">
-            <div className="m-5">
+            <div className="m-4" >
                 <figure>
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="h-full w-full rounded-lg"
-                            style={{
-                                maxWidth: '50%',
-                                maxHeight: '50%',
-                                objectFit: 'cover',
-                            }}
+                            className="h-[50%] w-[70%] rounded-lg object-contain"
                         />
                     )}{' '}
                 </figure>
             </div>
             <div className="card-body">
-                <h2 className="card-title text-2xl font-semibold text-secondary">{anime.title}</h2>
+                <h2 className="card-title py-4 text-2xl font-semibold text-secondary">{anime.title}</h2>
                 <div className="card-actions mb-4">
                     {anime.genres.map((g) => (
                         <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={g}>
