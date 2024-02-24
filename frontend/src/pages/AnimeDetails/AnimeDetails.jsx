@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
+
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
 const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
@@ -100,7 +100,11 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                             </div>
                         </div>
                     </div>
-                    <p className="text-left">{anime.synopsis}</p>
+
+                    <div>
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Synopsis</h2>
+                        <p className="text-left">{anime.synopsis}</p>
+                    </div>
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">
                             Additional Information
@@ -183,8 +187,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                         </div>
                     </div>
                 </div>
-
-                <div className="container m-4 mx-auto">
+                <div className="container m-14 mx-auto pr-4">
                     <figure>
                         {!hasError && (
                             <img
