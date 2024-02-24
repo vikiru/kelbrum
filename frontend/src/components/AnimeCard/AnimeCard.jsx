@@ -14,7 +14,7 @@ const AnimeCard = ({ anime }) => {
 
     return (
         <div key={anime.title} className="card grid w-full cursor-default rounded-lg bg-primary p-2 shadow-lg">
-            <div className="m-4" >
+            <div className="mx-4 mt-4" >
                 <figure>
                     {!hasError && (
                         <img
@@ -26,7 +26,7 @@ const AnimeCard = ({ anime }) => {
                 </figure>
             </div>
             <div className="card-body">
-                <h2 className="card-title py-4 text-2xl font-semibold text-secondary">{anime.title}</h2>
+                <h2 className="card-title pb-4 text-2xl font-semibold text-secondary">{anime.title}</h2>
                 <div className="card-actions mb-4">
                     {anime.genres.map((g) => (
                         <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={g}>
