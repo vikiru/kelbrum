@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
+
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
-
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
 const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
@@ -39,7 +39,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
     return (
         <div>
             <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">{anime.title}</h2>
-            <div className="grid lg:grid-cols-2 gap-4">
+            <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md m-8 text-justify">
                     <div>
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
@@ -47,26 +47,17 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                         </h2>
                         <div className="card-actions my-4 flex flex-wrap gap-2">
                             {anime.genres.map((g) => (
-                                <span
-                                    className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
-                                    key={g}
-                                >
+                                <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={g}>
                                     {g}
                                 </span>
                             ))}
                             {anime.demographics.map((d) => (
-                                <span
-                                    className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
-                                    key={d}
-                                >
+                                <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={d}>
                                     {d}
                                 </span>
                             ))}
                             {anime.themes.map((t) => (
-                                <span
-                                    className="badge badge-neutral bg-gray-200 px-4 py-4 text-lg text-gray-700"
-                                    key={t}
-                                >
+                                <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={t}>
                                     {t}
                                 </span>
                             ))}
@@ -74,56 +65,62 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                         <div className="grid gap-4 pb-4 lg:grid-cols-2">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Type</h2>
-                                <p className="text-base text-gray-700">{anime.type}</p>
+                                <p className="text-base text-neutral">{anime.type}</p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Season</h2>
-                                <p className="text-base text-gray-700">
-                                    <span className="capitalize">{anime.season === 'Unknown' ? '' : anime.season}</span>
-                                    <span className="capitalize">
-                                        {anime.year === 'Unknown' ? '' : ` ${anime.year}`}
-                                    </span>
+                                <p className="text-base text-neutral">
+                                    {anime.season === 'Unknown' && anime.year === 'Unknown' ? (
+                                        'Unknown'
+                                    ) : (
+                                        <>
+                                            <span className="capitalize">{anime.season}</span>
+                                            <span className="capitalize">
+                                                {anime.year !== 'Unknown' && ` ${anime.year}`}
+                                            </span>
+                                        </>
+                                    )}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Rating</h2>
-                                <p className="text-base text-gray-700">{anime.rating}</p>
+                                <p className="text-base text-neutral">{anime.rating}</p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Episodes</h2>
-                                <p className="text-base text-gray-700">
+                                <p className="text-base text-neutral">
                                     {anime.episodes === '0' ? 'Unknown' : anime.episodes}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Score</h2>
-                                <p className="text-base text-gray-700">
+                                <p className="text-base text-neutral">
                                     {anime.score === '0' ? 'Unknown' : `${anime.score} /  10`}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <p className='text-left'>{anime.synopsis}</p>
+                    <p className="text-left">{anime.synopsis}</p>
                     <div>
-                        <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">
                             Additional Information
                         </h2>
-                        <div className="grid lg:grid-cols-2 gap-4">
+                        <div className="grid gap-4">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Studios</h2>
-                                <p className="text-base text-gray-700">
+                                <p className="text-base text-neutral">
                                     {anime.studios.length === 0 ? 'Unknown' : anime.studios.join(', ')}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Producers</h2>
-                                <p className="text-base text-gray-700">
+                                <p className="text-base text-neutral">
                                     {anime.producers.length === 0 ? 'Unknown' : anime.producers.join(', ')}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Licensors</h2>
-                                <p className="text-base text-gray-700">
+                                <p className="text-base text-neutral">
                                     {anime.licensors.length === 0 ? 'Unknown' : anime.licensors.join(', ')}
                                 </p>
                             </div>
@@ -131,9 +128,41 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                     </div>
 
                     <div>
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Statistics</h2>
+                        <div className="stats bg-base-200">
+                            <div className="stat">
+                                <div className="stat-title text-secondary">Rank</div>
+                                <div className="stat-value text-xl font-medium text-neutral">
+                                    # {anime.rank === 0 ? 'Unknown' : anime.rank}
+                                </div>
+                            </div>
+
+                            <div className="stat">
+                                <div className="stat-title text-secondary">Popularity</div>
+                                <div className="stat-value text-xl font-medium text-neutral">
+                                    # {anime.popularity === 0 ? 'Unknown' : anime.popularity}
+                                </div>
+                            </div>
+                            <div className="stat">
+                                <div className="stat-title text-secondary">Total Favourites</div>
+                                <div className="stat-value text-xl font-medium text-neutral">
+                                    {anime.favourites === 0 ? 'Unknown' : anime.favourites}
+                                </div>
+                            </div>
+
+                            <div className="stat">
+                                <div className="stat-title text-secondary">Total Members</div>
+                                <div className="stat-value text-xl font-medium text-neutral">
+                                    {anime.members === 0 ? 'Unknown' : anime.members}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">External Links</h2>
                         <div className="flex space-x-2">
-                            <button className="rounded-lg bg-gray-200 p-2 transition-colors duration-200 hover:bg-gray-400">
+                            <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
                                 <a href={anime.pageURL} target="_blank" rel="noopener noreferrer">
                                     <img
                                         src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/myanimelist.svg"
@@ -142,7 +171,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                                     />
                                 </a>
                             </button>
-                            <button className="rounded-lg bg-gray-200 p-2 transition-colors duration-200 hover:bg-gray-400">
+                            <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
                                 <a href={anime.trailerURL} target="_blank" rel="noopener noreferrer">
                                     <img
                                         src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg"
@@ -171,6 +200,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                     </figure>
                 </div>
             </div>
+
             <div>
                 <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">
                     Unique Random Suggestions
