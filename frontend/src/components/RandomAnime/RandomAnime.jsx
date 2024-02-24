@@ -9,7 +9,7 @@ const RandomAnime = ({ allAnime }) => {
     const randomAnime = allAnime.slice(0, 10);
 
     return (
-        <div className="3xl:grid-cols-4 carousel carousel-center grid w-full gap-4 bg-secondary py-6 px-4 md:grid-cols-2">
+        <div className="3xl:grid-cols-4 carousel carousel-center grid w-full gap-4 bg-secondary px-4 py-6 md:grid-cols-2">
             {randomAnime
                 .sort((a, b) => b.score - a.score)
                 .map((anime, index) => {

@@ -187,17 +187,13 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                         </div>
                     </div>
                 </div>
-                <div className="container m-14 mx-auto pr-4">
+                <div className="container mx-4 my-14">
                     <figure>
                         {!hasError && (
                             <img
                                 src={anime.imageURL}
                                 alt={`${anime.title} image`}
-                                className="w-full rounded-lg object-contain"
-                                style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '50%',
-                                }}
+                                className="h-[50%] w-[90%] rounded-lg object-contain"
                             />
                         )}
                     </figure>
