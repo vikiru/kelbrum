@@ -56,6 +56,8 @@ const RandomAnime = ({ allAnime }) => {
                                     <div className="card-actions justify-center">
                                         <Link
                                             to={`/anime/${anime.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"
                                         >
                                             Read more

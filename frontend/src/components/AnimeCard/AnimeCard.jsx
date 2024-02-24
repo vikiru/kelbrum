@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime }) => {
@@ -59,6 +58,8 @@ const AnimeCard = ({ anime }) => {
                 <div className="card-actions">
                     <Link
                         to={`/anime/${anime.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"
                     >
                         Read more
