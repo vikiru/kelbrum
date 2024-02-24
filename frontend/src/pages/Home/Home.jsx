@@ -29,7 +29,7 @@ function Home({ data }) {
                 <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">
                     Random Anime
                 </h2>
-                <RandomAnime allAnime={data} />
+                <RandomAnime allAnime={data.filter((a) => a.score >= 7)} />
             </div>
         </div>
     );
