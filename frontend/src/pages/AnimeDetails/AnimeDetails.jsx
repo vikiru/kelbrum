@@ -6,9 +6,11 @@ import {
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
+import { useData } from '../../context/DataProvider';
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
-const AnimeDetails = ({ data, featureArray, kmeans }) => {
+const AnimeDetails = () => {
+    const { data, featureArray, kmeans } = useData();
     const { id } = useParams();
     const anime = data[id];
     const [hasError, setHasError] = useState(false);

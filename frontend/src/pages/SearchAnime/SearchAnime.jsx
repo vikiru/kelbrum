@@ -2,7 +2,10 @@ import MiniSearch from 'minisearch';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SearchAnime = ({ data, titleIDMap }) => {
+import { useData } from '../../context/DataProvider';
+
+const SearchAnime = () => {
+    const { data, titleIDMap } = useData();
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);

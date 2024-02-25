@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 
 import RandomAnime from '../../components/RandomAnime/RandomAnime';
+import { useData } from '../../context/DataProvider';
 
-function Home({ data }) {
+function Home() {
+    const { data } = useData();
+
     return (
         <div>
             <div className="hero flex min-h-screen items-center justify-center bg-primary">

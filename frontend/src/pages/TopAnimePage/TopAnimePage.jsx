@@ -1,11 +1,15 @@
 import { debounce } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 
 import { useData } from '../../context/DataProvider';
 import AnimeCard from './../../components/AnimeCard/AnimeCard';
 
-const TopAnimePage = ({ top100Anime }) => {
+const TopAnimePage = () => {
+    const { data } = useData();
+    const sortedData = [...data].sort((a, b) => b.score - a.score);
+    const top100Anime = sortedData.slice(0, 100);
+
     const [items, setItems] = useState([]);
     const [hasMore, setHasMore] = useState(true);
 
