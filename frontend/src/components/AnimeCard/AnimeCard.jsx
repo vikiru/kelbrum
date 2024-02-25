@@ -68,6 +68,7 @@ const AnimeCard = ({ anime, index }) => {
                     <div className="mt-2">
                         <Link
                             to={`/anime/${anime.id}`}
+                            target="_blank"
                             className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
                         >
                             Read more
