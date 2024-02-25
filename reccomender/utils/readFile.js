@@ -1,8 +1,23 @@
-const path = require('path');
-const fs = require('fs');
+import { Buffer } from 'buffer';
+import fs from 'fs';
+import Papa from 'papaparse';
 
-const { parse } = require('csv-parse');
-const { processUserInteractionData, processAnimeData } = require('./processData');
+import { processAnimeData, processUserInteractionData } from './processData.js';
+
+let path;
+let url;
+let fileURLToPath;
+let dirname;
+let __filename, __dirname;
+
+if (typeof window === 'undefined') {
+    path = require('path');
+    url = require('url');
+    fileURLToPath = url.fileURLToPath;
+    dirname = path.dirname;
+    __filename = fileURLToPath(import.meta.url);
+    __dirname = dirname(__filename);
+}
 
 async function checkFileExists(fileName) {
     const filePath = path.resolve(__dirname, `../data/${fileName}`);
@@ -18,35 +33,31 @@ async function checkFileExists(fileName) {
     }
 }
 
-async function readJSONFile(fileName) {
-    try {
-        const jsonData = await fs.promises.readFile(fileName, 'utf8');
-        const parsedData = JSON.parse(jsonData);
-        console.log(`Successfully read JSON file at path "${fileName}".`);
-        return parsedData;
-    } catch (error) {
-        console.error(`Error reading JSON file at path "${fileName}":`, error);
-        throw error;
+async function readFile(filePathOrFile) {
+    if (typeof window === 'undefined') {
+        return fs.promises.readFile(filePathOrFile, 'utf8');
+    } else {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target.result);
+            reader.onerror = (error) => reject(error);
+            reader.readAsText(filePathOrFile);
+        });
     }
 }
 
-async function readCSVFile(filePath) {
-    return new Promise((resolve, reject) => {
-        const data = [];
-        fs.createReadStream(filePath)
-            .pipe(parse({ delimiter: ',', from_line: 2 }))
-            .on('data', (row) => {
-                data.push(row);
-            })
-            .on('end', () => {
-                console.log(`Successfully read CSV file at path "${filePath}".`);
-                resolve(data);
-            })
-            .on('error', (error) => {
-                console.error(`Error reading CSV file at path "${filePath}":`, error);
-                reject(error);
-            });
+async function readJSONFile(filePathOrFile) {
+    const fileData = await readFile(filePathOrFile);
+    return JSON.parse(fileData);
+}
+
+async function readCSVFile(filePathOrFile) {
+    const fileData = await readFile(filePathOrFile);
+    const results = Papa.parse(fileData, {
+        header: true,
+        skipEmptyLines: true,
     });
+    return results.data;
 }
 
 async function readAndProcessFile(fileName, type) {
@@ -78,9 +89,4 @@ async function readAndProcessFile(fileName, type) {
     }
 }
 
-module.exports = {
-    readCSVFile,
-    readJSONFile,
-    readAndProcessFile,
-    checkFileExists,
-};
+export { readCSVFile, readJSONFile, readAndProcessFile, checkFileExists };

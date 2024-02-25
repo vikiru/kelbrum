@@ -1,5 +1,5 @@
-const { cleanDuration, cleanRating } = require('./clean');
-const { writeData } = require('./writeFile');
+import { cleanDuration, cleanRating } from './clean.js';
+import { writeData } from './writeFile.js';
 
 const RATE_LIMIT_STATUS = 429;
 async function fetchWithRetry(url, retries = 1) {
@@ -239,7 +239,7 @@ async function handleMissingData(data) {
     return remainingEntries;
 }
 
-module.exports = {
+export {
     fetchWithRetry,
     fetchData,
     delay,

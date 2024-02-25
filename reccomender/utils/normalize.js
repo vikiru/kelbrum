@@ -1,6 +1,7 @@
-const { calculateStatistics, createMapping } = require('./stats');
-const { sortData, returnUniqueArray } = require('./utils');
-const tf = require('@tensorflow/tfjs');
+import * as tf from '@tensorflow/tfjs';
+
+import { calculateStatistics, createMapping } from './stats.js';
+import { returnUniqueArray, sortData } from './utils.js';
 
 function jaccardSimilarity(setA, setB) {
     const intersection = new Set([...setA].filter((x) => setB.has(x)));
@@ -98,14 +99,6 @@ function multiHotEncode(data, property) {
     });
 }
 
-function checkArrayDimension(arr) {
-    if (arr.some((item) => Array.isArray(item))) {
-        return '2D';
-    } else {
-        return '1D';
-    }
-}
-
 function normalizeCategorical(data) {
     const uniqueValues = Array.from(new Set(data.map((d) => d)));
     const minValue = Math.min(...uniqueValues);
@@ -118,6 +111,14 @@ function normalizeCategorical(data) {
             return (entry - minValue) / range;
         }
     });
+}
+
+function checkArrayDimension(arr) {
+    if (arr.some((item) => Array.isArray(item))) {
+        return '2D';
+    } else {
+        return '1D';
+    }
 }
 
 async function createFeatureTensor(data) {
@@ -209,13 +210,16 @@ function validateTensors(tensors) {
     });
 }
 
-module.exports = {
+export {
     jaccardSimilarity,
-    ordinalEncode,
     minMaxScale,
-    robustScale,
     multiHotEncode,
+    ordinalEncode,
+    robustScale,
     checkArrayDimension,
+    encodeCombination,
+    encodeCategorical,
+    normalizeCategorical,
     createFeatureTensor,
     calculateFeatureVariance,
     validateTensors,

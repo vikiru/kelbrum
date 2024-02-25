@@ -14,6 +14,7 @@
   "bracketSameLine": false,
   "plugins": [
     "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-jsdoc"
+    "prettier-plugin-jsdoc",
+    "prettier-plugin-tailwindcss"
   ]
 }
