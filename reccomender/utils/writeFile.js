@@ -12,9 +12,8 @@ if (typeof window === 'undefined') {
     fileURLToPath = url.fileURLToPath;
     dirname = path.dirname;
     __filename = fileURLToPath(import.meta.url);
-    __dirname= dirname(__filename);
+    __dirname = dirname(__filename);
 }
-
 
 function formatNumber(num) {
     return num.toFixed(2);

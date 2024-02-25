@@ -1,15 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
-
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
-const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
+const AnimeDetails = ({ data, featureArray, kmeans }) => {
+    const { id } = useParams();
+    const anime = data[id];
     const [hasError, setHasError] = useState(false);
     const [topResults, setTopResults] = useState([]);
+
+    const trimmedStudios = useMemo(() => {
+        return anime.studios.length === 0 ? ['Unknown'] : anime.studios.map((studio) => studio.trim());
+    }, [anime.studios]);
+
+    const trimmedProducers = useMemo(() => {
+        return anime.producers.length === 0 ? ['Unknown'] : anime.producers.map((producer) => producer.trim());
+    }, [anime.producers]);
+
+    const trimmedLicensors = useMemo(() => {
+        return anime.licensors.length === 0 ? ['Unknown'] : anime.licensors.map((licensor) => licensor.trim());
+    }, [anime.licensors]);
 
     useEffect(() => {
         const img = new Image();
@@ -37,7 +52,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
     }, [anime.id, data, featureArray, kmeans.clusters]);
 
     return (
-        <div>
+        <div className="overflow-x-hidden">
             <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">{anime.title}</h2>
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md m-8 text-justify">
@@ -62,6 +77,7 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                                 </span>
                             ))}
                         </div>
+
                         <div className="grid gap-4 pb-4 lg:grid-cols-2">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Type</h2>
@@ -113,19 +129,34 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Studios</h2>
                                 <p className="text-base text-neutral">
-                                    {anime.studios.length === 0 ? 'Unknown' : anime.studios.join(', ')}
+                                    {trimmedStudios.map((studio, index) => (
+                                        <span key={index}>
+                                            {studio}
+                                            <br />
+                                        </span>
+                                    ))}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Producers</h2>
                                 <p className="text-base text-neutral">
-                                    {anime.producers.length === 0 ? 'Unknown' : anime.producers.join(', ')}
+                                    {trimmedProducers.map((producer, index) => (
+                                        <span key={index}>
+                                            {producer}
+                                            <br />
+                                        </span>
+                                    ))}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Licensors</h2>
                                 <p className="text-base text-neutral">
-                                    {anime.licensors.length === 0 ? 'Unknown' : anime.licensors.join(', ')}
+                                    {trimmedLicensors.map((licensor, index) => (
+                                        <span key={index}>
+                                            {licensor}
+                                            <br />
+                                        </span>
+                                    ))}
                                 </p>
                             </div>
                         </div>
@@ -166,27 +197,32 @@ const AnimeDetails = ({ anime, data, featureArray, kmeans }) => {
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">External Links</h2>
                         <div className="flex space-x-2">
-                            <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
-                                <a href={anime.pageURL} target="_blank" rel="noopener noreferrer">
-                                    <img
-                                        src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/myanimelist.svg"
-                                        className="h-10 w-10 rounded-lg object-cover"
-                                        alt="MyAnimeList Icon"
-                                    />
-                                </a>
-                            </button>
-                            <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
-                                <a href={anime.trailerURL} target="_blank" rel="noopener noreferrer">
-                                    <img
-                                        src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg"
-                                        className="h-10 w-10 rounded-lg object-cover"
-                                        alt="YouTube Icon"
-                                    />
-                                </a>
-                            </button>
+                            {anime.pageURL !== 'Unknown' && (
+                                <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
+                                    <a href={anime.pageURL} target="_blank" rel="noopener noreferrer">
+                                        <img
+                                            src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/myanimelist.svg"
+                                            className="h-10 w-10 rounded-lg object-cover"
+                                            alt="MyAnimeList Icon"
+                                        />
+                                    </a>
+                                </button>
+                            )}
+                            {anime.trailerURL !== 'Unknown' && (
+                                <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
+                                    <a href={anime.trailerURL} target="_blank" rel="noopener noreferrer">
+                                        <img
+                                            src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg"
+                                            className="h-10 w-10 rounded-lg object-cover"
+                                            alt="YouTube Icon"
+                                        />
+                                    </a>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
+
                 <div className="container mx-4 my-14">
                     <figure>
                         {!hasError && (

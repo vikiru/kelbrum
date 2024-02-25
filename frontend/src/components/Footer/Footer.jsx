@@ -16,7 +16,7 @@ function Footer() {
                         View the top 100 Anime
                     </Link>
                     <Link
-                        to="/searchAnime"
+                        to="/search"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="link-hover link text-lg capitalize"

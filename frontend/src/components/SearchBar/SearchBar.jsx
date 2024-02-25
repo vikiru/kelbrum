@@ -1,6 +1,6 @@
-// SearchBar.js
 import React, { useState } from 'react';
-import ReactSearchAutocomplete from 'react-search-autocomplete';
+import { useNavigate } from 'react-router-dom';
+import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 
 import useData from '../../context/DataProvider';
 
@@ -8,6 +8,7 @@ const SearchBar = () => {
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const { data, titleIDMap } = useData();
+    const navigate = useNavigate();
 
     const items = titleIDMap.map((item) => ({ id: item.value, name: item.title, synonyms: item.synonyms }));
 
@@ -32,8 +33,9 @@ const SearchBar = () => {
     };
 
     const handleOnSelect = (selectedItem) => {
-        setInputValue(selectedItem.name);
         setSuggestions([]);
+        setInputValue(selectedItem.name);
+        debounce(navigate(`/anime/${selectedItem.id}`, 200));
     };
 
     const formatResult = (item) => (

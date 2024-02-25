@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
-const AnimeCard = ({ anime }) => {
+const AnimeCard = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
@@ -13,14 +12,20 @@ const AnimeCard = ({ anime }) => {
     }, [anime.imageURL]);
 
     return (
-        <div key={anime.title} className="card grid w-full cursor-default rounded-lg bg-primary p-2 shadow-lg">
-            <div className="mx-4 mt-4" >
+        <div
+            key={anime.title}
+            className="card grid min-h-full min-w-[50%] max-w-full cursor-default rounded-lg bg-primary p-2 shadow-lg"
+        >
+            <span className="bg-accent-darker badge badge-accent absolute left-2 top-2 rounded-full p-4 text-white">
+                {index}
+            </span>
+            <div className="mx-4 mt-4">
                 <figure>
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="h-[50%] w-[70%] rounded-lg object-contain"
+                            className="h-[50%] w-[50%] rounded-lg object-contain"
                         />
                     )}{' '}
                 </figure>
