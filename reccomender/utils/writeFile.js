@@ -1,5 +1,19 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+
+let path;
+let url;
+let fileURLToPath;
+let dirname;
+let __filename, __dirname;
+
+if (typeof window === 'undefined') {
+    path = require('path');
+    url = require('url');
+    fileURLToPath = url.fileURLToPath;
+    dirname = path.dirname;
+    __filename = fileURLToPath(import.meta.url);
+    __dirname = dirname(__filename);
+}
 
 function formatNumber(num) {
     return num.toFixed(2);
@@ -28,6 +42,4 @@ async function writeData(fileName, data) {
         throw err;
     }
 }
-module.exports = {
-    writeData,
-};
+export { writeData };

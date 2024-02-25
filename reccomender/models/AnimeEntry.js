@@ -64,6 +64,4 @@ class AnimeEntry {
     }
 }
 
-module.exports = {
-    AnimeEntry,
-};
+export { AnimeEntry };

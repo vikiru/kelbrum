@@ -1,32 +1,9 @@
-const tf = require('@tensorflow/tfjs');
-const { initializeDataFile, returnUniqueArray, writeData, sortData } = require('./utils/utils');
-const { createFeatureTensor, calculateFeatureVariance } = require('./utils/normalize');
-const { returnKmeansModel, returnOptimalK } = require('./utils/train');
-const { similarity, distance } = require('ml-distance');
+import * as tf from '@tensorflow/tfjs';
+import { distance, similarity } from 'ml-distance';
 
-// dice, jaccard, tanimoto, sorensen. k = 10
-
-// k = 10, 37 - 40, 99, 100
-// 37, 43, 47 51 52 -< k
-async function main() {
-    try {
-        const data = await initializeDataFile();
-        const featureTensor = await createFeatureTensor(data);
-        const featureArray = featureTensor.arraySync();
-        const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
-        const id = data.findIndex((d) => d.malID === 4898); // 25013 - akayona, 6, 21
-        const entry = data[id];
-        const cluster = kmeans.clusters[entry.id];
-        const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
-        const reccs = await returnRandomRecommendations(results);
-        const topResults = await retrieveAnimeData(reccs, data);
-        topResults.forEach((d) => {
-            console.log(d.title);
-        });
-    } catch (err) {
-        console.error('Error occured:', err);
-    }
-}
+import { createFeatureTensor } from './utils/normalize.js';
+import { returnKmeansModel } from './utils/train.js';
+import { initializeDataFile, writeData } from './utils/utils.js';
 
 async function retrieveAnimeData(recommendations, data) {
     const indexes = recommendations.map((r) => r.index);
@@ -37,6 +14,13 @@ async function retrieveAnimeData(recommendations, data) {
     return animeData.sort((a, b) => b.similarity - a.similarity);
 }
 
+async function shuffleRandom(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
 async function returnRandomRecommendations(similarities) {
     const MIN_THRESHOLD = 0.8;
     const MAX_ANIME = 100;
@@ -44,10 +28,7 @@ async function returnRandomRecommendations(similarities) {
     const filteredSimilarities = similarities.filter((s) => s.similarity >= MIN_THRESHOLD);
     filteredSimilarities.sort((a, b) => b.similarity - a.similarity);
 
-    for (let i = filteredSimilarities.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [filteredSimilarities[i], filteredSimilarities[j]] = [filteredSimilarities[j], filteredSimilarities[i]];
-    }
+    shuffleRandom(filteredSimilarities);
 
     const selectedIds = new Set();
     const recommendations = [];
@@ -126,6 +107,35 @@ function compareTensors(tensorA, tensorB) {
     return similarity.cosine(tensorA, tensorB);
 }
 
-main();
+// dice, jaccard, tanimoto, sorensen. k = 10
 
+// k = 10, 37 - 40, 99, 100
+// 37, 43, 47 51 52 -< k
+async function main() {
+    try {
+        const data = await initializeDataFile();
+        const featureTensor = await createFeatureTensor(data);
+        const featureArray = featureTensor.arraySync();
+        const titleIDMap = data.flatMap((d) => {
+            const uniqueTitles = Array.from(new Set(d.titles));
+            return { title: d.title, synonyms: uniqueTitles, value: d.id };
+        });
+        await writeData('titleIDMap.json', titleIDMap);
+        await writeData('featureArray.json', featureArray);
+        const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
+        const id = data.findIndex((d) => d.malID === 4898); // 25013 - akayona, 6, 21
+        const entry = data[id];
+        const cluster = kmeans.clusters[entry.id];
+        const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
+        const reccs = await returnRandomRecommendations(results);
+        const topResults = await retrieveAnimeData(reccs, data);
+        topResults.forEach((d) => {
+            console.log(d.title);
+        });
+    } catch (err) {
+        console.error('Error occured:', err);
+    }
+}
+
+export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };
 // start working on ui (user enters up to 10 titles, auto complete

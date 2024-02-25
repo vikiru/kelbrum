@@ -1,6 +1,6 @@
-const { AnimeEntry } = require('../models/AnimeEntry');
-const { UserInteraction } = require('../models/UserInteraction');
-const { cleanRating, cleanDuration, cleanArray, findSeasonalYear, cleanPremiered } = require('./clean');
+import { AnimeEntry } from '../models/AnimeEntry.js';
+import { UserInteraction } from '../models/UserInteraction.js';
+import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
 
 function parseOrDefault(value, defaultValue = 0, type = 'int') {
     if (type === 'int') {
@@ -109,7 +109,4 @@ async function processUserInteractionData(data) {
     return users;
 }
 
-module.exports = {
-    processAnimeData,
-    processUserInteractionData,
-};
+export { processAnimeData, processUserInteractionData };

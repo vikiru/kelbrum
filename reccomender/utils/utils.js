@@ -1,10 +1,7 @@
-const { parse } = require('csv-parse');
-const { cleanArray, findSeasonalYear, cleanDuration, cleanRating, cleanPremiered } = require('./clean');
-const { AnimeEntry } = require('../models/AnimeEntry');
-const { UserInteraction } = require('../models/UserInteraction');
-const { checkFileExists, readAndProcessFile } = require('./readFile');
-const { handleMissingData } = require('./fetchData');
-const { writeData } = require('./writeFile');
+import { cleanDuration, cleanPremiered, cleanRating } from './clean.js';
+import { handleMissingData } from './fetchData.js';
+import { checkFileExists, readAndProcessFile } from './readFile.js';
+import { writeData } from './writeFile.js';
 
 function findMax(data, property) {
     const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
@@ -63,6 +60,7 @@ async function constructDataFile() {
 async function initializeDataFile() {
     const fileName = 'entries.json';
     const fileExists = await checkFileExists(fileName);
+    console.log(fileExists);
 
     if (!fileExists) {
         console.log(`The file '${fileName}' does not exist. Constructing data files...`);
@@ -76,7 +74,7 @@ async function initializeDataFile() {
     }
 }
 
-module.exports = {
+export {
     writeData,
     findMax,
     findMin,
