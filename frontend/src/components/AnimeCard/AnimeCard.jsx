@@ -16,26 +16,28 @@ const AnimeCard = ({ anime, index }) => {
             key={anime.title}
             className="card grid min-h-full min-w-[50%] max-w-full cursor-default rounded-lg bg-primary p-1"
         >
-            <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-2 text-white">
+            <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-3 text-white">
                 {index}
             </span>
+            <div className="container mt-6 flex justify-center">
+                <h2 className="text-center text-lg font-semibold text-secondary">{anime.title}</h2>
+            </div>
             <div className="grid grid-cols-2 gap-2">
-                <div className="mt-6 rounded-lg bg-primary p-2">
+                <div className="rounded-lg bg-primary p-2">
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="object-fit h-46 mb-2 w-full rounded-lg object-contain"
+                            className="object-fit h-46 mb-2 w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                         />
                     )}
                 </div>
                 <div className="mt-4 flex flex-col justify-between rounded-lg bg-primary p-2">
                     <div>
-                        <h2 className="mb-2 text-lg font-semibold text-secondary">{anime.title}</h2>
                         <div className="mb-1 flex flex-wrap">
                             {anime.genres.map((g) => (
                                 <span
-                                    className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs text-primary"
+                                    className="badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs text-primary"
                                     key={g}
                                 >
                                     {g}
@@ -43,7 +45,7 @@ const AnimeCard = ({ anime, index }) => {
                             ))}
                             {anime.demographics.map((d) => (
                                 <span
-                                    className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs text-primary"
+                                    className="badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs text-primary"
                                     key={d}
                                 >
                                     {d}
