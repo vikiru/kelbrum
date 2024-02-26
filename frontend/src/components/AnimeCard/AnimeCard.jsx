@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -49,7 +48,7 @@ const AnimeCard = ({ anime, index }) => {
                         </div>
                     </div>
 
-                    <div className="xs:flex mt-2 flex-grow">
+                    <div className="xs:flex mt-2 lg:grid">
                         {anime.genres
                             .filter((g) => g !== 'Unknown')
                             .map((g) => (
