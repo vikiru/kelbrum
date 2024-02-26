@@ -31,7 +31,7 @@ const SearchAnime = () => {
 
     const handleOnSearch = useCallback(
         (string) => {
-            const results = miniSearch.search(string, { limit: 10 });
+            const results = miniSearch.search(string, { limit: 20 });
             setSuggestions(
                 results
                     .slice(0, 10)
@@ -70,21 +70,24 @@ const SearchAnime = () => {
     }, [activeSuggestionIndex]);
 
     return (
-        <div className={`container min-h-screen flex-grow p-8 pb-6 ${showSuggestions ? 'overflow-y-hidden' : ''}`}>
-            <div className="min-h-[40rem] flex-shrink-0">
-                <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => {
-                        setInputValue(e.target.value);
-                        handleOnSearch(e.target.value);
-                    }}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type to filter titles..."
-                    className="input input-bordered w-full"
-                />
+        <div className={`min-h-screen flex-grow p-8 pb-16 ${showSuggestions ? 'overflow-y-hidden' : ''}`}>
+            <div className="min-h-[40rem]">
+                <div className="w-full">
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => {
+                            setInputValue(e.target.value);
+                            handleOnSearch(e.target.value);
+                        }}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type to filter titles..."
+                        className="input input-bordered w-full p-2 pl-4 pr-4 text-sm sm:p-3 sm:pl-5 sm:pr-5 md:p-4 md:pl-6 md:pr-6 md:text-lg"
+                    />
+                </div>
+
                 {suggestions.length > 0 && (
-                    <div className="search-results mt-4 max-h-[20rem] space-y-2 overflow-y-hidden">
+                    <div className="mt-4 max-h-60 overflow-y-auto">
                         {suggestions.map((suggestion, index) => (
                             <div
                                 key={index}
@@ -92,9 +95,11 @@ const SearchAnime = () => {
                                 className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100' : ''}`}
                                 onClick={() => handleOnSelect(suggestion)}
                             >
-                                <div className="card-body">
-                                    <p className="text-md card-title">{suggestion.title}</p>
-                                    <p className="text-sm text-gray-500">{suggestion.synonyms.join(', ')}</p>
+                                <div className="card-body p-2 sm:p-3 md:p-4">
+                                    <p className="card-title text-xs sm:text-sm md:text-base">{suggestion.title}</p>
+                                    <p className="text-xs text-gray-500 sm:text-sm md:text-base">
+                                        {suggestion.synonyms.slice(0, 5).join(', ')}
+                                    </p>
                                 </div>
                             </div>
                         ))}
