@@ -31,7 +31,7 @@ const SearchAnime = () => {
 
     const handleOnSearch = useCallback(
         (string) => {
-            const results = miniSearch.search(string, { limit: 20 });
+            const results = miniSearch.search(string, { limit: 10 });
             setSuggestions(
                 results
                     .slice(0, 10)
