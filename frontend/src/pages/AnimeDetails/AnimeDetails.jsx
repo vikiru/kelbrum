@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
-import { useData } from '../../context/DataProvider';
+
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
+import { useData } from '../../context/DataProvider';
+import { useParams } from 'react-router-dom';
 
 const AnimeDetails = () => {
     const { data, featureArray, kmeans } = useData();
@@ -57,14 +57,14 @@ const AnimeDetails = () => {
         <div className="overflow-x-hidden">
             <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">{anime.title}</h2>
             <div className="grid gap-4 lg:grid-cols-2">
-                <div className="text-md m-8 text-justify">
-                    <div className="mx-4 lg:hidden">
+                <div className="text-md mx-8 text-justify">
+                    <div className="mx-4 mt-4 lg:hidden">
                         <figure>
                             {!hasError && (
                                 <img
                                     src={anime.imageURL}
                                     alt={`${anime.title} image`}
-                                    className="h-[80%] w-full rounded-lg object-contain"
+                                    className="h-[80%] w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                                 />
                             )}
                         </figure>
@@ -110,25 +110,24 @@ const AnimeDetails = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="card-actions my-4 flex flex-wrap gap-2">
-                            {anime.genres.map((g) => (
-                                <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={g}>
-                                    {g}
-                                </span>
-                            ))}
-                            {anime.demographics.map((d) => (
-                                <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={d}>
-                                    {d}
-                                </span>
-                            ))}
-                            {anime.themes.map((t) => (
-                                <span className="badge badge-neutral bg-neutral px-4 py-4 text-lg text-primary" key={t}>
-                                    {t}
-                                </span>
-                            ))}
-                        </div>
                     </div>
+                </div>
 
+                <div className="xs:hidden container mx-4 mt-14 lg:block">
+                    <figure>
+                        {!hasError && (
+                            <img
+                                src={anime.imageURL}
+                                alt={`${anime.title} image`}
+                                className="h-[50%] w-[80%] max-w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                            />
+                        )}
+                    </figure>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-4 lg:flex-row">
+                <div className="text-md mx-8 text-justify">
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Synopsis</h2>
                         <p className="text-left">{anime.synopsis}</p>
@@ -138,6 +137,35 @@ const AnimeDetails = () => {
                             Additional Information
                         </h2>
                         <div className="grid gap-4">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Tags</h2>
+                                <p className="text-base text-neutral">
+                                    {anime.genres
+                                        .filter((g) => g !== 'Unknown')
+                                        .map((g, index) => (
+                                            <span key={index}>
+                                                {g}
+                                                <br />
+                                            </span>
+                                        ))}
+                                    {anime.demographics
+                                        .filter((d) => d !== 'Unknown')
+                                        .map((d, index) => (
+                                            <span key={index}>
+                                                {d}
+                                                <br />
+                                            </span>
+                                        ))}
+                                    {anime.themes
+                                        .filter((t) => t !== 'Unknown')
+                                        .map((t, index) => (
+                                            <span key={index}>
+                                                {t}
+                                                <br />
+                                            </span>
+                                        ))}
+                                </p>
+                            </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Studios</h2>
                                 <p className="text-base text-neutral">
@@ -173,7 +201,6 @@ const AnimeDetails = () => {
                             </div>
                         </div>
                     </div>
-
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Statistics</h2>
                         <div className="xs:stats-vertical stats w-full bg-base-200 shadow xl:stats-horizontal xl:w-auto">
@@ -183,7 +210,6 @@ const AnimeDetails = () => {
                                     # {anime.rank === 0 ? 'Unknown' : anime.rank}
                                 </div>
                             </div>
-
                             <div className="stat">
                                 <div className="stat-title text-secondary">Popularity</div>
                                 <div className="stat-value text-xl font-medium text-neutral">
@@ -196,7 +222,6 @@ const AnimeDetails = () => {
                                     {anime.favourites === 0 ? 'Unknown' : anime.favourites}
                                 </div>
                             </div>
-
                             <div className="stat">
                                 <div className="stat-title text-secondary">Total Members</div>
                                 <div className="stat-value text-xl font-medium text-neutral">
@@ -206,7 +231,7 @@ const AnimeDetails = () => {
                         </div>
                     </div>
 
-                    <div>
+                    <div className="pb-6">
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">External Links</h2>
                         <div className="flex space-x-2">
                             {anime.pageURL !== 'Unknown' && (
@@ -233,18 +258,6 @@ const AnimeDetails = () => {
                             )}
                         </div>
                     </div>
-                </div>
-
-                <div className="xs:hidden container mx-4 my-14 lg:block">
-                    <figure>
-                        {!hasError && (
-                            <img
-                                src={anime.imageURL}
-                                alt={`${anime.title} image`}
-                                className="h-[50%] w-[80%] max-w-full rounded-lg object-contain"
-                            />
-                        )}
-                    </figure>
                 </div>
             </div>
 
