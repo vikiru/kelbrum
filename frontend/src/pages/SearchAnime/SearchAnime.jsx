@@ -87,7 +87,7 @@ const SearchAnime = () => {
                 </div>
 
                 {suggestions.length > 0 && (
-                    <div className="mt-4 max-h-60 overflow-y-auto">
+                    <div className="mt-4 max-h-60 overflow-y-scroll scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500">
                         {suggestions.map((suggestion, index) => (
                             <div
                                 key={index}
