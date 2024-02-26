@@ -1,6 +1,7 @@
 import { cleanDuration, cleanPremiered, cleanRating } from './clean.js';
 import { handleMissingData } from './fetchData.js';
 import { checkFileExists, readAndProcessFile } from './readFile.js';
+import { createMapping } from './stats.js';
 import { writeData } from './writeFile.js';
 
 function findMax(data, property) {
@@ -57,10 +58,62 @@ async function constructDataFile() {
     return filteredData;
 }
 
+async function returnFilteredData(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    const uniqueMapping = createMapping(uniqueValues);
+
+    const filteredData = {};
+
+    data.forEach((entry) => {
+        const propertyValue = entry[property];
+        const type = Array.isArray(propertyValue) ? 'array' : 'single';
+
+        if (type === 'array') {
+            if (propertyValue.length === 0) {
+                const lastId = Object.keys(uniqueMapping).reduce(
+                    (maxId, key) => Math.max(maxId, uniqueMapping[key]),
+                    -1,
+                );
+                const unknownId = lastId + 1;
+                const unknownKey = 'Unknown';
+                uniqueMapping[unknownKey] = unknownId;
+                propertyValue.push(unknownKey);
+            }
+
+            propertyValue.forEach((value) => {
+                const mappingId = uniqueMapping[value];
+                if (mappingId !== undefined) {
+                    if (!filteredData[mappingId]) {
+                        filteredData[mappingId] = {
+                            key: value,
+                            values: [],
+                        };
+                    }
+
+                    filteredData[mappingId].values.push(entry);
+                }
+            });
+        } else {
+            const mappingId = uniqueMapping[propertyValue];
+            if (mappingId !== undefined) {
+                if (!filteredData[mappingId]) {
+                    filteredData[mappingId] = {
+                        key: propertyValue,
+                        values: [],
+                    };
+                }
+
+                filteredData[mappingId].values.push(entry);
+            }
+        }
+    });
+
+    return filteredData;
+}
+
 async function initializeDataFile() {
     const fileName = 'entries.json';
     const fileExists = await checkFileExists(fileName);
-    console.log(fileExists);
 
     if (!fileExists) {
         console.log(`The file '${fileName}' does not exist. Constructing data files...`);
@@ -83,4 +136,5 @@ export {
     returnUniqueArray,
     constructDataFile,
     initializeDataFile,
+    returnFilteredData,
 };
