@@ -29,7 +29,7 @@ const AnimeCard = ({ anime, index }) => {
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="object-fit h-46 mb-2 w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                            className="object-fit h-46 mb-2 w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl"
                         />
                     )}
                 </div>
@@ -48,18 +48,30 @@ const AnimeCard = ({ anime, index }) => {
                             <span className="font-bold">Score:</span> {anime.score} / 10
                         </div>
                     </div>
-                    <div className="mt-2 flex flex-wrap">
-                        {anime.genres.map((g) => (
-                            <span className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs" key={g}>
-                                {g}
-                            </span>
-                        ))}
-                        {anime.demographics.map((d) => (
-                            <span className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs" key={d}>
-                                {d}
-                            </span>
-                        ))}
+
+                    <div className="xs:flex mt-2 flex-grow">
+                        {anime.genres
+                            .filter((g) => g !== 'Unknown')
+                            .map((g) => (
+                                <span
+                                    className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs"
+                                    key={g}
+                                >
+                                    {g}
+                                </span>
+                            ))}
+                        {anime.demographics
+                            .filter((d) => d !== 'Unknown')
+                            .map((d) => (
+                                <span
+                                    className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs"
+                                    key={d}
+                                >
+                                    {d}
+                                </span>
+                            ))}
                     </div>
+
                     <div className="mt-2 flex justify-center sm:justify-start lg:justify-start">
                         <Link
                             to={`/anime/${anime.id}`}
