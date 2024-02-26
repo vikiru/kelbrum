@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -19,8 +20,8 @@ const AnimeCard = ({ anime, index }) => {
             <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-3 text-white">
                 {index}
             </span>
-            <div className="container mt-6 flex justify-center">
-                <h2 className="text-center text-lg font-semibold text-secondary sm:text-base">{anime.title}</h2>
+            <div className="mt-6 flex items-center justify-center">
+                <h2 className="text-center text-lg font-semibold text-secondary">{anime.title}</h2>
             </div>
             <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
                 <div className="rounded-lg bg-primary p-2">
@@ -32,22 +33,22 @@ const AnimeCard = ({ anime, index }) => {
                         />
                     )}
                 </div>
-                <div className="mt-1 flex flex-col justify-between rounded-lg bg-primary p-2">
+                <div className="flex flex-col justify-between rounded-lg bg-primary p-2">
                     <div>
-                        <div className="text-sm text-neutral sm:text-xs">
+                        <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Type:</span> {anime.type}
                         </div>
-                        <div className="text-sm text-neutral sm:text-xs">
+                        <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Rating:</span> {anime.rating}
                         </div>
-                        <div className="text-sm text-neutral sm:text-xs">
+                        <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Episodes:</span> {anime.episodes}
                         </div>
-                        <div className="text-sm text-neutral sm:text-xs">
+                        <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Score:</span> {anime.score} / 10
                         </div>
                     </div>
-                    <div className="mt-1 flex flex-wrap">
+                    <div className="mt-2 flex flex-wrap">
                         {anime.genres.map((g) => (
                             <span className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs" key={g}>
                                 {g}
