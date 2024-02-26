@@ -10,7 +10,14 @@ import { returnFilteredData, returnUniqueArray } from '../../../reccomender/util
 const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-    const [processedData, setProcessedData] = useState({ filteredGenres: [], filteredDemographics: [] });
+    const [processedData, setProcessedData] = useState({
+        filteredGenres: [],
+        filteredDemographics: [],
+        filteredProducers: [],
+        filteredStudios: [],
+        filteredLicensors: [],
+        filteredSeasons: [],
+    });
 
     useEffect(() => {
         const processData = async () => {
