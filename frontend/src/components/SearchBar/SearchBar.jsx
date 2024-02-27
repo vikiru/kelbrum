@@ -1,63 +1,119 @@
-import React, { useState } from 'react';
+import { debounce } from 'lodash';
+import MiniSearch from 'minisearch';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 
-import useData from '../../context/DataProvider';
-
-const SearchBar = () => {
+const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState([]);
-    const { data, titleIDMap } = useData();
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const suggestionRefs = useRef([]);
+
     const navigate = useNavigate();
+    const navigateToPage = (id) => navigate(`/anime/${path}${id}`);
 
-    const items = titleIDMap.map((item) => ({ id: item.value, name: item.title, synonyms: item.synonyms }));
-
-    const normalizeString = (str) =>
-        str
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-
-    const handleOnSearch = (string) => {
-        const newSuggestions = items.filter((item) => {
-            const itemStr = normalizeString(item.name);
-            const stringStr = normalizeString(string);
-            const nameMatches = itemStr.includes(stringStr);
-            const synonymsMatch = item.synonyms.some((synonym) => normalizeString(synonym).includes(stringStr));
-            return nameMatches || synonymsMatch;
+    const miniSearch = useMemo(() => {
+        const miniSearch = new MiniSearch({
+            fields: fields,
+            storeFields: storeFields,
+            searchOptions: {
+                boost: { title: 2 },
+                fuzzy: 0.2,
+            },
         });
-        const sortedSuggestions = newSuggestions.sort((a, b) => {
-            return a.id - b.id;
-        });
-        setSuggestions(sortedSuggestions);
-    };
 
-    const handleOnSelect = (selectedItem) => {
-        setSuggestions([]);
-        setInputValue(selectedItem.name);
-        debounce(navigate(`/anime/${selectedItem.id}`, 200));
-    };
+        miniSearch.addAll(valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })));
+        return miniSearch;
+    }, [valueMap]);
 
-    const formatResult = (item) => (
-        <div className="cursor-pointer p-2 hover:bg-neutral">
-            <span>{item.name}</span>
-        </div>
+    const debouncedSearch = useCallback(
+        debounce((string) => {
+            const results = miniSearch.search(string, { limit: 10 });
+            setSuggestions(
+                results
+                    .slice(0, 6)
+                    .map((result) => ({ id: result.id, title: result.title, synonyms: result.synonyms })),
+            );
+            setActiveSuggestionIndex(0);
+            setShowSuggestions(true);
+        }, 300),
+        [miniSearch],
     );
 
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value);
+        debouncedSearch(e.target.value);
+    };
+
+    const handleOnSelect = useCallback((selectedItem) => {
+        setSuggestions([]);
+        setInputValue(selectedItem.title);
+        navigateToPage(selectedItem.id);
+        setShowSuggestions(false);
+    }, []);
+
+    const handleKeyDown = useCallback(
+        (event) => {
+            if (event.key === 'ArrowDown') {
+                setActiveSuggestionIndex((prevIndex) => Math.min(prevIndex + 1, suggestions.length - 1));
+            } else if (event.key === 'ArrowUp') {
+                setActiveSuggestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+            } else if (event.key === 'Enter') {
+                handleOnSelect(suggestions[activeSuggestionIndex]);
+            }
+        },
+        [suggestions, activeSuggestionIndex],
+    );
+
+    useEffect(() => {
+        const activeSuggestionElement = suggestionRefs.current[activeSuggestionIndex];
+        if (activeSuggestionElement) {
+            const container = activeSuggestionElement.parentNode;
+            const containerRect = container.getBoundingClientRect();
+            const elementRect = activeSuggestionElement.getBoundingClientRect();
+
+            const isFullyVisible = elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
+
+            if (!isFullyVisible) {
+                const scrollPosition = elementRect.top - containerRect.top;
+                setTimeout(() => {
+                    container.scrollTop = scrollPosition;
+                }, 100);
+            }
+        }
+    }, [activeSuggestionIndex]);
+
     return (
-        <div className="container min-h-screen flex-grow">
-            <div className="min-h-[20rem] flex-shrink-0">
-                <ReactSearchAutocomplete
-                    items={suggestions}
-                    onSearch={handleOnSearch}
-                    onSelect={handleOnSelect}
-                    formatResult={formatResult}
-                    maxResults={6}
-                    placeholder="Type to filter titles..."
-                    className="w-full rounded-md border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
-                    autocompleteItemClassName="p-2 hover:bg-neutral cursor-pointer"
-                    autocompleteItemActiveClassName="bg-blue-500 text-white"
-                />
+        <div className={`min-h-screen flex-grow p-8 pb-16 ${showSuggestions ? 'overflow-y-hidden' : ''}`}>
+            <div className="min-h-[40rem]">
+                <div className="w-full">
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type to filter results..."
+                        className="input input-bordered w-full p-4 pl-6 pr-6 text-sm sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg"
+                    />
+                </div>
+
+                {suggestions.length > 0 && (
+                    <div className="mt-4 max-h-[60vh] overflow-y-scroll scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500">
+                        {suggestions.map((suggestion, index) => (
+                            <div
+                                key={index}
+                                ref={(el) => (suggestionRefs.current[index] = el)}
+                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100' : ''}`}
+                                onClick={() => handleOnSelect(suggestion)}
+                            >
+                                <div className="card-body p-2 sm:p-3 md:p-4">
+                                    <p className="card-title text-xs sm:text-sm md:text-base">{suggestion.title}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
