@@ -16,8 +16,8 @@ const AnimeCard = ({ anime, index }) => {
             <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-3 text-white">
                 {index}
             </span>
-            <div className="mt-6 flex items-center justify-center">
-                <h2 className="text-center text-lg font-semibold text-secondary">{anime.title}</h2>
+            <div className="mt-6 flex items-center justify-center pb-2">
+                <h2 className="text-center text-lg font-semibold text-secondary sm:text-xl">{anime.title}</h2>
             </div>
             <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
                 <div className="rounded-lg bg-primary p-2">
@@ -25,7 +25,7 @@ const AnimeCard = ({ anime, index }) => {
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="object-fit h-46 mb-2 w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                            className="object-fit h-auto w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl sm:h-48 md:h-64"
                         />
                     )}
                 </div>
@@ -42,11 +42,11 @@ const AnimeCard = ({ anime, index }) => {
                         </div>
                         <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Score:</span>{' '}
-                            {anime.score === 0 ? 'Unknown' : `${anime.score} /  10`}
+                            {anime.score === 0 ? 'Unknown' : `${anime.score} /   10`}
                         </div>
                     </div>
 
-                    <div className="mt-2 xs:flex lg:grid">
+                    <div className="mt-2 flex flex-wrap">
                         {anime.genres
                             .filter((g) => g !== 'Unknown')
                             .map((g) => (
