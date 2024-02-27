@@ -62,7 +62,7 @@ async function returnFilteredData(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
     const uniqueMapping = createMapping(uniqueValues);
 
-    const filteredData = {};
+    const filteredData = [];
 
     data.forEach((entry) => {
         const propertyValue = entry[property];
@@ -83,34 +83,31 @@ async function returnFilteredData(data, property) {
             propertyValue.forEach((value) => {
                 const mappingId = uniqueMapping[value];
                 if (mappingId !== undefined) {
-                    if (!filteredData[mappingId]) {
-                        filteredData[mappingId] = {
-                            key: value,
-                            values: [],
-                        };
+                    let existingObject = filteredData.find((obj) => obj.key === value);
+                    if (!existingObject) {
+                        existingObject = { key: value, values: [] };
+                        filteredData.push(existingObject);
                     }
 
-                    filteredData[mappingId].values.push(entry);
+                    existingObject.values.push(entry);
                 }
             });
         } else {
             const mappingId = uniqueMapping[propertyValue];
             if (mappingId !== undefined) {
-                if (!filteredData[mappingId]) {
-                    filteredData[mappingId] = {
-                        key: propertyValue,
-                        values: [],
-                    };
+                let existingObject = filteredData.find((obj) => obj.key === propertyValue);
+                if (!existingObject) {
+                    existingObject = { key: propertyValue, values: [] };
+                    filteredData.push(existingObject);
                 }
 
-                filteredData[mappingId].values.push(entry);
+                existingObject.values.push(entry);
             }
         }
     });
 
     return filteredData;
 }
-
 async function initializeDataFile() {
     const fileName = 'entries.json';
     const fileExists = await checkFileExists(fileName);
