@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useData } from '../../context/DataProvider';
 
 function LicensorsPage() {
     const { filteredLicensors } = useData();
@@ -13,4 +13,4 @@ function LicensorsPage() {
     );
 }
 
-export default LicensorsPage;
+export default React.memo(LicensorsPage);

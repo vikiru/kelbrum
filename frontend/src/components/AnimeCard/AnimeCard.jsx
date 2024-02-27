@@ -12,10 +12,7 @@ const AnimeCard = ({ anime, index }) => {
     }, [anime.imageURL]);
 
     return (
-        <div
-            key={anime.title}
-            className="card grid min-h-full min-w-[50%] max-w-full cursor-default rounded-lg bg-primary p-1"
-        >
+        <div key={anime.title} className="card min-h-full w-full cursor-default rounded-lg bg-primary p-1">
             <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-3 text-white">
                 {index}
             </span>
@@ -44,11 +41,12 @@ const AnimeCard = ({ anime, index }) => {
                             <span className="font-bold">Episodes:</span> {anime.episodes}
                         </div>
                         <div className="text-sm text-neutral sm:text-xs md:text-sm">
-                            <span className="font-bold">Score:</span> {anime.score} / 10
+                            <span className="font-bold">Score:</span>{' '}
+                            {anime.score === 0 ? 'Unknown' : `${anime.score} /  10`}
                         </div>
                     </div>
 
-                    <div className="xs:flex mt-2 lg:grid">
+                    <div className="mt-2 xs:flex lg:grid">
                         {anime.genres
                             .filter((g) => g !== 'Unknown')
                             .map((g) => (

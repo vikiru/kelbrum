@@ -73,10 +73,14 @@ const AnimeDetails = () => {
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
                             General Information
                         </h2>
-                        <div className="mt-4 grid gap-4 pb-4 xl:grid-cols-2">
+                        <div className="3xl:grid-cols-2 mt-4 grid gap-4 pb-4">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Type</h2>
                                 <p className="text-base text-neutral">{anime.type}</p>
+                            </div>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Source</h2>
+                                <p className="text-base text-neutral">{anime.source}</p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Season</h2>
@@ -113,7 +117,7 @@ const AnimeDetails = () => {
                     </div>
                 </div>
 
-                <div className="xs:hidden container mx-4 mt-14 lg:block">
+                <div className="container mx-4 mt-14 xs:hidden lg:block">
                     <figure>
                         {!hasError && (
                             <img
@@ -199,11 +203,22 @@ const AnimeDetails = () => {
                                     ))}
                                 </p>
                             </div>
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                                <h2 className="text-lg font-bold text-secondary">Synonyms</h2>
+                                <p className="text-base text-neutral">
+                                    {anime.titles.map((synonym, index) => (
+                                        <span key={index}>
+                                            {synonym}
+                                            <br />
+                                        </span>
+                                    ))}
+                                </p>
+                            </div>
                         </div>
                     </div>
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Statistics</h2>
-                        <div className="xs:stats-vertical stats w-full bg-base-200 shadow xl:stats-horizontal xl:w-auto">
+                        <div className="stats w-full bg-base-200 shadow xs:stats-vertical xl:stats-horizontal xl:w-auto">
                             <div className="stat">
                                 <div className="stat-title text-secondary">Rank</div>
                                 <div className="stat-value text-xl font-medium text-neutral">
@@ -260,7 +275,6 @@ const AnimeDetails = () => {
                     </div>
                 </div>
             </div>
-
             <div>
                 <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">
                     Unique Random Suggestions

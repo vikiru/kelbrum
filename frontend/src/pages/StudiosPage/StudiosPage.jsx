@@ -13,4 +13,4 @@ function StudiosPage() {
     );
 }
 
-export default StudiosPage;
+export default React.memo(StudiosPage);

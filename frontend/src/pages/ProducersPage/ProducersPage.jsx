@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useData } from '../../context/DataProvider';
 
 function ProducersPage() {
     const { filteredProducers } = useData();
@@ -13,4 +13,4 @@ function ProducersPage() {
     );
 }
 
-export default ProducersPage;
+export default React.memo(ProducersPage);

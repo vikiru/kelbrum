@@ -4,32 +4,64 @@ import { Link } from 'react-router-dom';
 function Footer() {
     return (
         <div>
-            <footer className="footer bg-neutral p-10 text-neutral-content">
+            <footer className="footer grid bg-neutral p-10 text-neutral-content lg:grid-cols-2">
                 <nav>
-                    <h6 className="footer-title text-xl">Features</h6>
+                    <h6 className="footer-title text-xl">Discover</h6>
+                    <Link to="#" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
+                        Get recommendations for an anime
+                    </Link>
+                    <Link to="#" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
+                        View top 100 anime
+                    </Link>
+                    <Link to="#" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
+                        View random anime
+                    </Link>
+                    <Link to="/search" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
+                        Search for an anime
+                    </Link>
+                </nav>
+                <nav>
+                    <h6 className="footer-title text-xl">Information</h6>
+
                     <Link
-                        to="/topAnime"
+                        to="/anime/genres"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link-hover link text-lg capitalize"
+                        className="link-hover link text-lg"
                     >
-                        View the top 100 Anime
+                        View all genres
                     </Link>
                     <Link
-                        to="/search"
+                        to="/anime/licensors"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link-hover link text-lg capitalize"
+                        className="link-hover link text-lg"
                     >
-                        Search Anime
+                        View all licensors
                     </Link>
                     <Link
-                        to="/recommendations"
+                        to="/anime/studios"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="link-hover link text-lg capitalize"
+                        className="link-hover link text-lg"
                     >
-                        Get anime recommendations
+                        View all studios
+                    </Link>
+                    <Link
+                        to="/anime/producers"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-hover link text-lg"
+                    >
+                        View all producers
+                    </Link>
+                    <Link
+                        to="/anime/seasons"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-hover link text-lg"
+                    >
+                        View all seasons
                     </Link>
                 </nav>
                 <nav>
@@ -65,7 +97,6 @@ function Footer() {
                     &copy; {new Date().getFullYear()} Placeholder Name, built by vikiru. All images and text belong to
                     their rightful owners.
                     <span>Built with React, TailwindCSS, and DaisyUI.</span>
-                    <span></span>
                 </div>
             </footer>
         </div>

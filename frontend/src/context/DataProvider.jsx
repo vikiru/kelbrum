@@ -12,6 +12,7 @@ const DataContext = createContext();
 export const DataProvider = ({ children }) => {
     const [processedData, setProcessedData] = useState({
         filteredGenres: [],
+        filteredThemes: [],
         filteredDemographics: [],
         filteredProducers: [],
         filteredStudios: [],
@@ -22,6 +23,7 @@ export const DataProvider = ({ children }) => {
     useEffect(() => {
         const processData = async () => {
             const filteredGenres = await returnFilteredData(data, 'genres');
+            const filteredThemes = await returnFilteredData(data, 'themes');
             const filteredDemographics = await returnFilteredData(data, 'demographics');
             const filteredProducers = await returnFilteredData(data, 'producers');
             const filteredStudios = await returnFilteredData(data, 'studios');
@@ -30,6 +32,7 @@ export const DataProvider = ({ children }) => {
 
             setProcessedData({
                 filteredGenres,
+                filteredThemes,
                 filteredDemographics,
                 filteredProducers,
                 filteredStudios,
