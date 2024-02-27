@@ -7,17 +7,11 @@ function Footer() {
             <footer className="footer grid bg-neutral p-10 text-neutral-content lg:grid-cols-2">
                 <nav>
                     <h6 className="footer-title text-xl">Discover</h6>
-                    <Link to="#" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
-                        Get recommendations for an anime
-                    </Link>
-                    <Link to="#" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
-                        View top 100 anime
-                    </Link>
-                    <Link to="#" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
-                        View random anime
-                    </Link>
                     <Link to="/search" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
                         Search for an anime
+                    </Link>
+                    <Link to="/anime/top" target="_blank" rel="noopener noreferrer" className="link-hover link text-lg">
+                        View top 100 anime
                     </Link>
                 </nav>
                 <nav>
