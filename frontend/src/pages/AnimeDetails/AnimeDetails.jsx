@@ -104,13 +104,13 @@ const AnimeDetails = () => {
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Episodes</h2>
                                 <p className="text-base text-neutral">
-                                    {anime.episodes === '0' ? 'Unknown' : anime.episodes}
+                                    {anime.episodes === 0 ? 'Unknown' : anime.episodes}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Score</h2>
                                 <p className="text-base text-neutral">
-                                    {anime.score === '0' ? 'Unknown' : `${anime.score} /  10`}
+                                    {anime.score === 0 ? 'Unknown' : `${anime.score} /  10`}
                                 </p>
                             </div>
                         </div>
@@ -222,13 +222,13 @@ const AnimeDetails = () => {
                             <div className="stat">
                                 <div className="stat-title text-secondary">Rank</div>
                                 <div className="stat-value text-xl font-medium text-neutral">
-                                    # {anime.rank === 0 ? 'Unknown' : anime.rank}
+                                    {anime.rank === 0 ? 'Unknown' : `# ${anime.rank}`}
                                 </div>
                             </div>
                             <div className="stat">
                                 <div className="stat-title text-secondary">Popularity</div>
                                 <div className="stat-value text-xl font-medium text-neutral">
-                                    # {anime.popularity === 0 ? 'Unknown' : anime.popularity}
+                                    {anime.popularity === 0 ? 'Unknown' : `# ${anime.popularity}`}
                                 </div>
                             </div>
                             <div className="stat">

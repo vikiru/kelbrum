@@ -1,5 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 function NavBar() {
     return (
@@ -45,7 +45,7 @@ function NavBar() {
                 <a className="btn btn-ghost text-xl">AnimeReccomendation</a>
             </div>
             <div className="navbar-end">
-                <Link to="/search" target="_blank" rel="noopener noreferrer">
+                <Link to="/anime/search">
                     <button className="btn btn-circle btn-ghost">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
