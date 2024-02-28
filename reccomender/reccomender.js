@@ -137,5 +137,4 @@ async function main() {
     }
 }
 
-main();
 export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };

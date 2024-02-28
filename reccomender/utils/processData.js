@@ -1,7 +1,6 @@
-import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
-
 import { AnimeEntry } from '../models/AnimeEntry.js';
 import { UserInteraction } from '../models/UserInteraction.js';
+import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
 
 function parseOrDefault(value, defaultValue = 0, type = 'int') {
     if (type === 'int') {

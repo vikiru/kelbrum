@@ -3,6 +3,12 @@ import * as ss from 'simple-statistics';
 
 import { returnUniqueArray, writeData } from './utils.js';
 
+/**
+ * Create a mapping of unique values to integers, starting from 0.
+ *
+ * @param {Array} uniqueValues - The array of unique values
+ * @returns {Object} The mapping of unique values to integers
+ */
 function createMapping(uniqueValues) {
     const unknownCheck = uniqueValues.filter((v) => v === 'Unknown').length;
     const filteredValues = uniqueValues.filter((v) => v !== 'Unknown');
@@ -20,6 +26,14 @@ function createMapping(uniqueValues) {
     return mapping;
 }
 
+/**
+ * Fills an array based on the given data, mapping, and key.
+ *
+ * @param {Array} data - The input data array
+ * @param {Object} mapping - The mapping object
+ * @param {string} key - The key to access the value in each data entry
+ * @returns {Array} An array filled based on the mapping and key
+ */
 function fillArray(data, mapping, key) {
     const array = [];
     data.forEach((entry) => {
@@ -36,6 +50,13 @@ function fillArray(data, mapping, key) {
     return array;
 }
 
+/**
+ * Calculate the median and mode of the given values.
+ *
+ * @param {Array} values - The array of values to calculate median and mode.
+ * @param {boolean} isCategorical - Indicates if the values are categorical or not.
+ * @returns {Object} An object containing the median and mode values.
+ */
 function returnMedianMode(values, isCategorical) {
     let median, mode;
 
@@ -62,6 +83,15 @@ function returnMedianMode(values, isCategorical) {
     return { median, mode };
 }
 
+/**
+ * Constructs a frequency map based on the data and mapping provided, using the specified key.
+ *
+ * @param {Array} data - The data to be used for constructing the frequency map.
+ * @param {Object} mapping - The mapping object that maps values to their corresponding keys.
+ * @param {string} key - The key to be used for constructing the frequency map.
+ * @returns {Array} An array containing objects with the value and its occurrences, along with the count of invalid
+ *   values.
+ */
 function constructFrequencyMap(data, mapping, key) {
     const valuesArray = fillArray(data, mapping, key);
     const frequencyMap = [];
@@ -86,6 +116,12 @@ function constructFrequencyMap(data, mapping, key) {
     return frequencyMap;
 }
 
+/**
+ * Asynchronously calculates various statistical properties for the given data.
+ *
+ * @param {Array} data - The input data array to calculate statistics for.
+ * @returns {Array} An array of objects containing statistical properties for each key in the input data.
+ */
 async function calculateStatistics(data) {
     try {
         const firstElement = data[0];

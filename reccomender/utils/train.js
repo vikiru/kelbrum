@@ -1,23 +1,34 @@
-import { distance, similarity } from 'ml-distance';
 import { kmeans } from 'ml-kmeans';
-import path from 'path';
 import * as ss from 'simple-statistics';
-import { fileURLToPath } from 'url';
 
-import { createFeatureTensor } from './normalize.js';
+import { distance, similaror } from './normalize.js';
 import { checkFileExists, readJSONFile } from './readFile.js';
-import { initializeDataFile } from './utils.js';
 import { writeData } from './writeFile.js';
 
 let dirname;
 let __filename, __dirname;
 
+let fs, path, url;
+
 if (typeof window === 'undefined') {
+    fs = require('fs/promises');
+    path = require('path');
+    url = require('url');
     dirname = path.dirname;
-    __filename = fileURLToPath(import.meta.url);
+    __filename = url.fileURLToPath(import.meta.url);
     __dirname = dirname(__filename);
 }
 
+/**
+ * Asynchronously computes the optimal value of k for k-means clustering using the given feature array, maximum value of
+ * k, distance function, and file name.
+ *
+ * @param {Array} featureArray - The array of feature vectors
+ * @param {number} max - The maximum value of k
+ * @param {Function} distanceFunction - The function to compute distance between feature vectors
+ * @param {string} fileName - The name of the file for writing data
+ * @returns {Promise<Object>} An object containing the optimal value of k and the silhouette score
+ */
 async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
     const results = [];
     for (let k = 2; k <= max; k++) {
@@ -45,6 +56,14 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
     return { optimalK, optimalS };
 }
 
+/**
+ * Asynchronously returns a KMeans model based on the provided feature array, number of clusters, and distance function.
+ *
+ * @param {Array} featureArray - The array of features used for training the model
+ * @param {number} k - The number of clusters
+ * @param {Function} distanceFunction - The distance function used for clustering
+ * @returns {Promise<Object>} The KMeans model
+ */
 async function returnKmeansModel(featureArray, k, distanceFunction) {
     const modelFileName = 'kmeans.json';
     const modelFilePath = path.resolve(__dirname, `../data/${modelFileName}`);
@@ -64,4 +83,5 @@ async function returnKmeansModel(featureArray, k, distanceFunction) {
         return kmeansModel;
     }
 }
+
 export { returnOptimalK, returnKmeansModel };

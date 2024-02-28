@@ -1,17 +1,19 @@
 import { Buffer } from 'buffer';
-import fs from 'fs';
 import Papa from 'papaparse';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 import { processAnimeData, processUserInteractionData } from './processData.js';
 
 let dirname;
 let __filename, __dirname;
 
+let fs, path, url;
+
 if (typeof window === 'undefined') {
+    fs = require('fs/promises');
+    path = require('path');
+    url = require('url');
     dirname = path.dirname;
-    __filename = fileURLToPath(import.meta.url);
+    __filename = url.fileURLToPath(import.meta.url);
     __dirname = dirname(__filename);
 }
 

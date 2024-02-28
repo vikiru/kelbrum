@@ -12,13 +12,13 @@ This project was bootstraped using [Create React App via Vite.js](https://vitejs
 
 ## 📖 Table of Contents
 
-- [📖 Table of Contents](#-table-of-contents)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [📝 Prerequisites](#-prerequisites)
-- [⚡ Setup Instructions](#-setup-instructions)
-- [📜 Available Scripts](#-available-scripts)
-- [✨ Acknowledgements](#-acknowledgements)
-- [©️ License](#️-license)
+-   [📖 Table of Contents](#-table-of-contents)
+-   [🛠️ Tech Stack](#️-tech-stack)
+-   [📝 Prerequisites](#-prerequisites)
+-   [⚡ Setup Instructions](#-setup-instructions)
+-   [📜 Available Scripts](#-available-scripts)
+-   [✨ Acknowledgements](#-acknowledgements)
+-   [©️ License](#️-license)
 
 ## 🛠️ Tech Stack
 

@@ -21,13 +21,25 @@ const DataProvider = ({ children }) => {
 
     useEffect(() => {
         const processData = async () => {
-            const filteredGenres = await returnFilteredData(data, 'genres');
-            const filteredThemes = await returnFilteredData(data, 'themes');
-            const filteredDemographics = await returnFilteredData(data, 'demographics');
-            const filteredProducers = await returnFilteredData(data, 'producers');
-            const filteredStudios = await returnFilteredData(data, 'studios');
-            const filteredLicensors = await returnFilteredData(data, 'licensors');
-            const filteredSeasons = await returnFilteredData(data, 'premiered');
+            const promises = [
+                returnFilteredData(data, 'genres'),
+                returnFilteredData(data, 'themes'),
+                returnFilteredData(data, 'demographics'),
+                returnFilteredData(data, 'producers'),
+                returnFilteredData(data, 'studios'),
+                returnFilteredData(data, 'licensors'),
+                returnFilteredData(data, 'premiered'),
+            ];
+
+            const [
+                filteredGenres,
+                filteredThemes,
+                filteredDemographics,
+                filteredProducers,
+                filteredStudios,
+                filteredLicensors,
+                filteredSeasons,
+            ] = await Promise.all(promises);
 
             setProcessedData({
                 filteredGenres,

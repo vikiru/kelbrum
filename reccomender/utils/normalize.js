@@ -3,12 +3,13 @@ import * as tf from '@tensorflow/tfjs';
 import { calculateStatistics, createMapping } from './stats.js';
 import { returnUniqueArray, sortData } from './utils.js';
 
-function jaccardSimilarity(setA, setB) {
-    const intersection = new Set([...setA].filter((x) => setB.has(x)));
-    const union = new Set([...setA, ...setB]);
-    return intersection.size / union.size;
-}
-
+/**
+ * Encodes the combination of data based on the given property using a unique value mapping.
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property to encode the combination on
+ * @returns {Array} The encoded combination array
+ */
 function encodeCombination(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
     const mapping = createMapping(uniqueValues);
@@ -51,6 +52,13 @@ function encodeCategorical(data, property) {
     });
 }
 
+/**
+ * Encodes the given property in the data array as ordinal values.
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property to be encoded
+ * @returns {Array} The encoded array
+ */
 function ordinalEncode(data, property) {
     const uniqueValues = sortData(returnUniqueArray(data, property, ['Unknown']));
     return data.map((entry) => {
@@ -61,6 +69,13 @@ function ordinalEncode(data, property) {
     });
 }
 
+/**
+ * Scales the given data based on the specified property to a range of [0, 1].
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property to be used for scaling
+ * @returns {Array} The scaled data array
+ */
 function minMaxScale(data, property) {
     const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
     const minValue = Math.min(...uniqueValues);
@@ -76,6 +91,14 @@ function minMaxScale(data, property) {
     });
 }
 
+/**
+ * Scales the given data based on the specified property using robust scaling.
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property to be used for scaling
+ * @param {Array} stats - The statistical information for the property
+ * @returns {Array} The scaled values based on robust scaling
+ */
 function robustScale(data, property, stats) {
     const values = data.map((d) => d[property]);
     const valueStats = stats.find((s) => s.property === property);
@@ -92,6 +115,13 @@ function robustScale(data, property, stats) {
     });
 }
 
+/**
+ * Multi-hot encodes the data based on the specified property.
+ *
+ * @param {Array} data - The input data array.
+ * @param {string} property - The property to perform encoding on.
+ * @returns {Array} - The multi-hot encoded array.
+ */
 function multiHotEncode(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
     return data.map((entry) => {
@@ -99,6 +129,12 @@ function multiHotEncode(data, property) {
     });
 }
 
+/**
+ * Normalizes categorical data to a range between 0 and 1.
+ *
+ * @param {Array} data - The array of categorical data to be normalized
+ * @returns {Array} - The normalized data array
+ */
 function normalizeCategorical(data) {
     const uniqueValues = Array.from(new Set(data.map((d) => d)));
     const minValue = Math.min(...uniqueValues);
@@ -113,6 +149,12 @@ function normalizeCategorical(data) {
     });
 }
 
+/**
+ * Check if the array is 1D or 2D.
+ *
+ * @param {Array} arr - The input array to be checked
+ * @returns {string} The dimension of the array, either '1D' or '2D'
+ */
 function checkArrayDimension(arr) {
     if (arr.some((item) => Array.isArray(item))) {
         return '2D';
@@ -121,6 +163,12 @@ function checkArrayDimension(arr) {
     }
 }
 
+/**
+ * Asynchronously creates a feature tensor based on the given data.
+ *
+ * @param {array} data - The input data to create the feature tensor
+ * @returns {Tensor} The concatenated feature tensor
+ */
 async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const normalizationFunctions = [
@@ -175,8 +223,14 @@ async function createFeatureTensor(data) {
     return concatenatedTensor;
 }
 
+/**
+ * Calculate the variance of each feature in the given data.
+ *
+ * @param {number[][]} data - The input data containing features
+ * @returns {number[]} An array containing the variance of each feature
+ */
 function calculateFeatureVariance(data) {
-    const length = 11925;
+    const length = data.length;
     const numFeatures = data[0].length;
     const featureVariances = Array(numFeatures).fill(0);
     const sums = Array(numFeatures).fill(0);
@@ -197,6 +251,12 @@ function calculateFeatureVariance(data) {
     return variances;
 }
 
+/**
+ * Validates an array of tensors for NaN values and logs an error if NaN values are found.
+ *
+ * @param {Array} tensors - The array of tensors to be validated
+ * @returns {void}
+ */
 function validateTensors(tensors) {
     tensors.forEach((tensor, index) => {
         const hasNaN = tf.tidy(() => {
@@ -211,7 +271,6 @@ function validateTensors(tensors) {
 }
 
 export {
-    jaccardSimilarity,
     minMaxScale,
     multiHotEncode,
     ordinalEncode,
