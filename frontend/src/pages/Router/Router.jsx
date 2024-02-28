@@ -2,10 +2,10 @@ import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import Home from '../Home/Home';
-import InfinitePagination from '../InfinitePagination/InfinitePagination';
 import Footer from './../../components/Footer/Footer';
 import NavBar from './../../components/NavBar/NavBar';
 
+const InfinitePagination = React.lazy(() => import('../InfinitePagination/InfinitePagination'));
 const AnimeDetails = React.lazy(() => import('../AnimeDetails/AnimeDetails'));
 const TopAnimePage = React.lazy(() => import('../TopAnimePage/TopAnimePage'));
 const SearchAnime = React.lazy(() => import('../SearchAnime/SearchAnime'));

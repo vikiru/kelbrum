@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import data from '../../../reccomender/data/entries.json';
 import featureArray from '../../../reccomender/data/featureArray.json';
@@ -43,13 +43,16 @@ const DataProvider = ({ children }) => {
         processData();
     }, [data]);
 
-    const state = {
-        ...processedData,
-        data: data,
-        featureArray: featureArray,
-        kmeans: kmeans,
-        titleIDMap: titleIDMap,
-    };
+    const state = useMemo(
+        () => ({
+            ...processedData,
+            data: data,
+            featureArray: featureArray,
+            kmeans: kmeans,
+            titleIDMap: titleIDMap,
+        }),
+        [processedData, data, featureArray, kmeans, titleIDMap],
+    );
 
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;
 };
