@@ -1,6 +1,7 @@
 import { cleanDuration, cleanPremiered, cleanRating } from './clean.js';
 import { handleMissingData } from './fetchData.js';
 import { checkFileExists, readAndProcessFile } from './readFile.js';
+import { createMapping } from './stats.js';
 import { writeData } from './writeFile.js';
 
 function findMax(data, property) {
@@ -57,10 +58,31 @@ async function constructDataFile() {
     return filteredData;
 }
 
+async function returnFilteredData(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    const result = uniqueValues.map((value) => {
+        const filteredData = data.filter((d) => {
+            if (Array.isArray(d[property])) {
+                if (d[property].length === 0) {
+                    return value === 'Unknown';
+                }
+                return d[property].includes(value);
+            }
+            return d[property] === value;
+        });
+
+        return {
+            key: value,
+            values: filteredData,
+        };
+    });
+
+    return result;
+}
+
 async function initializeDataFile() {
     const fileName = 'entries.json';
     const fileExists = await checkFileExists(fileName);
-    console.log(fileExists);
 
     if (!fileExists) {
         console.log(`The file '${fileName}' does not exist. Constructing data files...`);
@@ -83,4 +105,5 @@ export {
     returnUniqueArray,
     constructDataFile,
     initializeDataFile,
+    returnFilteredData,
 };

@@ -39,6 +39,13 @@ const config = {
         logs: true,
         themeRoot: ':root',
     },
+    theme: {
+        extend: {
+            screens: {
+                xs: '300px',
+            },
+        },
+    },
     plugins: [require('daisyui'), require('tailwind-scrollbar')],
 };
 
