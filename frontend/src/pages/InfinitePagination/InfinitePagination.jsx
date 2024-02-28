@@ -1,20 +1,70 @@
-import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import AnimeCard from '../../components/AnimeCard/AnimeCard';
 import { useData } from '../../context/DataProvider';
-import AnimeCard from './../../components/AnimeCard/AnimeCard';
 
 const InfinitePagination = () => {
-    const { path, id } = useParams();
-    const index = id - 1;
+    const { id } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const parentPathSegments = location.pathname.split('/');
+    const parentPath = parentPathSegments[2];
+    const {
+        filteredGenres,
+        filteredThemes,
+        filteredDemographics,
+        filteredProducers,
+        filteredStudios,
+        filteredLicensors,
+        filteredSeasons,
+    } = useData();
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const pageParam = searchParams.get('page');
+        const page = pageParam ? parseInt(pageParam, 10) : 1;
+        setCurrentPage(page);
+    }, [location.search]);
+
+    let data;
+    switch (parentPath) {
+        case 'genres':
+            data = filteredGenres[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        case 'themes':
+            data = filteredThemes[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        case 'demographics':
+            data = filteredDemographics[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        case 'producers':
+            data = filteredProducers[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        case 'studios':
+            data = filteredStudios[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        case 'licensors':
+            data = filteredLicensors[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        case 'seasons':
+            data = filteredSeasons[id ? parseInt(id, 10) - 1 : 0];
+            break;
+        default:
+            data = null;
+    }
 
     const [items, setItems] = useState([]);
     const [hasMore, setHasMore] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [chunks, setChunks] = useState(0);
     const itemsPerPage = 50;
     const itemsPerFetch = 10;
+
+    const title = `Top ${parentPath} Anime`;
+    const sortedData = data.values.sort((a, b) => b.score - a.score);
 
     useEffect(() => {
         const allItemsLoaded = items.length >= sortedData.length;
@@ -22,13 +72,13 @@ const InfinitePagination = () => {
     }, [items, sortedData.length]);
 
     const fetchAnimeItems = () => {
-        const startIndex = (currentPage - 1) * itemsPerFetch;
-        const endIndex = startIndex + itemsPerFetch;
+        const startIndex = (currentPage - 1) * itemsPerPage + chunks;
+
+        const endIndex = Math.min(startIndex + itemsPerFetch, sortedData.length);
+
         const newItems = sortedData.slice(startIndex, endIndex);
 
-        if (newItems.length === 0 || items.length + newItems.length >= itemsPerPage) {
-            setHasMore(false);
-        }
+        setChunks((prevChunks) => prevChunks + itemsPerFetch);
 
         return newItems;
     };
@@ -38,33 +88,25 @@ const InfinitePagination = () => {
             setHasMore(false);
             return;
         }
-
+        setChunks((prevChunks) => prevChunks + itemsPerFetch);
         const newItems = fetchAnimeItems();
         setItems((prevItems) => [...prevItems, ...newItems]);
     };
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
+        setChunks(0);
+        navigate(`?page=${newPage}`);
         const newItems = fetchAnimeItems();
         setItems(newItems);
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-        });
     };
-
-    useEffect(() => {
-        const initialItems = fetchAnimeItems();
-        setItems(initialItems);
-    }, [currentPage]);
 
     return (
         <div className="bg-secondary pb-6">
             <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold text-primary underline">{title}</h2>
             <InfiniteScroll
                 pageStart={0}
-                loadMore={debounce(fetchMoreData, 1000)}
+                loadMore={fetchMoreData}
                 hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
@@ -74,8 +116,8 @@ const InfinitePagination = () => {
             >
                 <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2">
                     {items.map((item, index) => {
-                        const globalIndex = (currentPage - 1) * itemsPerFetch + index + 1;
-                        return <AnimeCard key={item.id} anime={item} index={globalIndex} />;
+                        const globalIndex = (currentPage - 1) * itemsPerPage + chunks + index + 1;
+                        return <AnimeCard key={item.title} anime={item} index={globalIndex} />;
                     })}
                 </div>
             </InfiniteScroll>
