@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
-import DataList from './../../components/DataList/DataList';
 import { useData } from '../../context/DataProvider';
+import DataList from './../../components/DataList/DataList';
 
 function SeasonsPage() {
     const { filteredSeasons } = useData();
-    console.log(filteredSeasons);
+    const location = useLocation();
+    const isSeasonDetailPage = location.pathname === '/anime/seasons';
 
     const compareSeasons = useMemo(() => {
         const seasons = ['spring', 'summer', 'fall', 'winter'];
@@ -45,17 +47,18 @@ function SeasonsPage() {
         }));
     }, [filteredSeasons]);
 
-    console.log(groupBySeason);
-
     return (
         <div className="min-h-screen bg-secondary pb-16">
-            <DataList
-                title="Seasons"
-                data={filteredSeasons}
-                path="seasons"
-                customSort={compareSeasons}
-                capitalizeTitle={true}
-            />
+            {isSeasonDetailPage && (
+                <DataList
+                    title="Seasons"
+                    data={filteredSeasons}
+                    path="seasons"
+                    customSort={compareSeasons}
+                    capitalizeTitle={true}
+                />
+            )}
+            <Outlet />
         </div>
     );
 }

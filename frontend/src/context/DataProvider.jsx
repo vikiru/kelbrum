@@ -4,12 +4,11 @@ import data from '../../../reccomender/data/entries.json';
 import featureArray from '../../../reccomender/data/featureArray.json';
 import kmeans from '../../../reccomender/data/kmeans.json';
 import titleIDMap from '../../../reccomender/data/titleIDMap.json';
-import { createMapping } from '../../../reccomender/utils/stats';
-import { returnFilteredData, returnUniqueArray } from '../../../reccomender/utils/utils';
+import { returnFilteredData } from '../../../reccomender/utils/utils';
 
 const DataContext = createContext();
 
-export const DataProvider = ({ children }) => {
+const DataProvider = ({ children }) => {
     const [processedData, setProcessedData] = useState({
         filteredGenres: [],
         filteredThemes: [],
@@ -55,6 +54,6 @@ export const DataProvider = ({ children }) => {
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;
 };
 
-export const useData = () => useContext(DataContext);
+const useData = () => useContext(DataContext);
 
-export default DataProvider;
+export { DataProvider, useData };

@@ -1,16 +1,24 @@
+import { Outlet, useLocation } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useData } from '../../context/DataProvider';
 
 function GenresPage() {
     const { filteredGenres, filteredThemes, filteredDemographics } = useData();
+    const location = useLocation();
+    const isGenreDetailPage = location.pathname === '/anime/genres';
 
     return (
         <div className="min-h-screen bg-secondary pb-16">
-            <DataList title="Genres" data={filteredGenres} path="genres" />
-            <DataList title="Themes" data={filteredThemes} path="themes" />
-            <DataList title="Demographics" data={filteredDemographics} path="demographics" />
+            {isGenreDetailPage && (
+                <>
+                    <DataList title="Genres" data={filteredGenres} path="genres" />
+                    <DataList title="Themes" data={filteredThemes} path="themes" />
+                    <DataList title="Demographics" data={filteredDemographics} path="demographics" />
+                </>
+            )}
+            <Outlet />
         </div>
     );
 }

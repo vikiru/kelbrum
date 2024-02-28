@@ -35,6 +35,7 @@ const InfinitePagination = () => {
         const page = pageParam ? parseInt(pageParam, 10) : 1;
         setCurrentPage(page);
     }, [location.search]);
+
     let data;
     switch (parentPath) {
         case 'genres':
@@ -129,7 +130,7 @@ const InfinitePagination = () => {
                             «
                         </button>
                         <button className="btn join-item" onClick={() => handlePageChange(currentPage)}>
-                            Page {currentPage}
+                            Page {currentPage} of {totalPages}
                         </button>
                         <button
                             className="btn join-item"
@@ -145,4 +146,4 @@ const InfinitePagination = () => {
     );
 };
 
-export default InfinitePagination;
+export default React.memo(InfinitePagination);

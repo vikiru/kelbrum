@@ -60,54 +60,26 @@ async function constructDataFile() {
 
 async function returnFilteredData(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
-    const uniqueMapping = createMapping(uniqueValues);
-
-    const filteredData = [];
-
-    data.forEach((entry) => {
-        const propertyValue = entry[property];
-        const type = Array.isArray(propertyValue) ? 'array' : 'single';
-
-        if (type === 'array') {
-            if (propertyValue.length === 0) {
-                const lastId = Object.keys(uniqueMapping).reduce(
-                    (maxId, key) => Math.max(maxId, uniqueMapping[key]),
-                    -1,
-                );
-                const unknownId = lastId + 1;
-                const unknownKey = 'Unknown';
-                uniqueMapping[unknownKey] = unknownId;
-                propertyValue.push(unknownKey);
-            }
-
-            propertyValue.forEach((value) => {
-                const mappingId = uniqueMapping[value];
-                if (mappingId !== undefined) {
-                    let existingObject = filteredData.find((obj) => obj.key === value);
-                    if (!existingObject) {
-                        existingObject = { key: value, values: [] };
-                        filteredData.push(existingObject);
-                    }
-
-                    existingObject.values.push(entry);
+    const result = uniqueValues.map((value) => {
+        const filteredData = data.filter((d) => {
+            if (Array.isArray(d[property])) {
+                if (d[property].length === 0) {
+                    return value === 'Unknown';
                 }
-            });
-        } else {
-            const mappingId = uniqueMapping[propertyValue];
-            if (mappingId !== undefined) {
-                let existingObject = filteredData.find((obj) => obj.key === propertyValue);
-                if (!existingObject) {
-                    existingObject = { key: propertyValue, values: [] };
-                    filteredData.push(existingObject);
-                }
-
-                existingObject.values.push(entry);
+                return d[property].includes(value);
             }
-        }
+            return d[property] === value;
+        });
+
+        return {
+            key: value,
+            values: filteredData,
+        };
     });
 
-    return filteredData;
+    return result;
 }
+
 async function initializeDataFile() {
     const fileName = 'entries.json';
     const fileExists = await checkFileExists(fileName);
