@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import SearchBar from './../../components/SearchBar/SearchBar';
+import { useData } from '../../context/DataProvider';
 
 const SearchAnime = () => {
     const { titleIDMap } = useData();
     const fields = ['title', 'synonyms'];
+
+    useEffect(() => {
+        window.scrollBy(0, 50);
+    }, []);
 
     return (
         <div>
@@ -17,4 +21,4 @@ const SearchAnime = () => {
     );
 };
 
-export default SearchAnime;
+export default React.memo(SearchAnime);

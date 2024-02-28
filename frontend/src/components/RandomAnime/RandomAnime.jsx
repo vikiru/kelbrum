@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
-import { shuffleRandom } from '../../../../reccomender/reccomender';
 import AnimeCard from '../AnimeCard/AnimeCard';
+import { Link } from 'react-router-dom';
+import { shuffleRandom } from '../../../../reccomender/reccomender';
 
 const RandomAnime = ({ allAnime }) => {
     shuffleRandom(allAnime);
@@ -30,4 +30,4 @@ const RandomAnime = ({ allAnime }) => {
     );
 };
 
-export default RandomAnime;
+export default React.memo(RandomAnime);

@@ -32,7 +32,7 @@ function returnUniqueArray(data, property, filter = []) {
 }
 
 function filterAnimeData(data) {
-    const excludedTypes = ['ONA', 'OVA', 'Special', 'Music', 'PV', 'TV Special'];
+    const excludedTypes = ['OVA', 'Special', 'Music', 'PV', 'TV Special'];
     const excludedGenres = ['Erotica', 'Hentai'];
     const filteredData = data.filter((d) => {
         return !excludedTypes.includes(d.type) && !d.genres.some((genre) => excludedGenres.includes(genre));
