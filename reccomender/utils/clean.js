@@ -5,6 +5,12 @@ const seasons = [
     { name: 'winter', months: ['Jan', 'Feb', 'Mar'] },
 ];
 
+/**
+ * Finds the seasonal year by the aired text.
+ *
+ * @param {string} text - The text to search for seasonal year.
+ * @returns {Object} An object containing the seasonal name and year.
+ */
 function findSeasonalYearByAired(text) {
     if (text === 'Not available') {
         return {
@@ -13,7 +19,6 @@ function findSeasonalYearByAired(text) {
         };
     }
 
-    // Updated regex to include optional day and month format
     const regex = /(?:([a-zA-Z]+)\s*(\d{4})|(\d{4})\s*to\s*(\d{4})?|(\d{4})|([a-zA-Z]{3})\s*(\d{1,2}),\s*(\d{4}))/i;
     const matches = text.match(regex);
     if (!matches) {
@@ -41,6 +46,12 @@ function findSeasonalYearByAired(text) {
     };
 }
 
+/**
+ * Function to find seasonal year based on the premiered text.
+ *
+ * @param {string} text - The premiered text
+ * @returns {Object} Object containing the season and year
+ */
 function findSeasonalYearByPremiered(text) {
     if (text.toLowerCase() === 'unknown') {
         return {
@@ -57,6 +68,13 @@ function findSeasonalYearByPremiered(text) {
     }
 }
 
+/**
+ * Finds the seasonal year based on the premiered and aired dates.
+ *
+ * @param {string} premiered - The premiered date of the show
+ * @param {string} aired - The aired date of the show
+ * @returns {object} Object with the season and year of the show
+ */
 function findSeasonalYear(premiered, aired) {
     if (premiered !== 'Unknown') {
         return findSeasonalYearByPremiered(premiered);
@@ -67,6 +85,12 @@ function findSeasonalYear(premiered, aired) {
     return { season: 'Unknown', year: 'Unknown' };
 }
 
+/**
+ * Cleans the rating text by replacing 'UNKNOWN' with 'Unknown' and returning the first word of any other text.
+ *
+ * @param {string} text - The input text to be cleaned
+ * @returns {string} The cleaned rating text
+ */
 function cleanRating(text) {
     if (text === 'UNKNOWN') {
         return text.replace(text, 'Unknown');
@@ -75,6 +99,12 @@ function cleanRating(text) {
     }
 }
 
+/**
+ * Cleans the input text by extracting duration information and converting it to total minutes.
+ *
+ * @param {string} text - The input text to be cleaned and processed for duration information.
+ * @returns {number} The total duration in minutes extracted from the input text.
+ */
 function cleanDuration(text) {
     if (text === 'Unknown' || typeof text !== 'string') {
         return text;
@@ -99,10 +129,17 @@ function cleanDuration(text) {
             }
         }
     }
-    const totalMinutes = hours * 60 + minutes + Math.round(seconds / 60); // Keep precision down to the second
+    const totalMinutes = hours * 60 + minutes + Math.round(seconds / 60);
     return totalMinutes;
 }
 
+/**
+ * Cleans the input array by splitting it, removing 'UNKNOWN' strings, trimming white spaces, and filtering empty
+ * strings.
+ *
+ * @param {string} array - The input array to be cleaned
+ * @returns {array} The cleaned array
+ */
 function cleanArray(array) {
     const cleanedArray = array
         .split(',')
@@ -112,6 +149,15 @@ function cleanArray(array) {
     return cleanedArray;
 }
 
+/**
+ * Cleans the premiered value based on the season and year, or returns the original premiered value if season or year is
+ * 'Unknown' or undefined.
+ *
+ * @param {string} premiered - The original premiered value
+ * @param {string} season - The season value
+ * @param {string} year - The year value
+ * @returns {string} The cleaned premiered value or the original premiered value
+ */
 function cleanPremiered(premiered, season, year) {
     if (season !== undefined && season !== 'Unknown' && year !== undefined && year !== 'Unknown') {
         return `${season} ${year}`;

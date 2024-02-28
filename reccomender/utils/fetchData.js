@@ -1,7 +1,11 @@
-import { cleanDuration, cleanRating } from './clean.js';
-import { writeData } from './writeFile.js';
-
 const RATE_LIMIT_STATUS = 429;
+/**
+ * Asynchronously fetches the data from the specified URL with the option to retry a certain number of times.
+ *
+ * @param {string} url - The URL to fetch data from
+ * @param {number} retries - The number of retries in case of failure (default is 1)
+ * @returns {Promise} A Promise that resolves with the fetched data, or rejects with an error
+ */
 async function fetchWithRetry(url, retries = 1) {
     try {
         const response = await fetch(url);
@@ -20,6 +24,12 @@ async function fetchWithRetry(url, retries = 1) {
     }
 }
 
+/**
+ * Asynchronously fetches data from the given URL, with error handling and retry mechanism.
+ *
+ * @param {string} url - The URL to fetch data from
+ * @returns {Promise} A Promise that resolves with the fetched data, or an empty array if an error occurs
+ */
 async function fetchData(url) {
     try {
         return await fetchWithRetry(url);
@@ -31,12 +41,24 @@ async function fetchData(url) {
     }
 }
 
+/**
+ * Creates a Promise that resolves after a specified delay.
+ *
+ * @returns {Promise} A Promise that resolves after the specified delay.
+ */
 function delay() {
     return new Promise((resolve) => {
         setTimeout(resolve, 1000);
     });
 }
 
+/**
+ * Compares two arrays and performs a specific operation on the input array based on the fetched array.
+ *
+ * @param {Array} inputArray - The input array to compare
+ * @param {Array} fetchedArray - The array to compare against the input array
+ * @returns {Array} The original input array
+ */
 function compareArrays(inputArray, fetchedArray) {
     let array = inputArray;
     if (fetchedArray === undefined) return;
@@ -46,6 +68,14 @@ function compareArrays(inputArray, fetchedArray) {
     return array;
 }
 
+/**
+ * Compares the input premiered with the fetched season and year, and returns the finalized premiered value.
+ *
+ * @param {string} inputPremiered - The input premiered value to compare.
+ * @param {string} fetchedSeason - The fetched season value.
+ * @param {string} fetchedYear - The fetched year value.
+ * @returns {string} The finalized premiered value.
+ */
 function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
     let premiered = inputPremiered;
     if (inputPremiered === 'Unknown') {
@@ -56,6 +86,13 @@ function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
     return premiered;
 }
 
+/**
+ * Compares input property to fetched property and returns the most suitable property based on certain conditions.
+ *
+ * @param {any} inputProperty - The input property to be compared
+ * @param {any} fetchedProperty - The fetched property to be compared
+ * @returns {any} The most suitable property based on comparison
+ */
 function compareInputToFetched(inputProperty, fetchedProperty) {
     let property = inputProperty;
     const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
@@ -79,11 +116,24 @@ function compareInputToFetched(inputProperty, fetchedProperty) {
     return property;
 }
 
+/**
+ * Cleans the given title by normalizing it and removing any special characters.
+ *
+ * @param {string} title - The title to be cleaned.
+ * @returns {string} The cleaned title.
+ */
 function cleanTitle(title) {
     const normalizedTitle = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     return normalizedTitle.replace(/[^a-zA-Z0-9\s]/g, '');
 }
 
+/**
+ * Filters and returns the keys of the given entry that are not in the excludedKeys array and have a value of 'Unknown',
+ * 0, or an empty array.
+ *
+ * @param {Object} entry - The entry object to identify missing properties from
+ * @returns {Array} An array of keys representing the missing properties
+ */
 function identifyMissingProperties(entry) {
     const excludedKeys = ['relations', 'streaming', 'external'];
     return Object.keys(entry).filter(
@@ -93,6 +143,12 @@ function identifyMissingProperties(entry) {
     );
 }
 
+/**
+ * Constructs a URL for searching anime based on the provided title.
+ *
+ * @param {string} title - The title of the anime to search for
+ * @returns {string} The constructed URL for searching the anime
+ */
 function constructUrl(title) {
     const searchTitle = cleanTitle(title);
     const baseQuery = 'https://api.jikan.moe/v4/anime?q=';
@@ -100,6 +156,12 @@ function constructUrl(title) {
     return url;
 }
 
+/**
+ * Asynchronously constructs URLs based on the provided data.
+ *
+ * @param {Array} data - The input data to be processed
+ * @returns {Promise<Array>} An array of URLs constructed based on the input data
+ */
 async function constructUrls(data) {
     const urls = [];
     for (const entry of data) {
@@ -111,6 +173,13 @@ async function constructUrls(data) {
     return urls;
 }
 
+/**
+ * Function to find a matching anime in the fetched data based on the provided entry.
+ *
+ * @param {Object} entry - The anime entry to search for
+ * @param {Object} fetchedData - The data containing anime information
+ * @returns {Object} The matching anime object from the fetched data
+ */
 function findMatchingAnime(entry, fetchedData) {
     const searchTitle = cleanTitle(entry.title);
     const possibleTitles = [entry.englishName, entry.otherName, entry.title, searchTitle].filter(

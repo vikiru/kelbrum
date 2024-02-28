@@ -1,8 +1,15 @@
-import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
-
 import { AnimeEntry } from '../models/AnimeEntry.js';
 import { UserInteraction } from '../models/UserInteraction.js';
+import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
 
+/**
+ * Parses the input value to the specified type, or returns the default value if parsing fails.
+ *
+ * @param {any} value - The value to parse.
+ * @param {number} defaultValue - The default value to return if parsing fails. Default is 0.
+ * @param {string} type - The type to parse the value to. Options are "int" or "float". Default is "int".
+ * @returns {number} The parsed value or the default value if parsing fails.
+ */
 function parseOrDefault(value, defaultValue = 0, type = 'int') {
     if (type === 'int') {
         return parseInt(value, 10) || defaultValue;
@@ -13,10 +20,22 @@ function parseOrDefault(value, defaultValue = 0, type = 'int') {
     }
 }
 
+/**
+ * Replaces 'UNKNOWN' with 'Unknown' in the given value.
+ *
+ * @param {string} value - The string to be cleaned
+ * @returns {string} The cleaned string
+ */
 function cleanString(value) {
     return value.replace('UNKNOWN', 'Unknown');
 }
 
+/**
+ * Processes the provided anime data and creates an array of AnimeEntry objects.
+ *
+ * @param {Array} data - The anime data to be processed
+ * @returns {Array} An array of AnimeEntry objects
+ */
 async function processAnimeData(data) {
     const animeEntries = data.map((row) => {
         const malID = row.anime_id;
@@ -92,6 +111,12 @@ async function processAnimeData(data) {
     return animeEntries;
 }
 
+/**
+ * Processes user interaction data to create user objects.
+ *
+ * @param {Array} data - The user interaction data to be processed
+ * @returns {Array} An array of user objects
+ */
 async function processUserInteractionData(data) {
     const users = [];
     const uniqueUserIDs = Array.from(new Set(data.map((d) => d[0])));
