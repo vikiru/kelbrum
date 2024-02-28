@@ -1,22 +1,18 @@
 import { distance, similarity } from 'ml-distance';
 import { kmeans } from 'ml-kmeans';
+import path from 'path';
 import * as ss from 'simple-statistics';
+import { fileURLToPath } from 'url';
 
 import { createFeatureTensor } from './normalize.js';
 import { checkFileExists, readJSONFile } from './readFile.js';
 import { initializeDataFile } from './utils.js';
 import { writeData } from './writeFile.js';
 
-let path;
-let url;
-let fileURLToPath;
 let dirname;
 let __filename, __dirname;
 
 if (typeof window === 'undefined') {
-    path = require('path');
-    url = require('url');
-    fileURLToPath = url.fileURLToPath;
     dirname = path.dirname;
     __filename = fileURLToPath(import.meta.url);
     __dirname = dirname(__filename);

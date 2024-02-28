@@ -137,5 +137,5 @@ async function main() {
     }
 }
 
+main();
 export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };
-// start working on ui (user enters up to 10 titles, auto complete

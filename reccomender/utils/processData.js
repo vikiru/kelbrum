@@ -1,6 +1,7 @@
+import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
+
 import { AnimeEntry } from '../models/AnimeEntry.js';
 import { UserInteraction } from '../models/UserInteraction.js';
-import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
 
 function parseOrDefault(value, defaultValue = 0, type = 'int') {
     if (type === 'int') {
@@ -18,32 +19,30 @@ function cleanString(value) {
 
 async function processAnimeData(data) {
     const animeEntries = data.map((row) => {
-        const [
-            malID,
-            name,
-            englishName,
-            otherName,
-            score,
-            genres,
-            synopsis,
-            type,
-            episodes,
-            aired,
-            premiered,
-            status,
-            producers,
-            licensors,
-            studios,
-            source,
-            durationText,
-            rating,
-            rank,
-            popularity,
-            favourites,
-            scoredBy,
-            members,
-            imageURL,
-        ] = row;
+        const malID = row.anime_id;
+        const name = row.Name;
+        const englishName = row['English name'];
+        const otherName = row['Other name'];
+        const score = row.Score;
+        const genres = row.Genres;
+        const synopsis = row.Synopsis;
+        const type = row.Type;
+        const episodes = row.Episodes;
+        const aired = row.Aired;
+        const premiered = row.Premiered;
+        const status = row.Status;
+        const producers = row.Producers;
+        const licensors = row.Licensors;
+        const studios = row.Studios;
+        const source = row.Source;
+        const durationText = row.Duration;
+        const rating = row.Rating;
+        const rank = row.Rank;
+        const popularity = row.Popularity;
+        const favourites = row.Favorites;
+        const scoredBy = row['Scored By'];
+        const members = row.Members;
+        const imageURL = row['Image URL'];
 
         const cleanedGenres = cleanArray(genres);
         const cleanedProducers = cleanArray(producers);

@@ -1,15 +1,11 @@
+import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
+import path from 'path';
 
-let path;
-let url;
-let fileURLToPath;
 let dirname;
 let __filename, __dirname;
 
 if (typeof window === 'undefined') {
-    path = require('path');
-    url = require('url');
-    fileURLToPath = url.fileURLToPath;
     dirname = path.dirname;
     __filename = fileURLToPath(import.meta.url);
     __dirname = dirname(__filename);

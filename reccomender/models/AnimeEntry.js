@@ -61,6 +61,9 @@ class AnimeEntry {
         this.imageURL = imageURL;
         this.trailerURL = 'Unknown';
         this.pageURL = `https://myanimelist.net/anime/${malID}/${title}`;
+        this.relations = [];
+        this.external = [];
+        this.streaming = [];
     }
 }
 

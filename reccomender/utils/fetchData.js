@@ -39,6 +39,7 @@ function delay() {
 
 function compareArrays(inputArray, fetchedArray) {
     let array = inputArray;
+    if (fetchedArray === undefined) return;
     if (inputArray.length === 0 && fetchedArray.length > 0) {
         inputArray = fetchedArray.map((a) => a.title || a.name).join(',');
     }
@@ -84,8 +85,11 @@ function cleanTitle(title) {
 }
 
 function identifyMissingProperties(entry) {
+    const excludedKeys = ['relations', 'streaming', 'external'];
     return Object.keys(entry).filter(
-        (key) => entry[key] === 'Unknown' || entry[key] === 0 || (Array.isArray(entry[key]) && entry[key].length === 0),
+        (key) =>
+            !excludedKeys.includes(key) &&
+            (entry[key] === 'Unknown' || entry[key] === 0 || (Array.isArray(entry[key]) && entry[key].length === 0)),
     );
 }
 
@@ -214,6 +218,7 @@ async function handleMissingData(data) {
                     if (animeResult) {
                         updateEntry(entry, animeResult);
                         console.info(`Entry for '${entry.title}' updated successfully.`);
+                        console.log(entry);
                     } else {
                         console.warn(
                             `Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`,
