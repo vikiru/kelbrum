@@ -1,9 +1,15 @@
 import * as tf from '@tensorflow/tfjs';
 import { distance, similarity } from 'ml-distance';
 
-import { returnKmeansModel } from './dataAccess/train.js';
-import { createFeatureTensor } from './utils/normalize.js';
-import { initializeDataFile, writeData } from './utils/utils.js';
+import { returnOptimalK } from '../dataAccess/train.js';
+import {
+    customDistance,
+    retrieveAnimeData,
+    returnClusterSimilarities,
+    returnRandomRecommendations,
+} from '../reccomender.js';
+import { createFeatureTensor } from '../utils/normalize.js';
+import { initializeDataFile } from '../utils/utils.js';
 
 async function main() {
     try {
@@ -14,8 +20,8 @@ async function main() {
             const uniqueTitles = Array.from(new Set(d.titles));
             return { title: d.title, synonyms: uniqueTitles, value: d.id };
         });
-        await writeData('titleIDMap.json', titleIDMap);
-        await writeData('featureArray.json', featureArray);
+        await returnOptimalK(featureArray, 100, customDistance, 'customDistance.json');
+
         const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
         const id = data.findIndex((d) => d.malID === 4898); // 25013 - akayona, 6, 21
         const entry = data[id];
