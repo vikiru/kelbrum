@@ -30,4 +30,4 @@ const RandomAnime = ({ allAnime }) => {
     );
 };
 
-export default RandomAnime;
+export default React.memo(RandomAnime);

@@ -24,4 +24,4 @@ function GenresPage() {
     );
 }
 
-export default GenresPage;
+export default React.memo(GenresPage);

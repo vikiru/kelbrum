@@ -21,4 +21,4 @@ const SearchAnime = () => {
     );
 };
 
-export default SearchAnime;
+export default React.memo(SearchAnime);

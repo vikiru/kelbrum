@@ -53,4 +53,4 @@ const TopAnimePage = () => {
     );
 };
 
-export default TopAnimePage;
+export default React.memo(TopAnimePage);
