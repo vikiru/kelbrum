@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import SearchBar from './../../components/SearchBar/SearchBar';
+import { useData } from '../../context/DataProvider';
 
 const SearchAnime = () => {
     const { titleIDMap } = useData();
