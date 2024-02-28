@@ -1,9 +1,7 @@
-import { checkFileExists, readAndProcessFile } from './readFile.js';
+import { checkFileExists, readAndProcessFile } from '../dataAccess/readFile.js';
 import { cleanDuration, cleanPremiered, cleanRating } from './clean.js';
-
-import { createMapping } from './stats.js';
 import { handleMissingData } from './fetchData.js';
-import { writeData } from './writeFile.js';
+import { createMapping } from './stats.js';
 
 /**
  * Finds the maximum value of a specified property in the given data array.
@@ -77,29 +75,6 @@ function filterAnimeData(data) {
 }
 
 /**
- * Construct data file by reading input csv file and processing the data.
- *
- * @returns {Promise<Array>} The filtered and sorted anime data.
- */
-async function constructDataFile() {
-    console.log('Starting to construct data files by reading input csv file.');
-    const animeCSV = await readAndProcessFile('../data/anime-dataset-2023.csv', 'AnimeEntry');
-    let filteredData = filterAnimeData(animeCSV);
-    filteredData = await handleMissingData(filteredData);
-    filteredData.sort((a, b) => a.title.localeCompare(b.title));
-    filteredData.forEach((entry, index) => {
-        entry.id = index;
-        entry.malID = parseInt(entry.malID, 10);
-        entry.durationMinutes = cleanDuration(entry.durationText);
-        entry.premiered = cleanPremiered(entry.premiered, entry.season, entry.year);
-        entry.rating = cleanRating(entry.rating);
-    });
-    filteredData = filterAnimeData(filteredData);
-    await writeData('entries.json', filteredData);
-    return filteredData;
-}
-
-/**
  * Returns filtered data based on unique values of a specified property.
  *
  * @param {Array} data - The input data array
@@ -129,9 +104,10 @@ async function returnFilteredData(data, property) {
 }
 
 /**
- * Initializes the data file by checking if it exists, constructing it if it doesn't, and reading and filtering the data if it does.
+ * Initializes the data file by checking if it exists, constructing it if it doesn't, and reading and filtering the data
+ * if it does.
  *
- * @return {Promise} The initialized data file.
+ * @returns {Promise} The initialized data file.
  */
 async function initializeDataFile() {
     const fileName = 'entries.json';
@@ -149,14 +125,4 @@ async function initializeDataFile() {
     }
 }
 
-export {
-    writeData,
-    findMax,
-    findMin,
-    filterAnimeData,
-    sortData,
-    returnUniqueArray,
-    constructDataFile,
-    initializeDataFile,
-    returnFilteredData,
-};
+export { findMax, findMin, filterAnimeData, sortData, returnUniqueArray, initializeDataFile, returnFilteredData };

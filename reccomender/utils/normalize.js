@@ -36,6 +36,13 @@ function encodeCombination(data, property) {
     });
 }
 
+/**
+ * Encodes categorical data based on unique property values.
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property to encode
+ * @returns {Array} The encoded data array
+ */
 function encodeCategorical(data, property) {
     const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
     return data.map((entry) => {
