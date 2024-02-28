@@ -13,17 +13,15 @@ function Home() {
                     <div className="mx-auto max-w-md">
                         <h1 className="text-5xl font-bold">Discover Your Next Favourite Anime</h1>
                         <p className="py-6 text-lg">
-                            Embark on an epic anime adventure with [Placeholder Name]! Tired of searching for a new
-                            anime or trying to find a new movie to watch but can't find one that suits your taste? Look
-                            no further! Search for one of your favorites, and you'll be presented with a selection of
-                            similar anime, tailored just for you. Not happy with the suggestions? Refresh and you'll be
-                            presented with even more!
+                            Tired of searching for a new anime or trying to find a new movie to watch but can't find one
+                            that suits your taste? Look no further! Search for one of your favorites, and you'll be
+                            presented with a selection of similar anime, tailored just for you. Not happy with the
+                            suggestions? Refresh and you'll be presented with even more!
                         </p>
                         <div className="flex justify-center space-x-4">
-                            <button className="btn btn-accent rounded-lg px-6 py-3 text-white">
+                            <button className="btn btn-accent w-full rounded-lg px-6 py-3 text-white">
                                 Start Your Journey
                             </button>
-                            <button className="btn btn-accent rounded-lg px-6 py-3 text-white">View All Anime</button>
                         </div>
                     </div>
                 </div>

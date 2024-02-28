@@ -1,6 +1,6 @@
 import React from 'react';
 
-import DataProvider from './context/DataProvider';
+import { DataProvider } from './context/DataProvider';
 import Router from './pages/Router/Router';
 
 function App() {
@@ -11,4 +11,4 @@ function App() {
     );
 }
 
-export default App;
+export { App };
