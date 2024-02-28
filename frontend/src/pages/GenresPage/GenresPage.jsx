@@ -1,13 +1,14 @@
-import { Outlet, useLocation } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
-import DataList from './../../components/DataList/DataList';
 import { useData } from '../../context/DataProvider';
+import DataList from './../../components/DataList/DataList';
 
 function GenresPage() {
     const { filteredGenres, filteredThemes, filteredDemographics } = useData();
     const location = useLocation();
-    const isGenreDetailPage = location.pathname === '/anime/genres';
+    const allowedUrls = ['/anime/genres', '/anime/themes', '/anime/demographics'];
+    const isGenreDetailPage = allowedUrls.includes(location.pathname);
 
     return (
         <div className="min-h-screen bg-secondary pb-16">
@@ -23,4 +24,4 @@ function GenresPage() {
     );
 }
 
-export default React.memo(GenresPage);
+export default GenresPage;
