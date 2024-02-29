@@ -23,13 +23,13 @@ const AnimeCard = ({ anime, index }) => {
             <div className="mt-6 flex items-center justify-center pb-2">
                 <h2 className="text-center text-lg font-semibold text-secondary sm:text-xl">{anime.title}</h2>
             </div>
-            <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
-                <div className="rounded-lg bg-primary p-2">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                <div className="flex justify-center rounded-lg bg-primary p-2">
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="h-auto w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl sm:h-48 md:h-64"
+                            className="h-auto w-full rounded-lg object-contain lg:h-[80%] 2xl:h-auto 2xl:w-auto"
                         />
                     )}
                 </div>
