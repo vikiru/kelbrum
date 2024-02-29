@@ -1,4 +1,6 @@
-<h2 align="center"> Kelbrum </h2>
+<div align="center" id="logo">
+    <img src="logo.png"/>
+</div>
 
 <div align="center" id="badges">
 <br/>
