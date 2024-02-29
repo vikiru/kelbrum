@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-import SearchBar from './../../components/SearchBar/SearchBar';
 import { useData } from '../../context/DataProvider';
+import SearchBar from './../../components/SearchBar/SearchBar';
 
 const SearchAnime = () => {
     const { titleIDMap } = useData();
@@ -12,10 +12,7 @@ const SearchAnime = () => {
     }, []);
 
     return (
-        <div>
-            <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">
-                Search for an anime
-            </h2>
+        <div className="bg-secondary">
             <SearchBar valueMap={titleIDMap} path="" fields={fields} storeFields={fields} />
         </div>
     );

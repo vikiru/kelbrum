@@ -1,24 +1,63 @@
-<h2 align="center"> Anime Recommendation System </h2>
+<div align="center" id="logo">
+    <img src="logo.png"/>
+</div>
 
-**[Placeholder NAME]** is an anime recommendation engine designed to suggest anime titles that are similar to those chosen by users.
+<div align="center" id="badges">
+<br/>
+<a href="https://vikiru.github.io/kelbrum/">
+	<img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation"/>
+</a>
+<a href="">
+    <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="kelbrum API hosted via Render"/>
+</a>
+<br/>
+ <a href="https://wakatime.com/@vikiru/projects/ioitawlsqa">
+  <img src="https://wakatime.com/badge/user/5e62f99d-3a1e-4fd2-8f37-77919d626a67/project/018d6816-57f1-4009-a823-d00889610f66.svg"
+  alt="Wakatime Coding Stats for Kelbrum"/>
+ </a>
+ <a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge"/>
+ </a>
+ <a href="https://github.com/prettier/prettier">
+  <img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style - Prettier"/>
+ </a>
+<br/>
+ <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
+  <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues"/>
+ </a>
+ <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
+  <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs"/>
+ </a>
+  <a href="https://github.com/vikiru/kelbrum/releases">
+  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
+ </a>
+<br/>
+ <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">
+  <img src="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml/badge.svg" alt="GitHub Lint Action Workflow Status"/>
+ </a>
+</div>
 
-This project was bootstraped using [Create React App via Vite.js](https://vitejs.dev/), along with [ShadcnUI](https://ui.shadcn.com/), [TailwindCSS](https://tailwindcss.com/), [React](https://react.dev/).
+---
+
+**Kelbrum** is an anime recommendation engine designed to suggest anime titles that are similar to those chosen by users. It employs K-means++ clustering in combination with a custom distance function, which uses Gower's distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to accurately compute the distance between two seperate anime.
+
+This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [DaisyUI](https://daisyui.com/), [TailwindCSS](https://tailwindcss.com/), [React](https://react.dev/), and [React Router](https://reactrouter.com/).
 
 > [!IMPORTANT]
 > The data used within this project was possible thanks to the following:
 >
-> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and proccessed into a custom JavaScript class known as [AnimeEntry](./reccomender/models/AnimeEntry.js).
+> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and proccessed into a custom JavaScript class known as [AnimeEntry](./recommender/models/AnimeEntry.js).
 > 2. [JikanAPI](https://github.com/jikan-me/jikan-rest) - Missing information such as `pageURL`, `imageURL`, `trailerURL` and other existing properties which may have needed updates were updated by making several API requests to JikanAPI, which contains anime information obtained from [MyAnimeList](https://myanimelist.net/).
 
 ## 📖 Table of Contents
 
-- [📖 Table of Contents](#-table-of-contents)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [📝 Prerequisites](#-prerequisites)
-- [⚡ Setup Instructions](#-setup-instructions)
-- [📜 Available Scripts](#-available-scripts)
-- [✨ Acknowledgements](#-acknowledgements)
-- [©️ License](#️-license)
+-   [📖 Table of Contents](#-table-of-contents)
+-   [🛠️ Tech Stack](#️-tech-stack)
+-   [📝 Prerequisites](#-prerequisites)
+-   [⚡ Setup Instructions](#-setup-instructions)
+-   [📜 Available Scripts](#-available-scripts)
+-   [✨ Acknowledgments](#-acknowledgments)
+-   [©️ License](#️-license)
 
 ## 🛠️ Tech Stack
 
@@ -33,8 +72,9 @@ Backend:
 Frontend:
 
 -   [React](https://react.dev/)
+-   [React Router](https://reactrouter.com/)
 -   [Vite](https://vitejs.dev/)
--   [ShadcnUI](https://ui.shadcn.com/)
+-   [DaisyUI](https://daisyui.com/)
 -   [TailwindCSS](https://tailwindcss.com/)
 
 Dev Tools:
@@ -54,8 +94,8 @@ Ensure that the following dependencies are installed onto your machine by follow
 1. Clone this repository to your local machine.
 
 ```bash
-git clone https://github.com/vikiru/anime-reccomender.git
-cd anime-reccomender
+git clone https://github.com/vikiru/kelbrum.git
+cd kelbrum
 ```
 
 2. Download and install all required dependencies.
@@ -66,32 +106,44 @@ npm install
 
 ## 📜 Available Scripts
 
-1. Start the app in `development` environment.
+1. Start the app in the development environment.
 
 ```bash
 npm run dev
 ```
 
-2. Start the app in `production` env, without nodemon.
+2. Build the project files and optimize for production.
 
 ```bash
-npm preview
+npm run build
 ```
 
-3. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
+3. Start the app with files optimized for production.
+
+```bash
+npm run preview
+```
+
+4. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
 
 ```bash
 npm run lint
 ```
 
-4. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
+5. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
 
 ```bash
 npm run prettier
 ```
 
-## ✨ Acknowledgements
+## ✨ Acknowledgments
 
+-   [csv-parse](https://github.com/adaltas/node-csv)
+-   [MiniSearch](https://github.com/lucaong/minisearch)
+-   [PapaParse](https://www.papaparse.com/)
+-   [React Infinite Scroller](https://github.com/danbovey/react-infinite-scroller)
+-   [SimpleIcons](https://simpleicons.org/)
+-   [tailwind-scrollbar](https://github.com/adoxography/tailwind-scrollbar)
 -   [Tensorflow.js](https://www.tensorflow.org/js)
 -   [Tensorflow.js Documentation](https://js.tensorflow.org/api/latest/)
 -   [Machine Learning Crash Course by Google](https://developers.google.com/machine-learning/crash-course/)
@@ -107,10 +159,19 @@ npm run prettier
 
 Various web articles for research and learning, such as:
 
--   [What is unsupervised learning?](https://www.ibm.com/topics/unsupervised-learning)
 -   [17 types of similarity and dissimilarity measures used in data science](https://towardsdatascience.com/17-types-of-similarity-and-dissimilarity-measures-used-in-data-science-3eb914d2681)
--   [Types of recommendation systems & their use cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
+-   [Gower's Distance](https://medium.com/analytics-vidhya/gowers-distance-899f9c4bd553)
 -   [Introduction to similarity metrics](https://medium.com/analytics-vidhya/introduction-to-similarity-metrics-a882361c9be4)
+-   [Types of recommendation systems & their use cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
+-   [What is unsupervised learning?](https://www.ibm.com/topics/unsupervised-learning)
+
+Additionally, this project would not be possible without the following sources of information:
+
+-   [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset)
+-   [JikanAPI](https://github.com/jikan-me/jikan-rest)
+-   [MyAnimeList](https://myanimelist.net/)
+
+All external images and text used within this app belong to their respective owners.
 
 ## ©️ License
 

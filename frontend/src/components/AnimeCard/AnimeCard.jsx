@@ -5,10 +5,14 @@ const AnimeCard = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
-        const img = new Image();
-        img.src = anime.imageURL;
-        img.onerror = () => setHasError(true);
-        img.onload = () => setHasError(false);
+        if (anime.imageURL === 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png') {
+            setHasError(true);
+        } else {
+            const img = new Image();
+            img.src = anime.imageURL;
+            img.onerror = () => setHasError(true);
+            img.onload = () => setHasError(false);
+        }
     }, [anime.imageURL]);
 
     return (
@@ -19,13 +23,13 @@ const AnimeCard = ({ anime, index }) => {
             <div className="mt-6 flex items-center justify-center pb-2">
                 <h2 className="text-center text-lg font-semibold text-secondary sm:text-xl">{anime.title}</h2>
             </div>
-            <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
-                <div className="rounded-lg bg-primary p-2">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                <div className="flex justify-center rounded-lg bg-primary p-2">
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="object-fit h-auto w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl sm:h-48 md:h-64"
+                            className="h-auto w-full rounded-lg object-contain lg:h-[80%] 2xl:h-auto 2xl:w-auto"
                         />
                     )}
                 </div>
@@ -38,7 +42,8 @@ const AnimeCard = ({ anime, index }) => {
                             <span className="font-bold">Rating:</span> {anime.rating}
                         </div>
                         <div className="text-sm text-neutral sm:text-xs md:text-sm">
-                            <span className="font-bold">Episodes:</span> {anime.episodes}
+                            <span className="font-bold">Episodes:</span>{' '}
+                            {anime.episodes === 0 ? 'Unknown' : anime.episodes}
                         </div>
                         <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Score:</span>{' '}
@@ -46,7 +51,7 @@ const AnimeCard = ({ anime, index }) => {
                         </div>
                     </div>
 
-                    <div className="mt-2 flex flex-wrap">
+                    <div className="mt-2 flex flex-wrap justify-center sm:justify-start">
                         {anime.genres
                             .filter((g) => g !== 'Unknown')
                             .map((g) => (
@@ -72,7 +77,6 @@ const AnimeCard = ({ anime, index }) => {
                     <div className="mt-2 flex justify-center sm:justify-start lg:justify-start">
                         <Link
                             to={`/anime/${anime.id}`}
-                            target="_blank"
                             className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
                         >
                             Read more
