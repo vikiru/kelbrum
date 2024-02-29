@@ -32,7 +32,7 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
             const results = miniSearch.search(string, { limit: 10 });
             setSuggestions(
                 results
-                    .slice(0, 10)
+                    .slice(0, 8)
                     .map((result) => ({ id: result.id, title: result.title, synonyms: result.synonyms })),
             );
             setActiveSuggestionIndex(0);
