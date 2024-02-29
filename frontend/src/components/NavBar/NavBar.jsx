@@ -1,12 +1,31 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 function NavBar() {
+    // Mobile Dropdown States
+    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const toggleDropdown = () => {
+        setIsDropdownVisible(!isDropdownVisible);
+    };
+
+    const location = useLocation();
+    const [openDropdowns, setOpenDropdowns] = useState({
+        discover: false,
+        information: false,
+    });
+
+    useEffect(() => {
+        setOpenDropdowns({
+            discover: false,
+            information: false,
+        });
+    }, [location]);
+
     return (
         <div className="navbar bg-base-100">
             <div className="navbar-start">
                 <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-circle btn-ghost">
+                    <div tabIndex={0} role="button" className="btn btn-ghost" onClick={toggleDropdown}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
@@ -18,31 +37,61 @@ function NavBar() {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M4 6h16M4 12h16M4 18h7"
+                                d="M4 6h16M4 12h8m-8 6h16"
                             />
                         </svg>
                     </div>
                     <ul
                         tabIndex={0}
-                        className="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
+                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow ${isDropdownVisible ? '' : 'hidden'}`}
                     >
                         <li>
-                            <a>View all anime</a>
+                            <span>Discover</span>
+                            <ul>
+                                <li>
+                                    <Link to="anime/top" onClick={toggleDropdown}>
+                                        View top 100 anime
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
                         <li>
-                            <a>View top 100 anime</a>
-                        </li>
-                        <li>
-                            <a>Search for an anime</a>
-                        </li>
-                        <li>
-                            <a>About</a>
+                            <span>Information</span>
+                            <ul className="p-2">
+                                <li className="p-2">
+                                    <Link to="/anime/genres" onClick={toggleDropdown}>
+                                        View all genres
+                                    </Link>
+                                </li>
+                                <li className="p-2">
+                                    <Link to="/anime/licensors" onClick={toggleDropdown}>
+                                        View all licensors
+                                    </Link>
+                                </li>
+                                <li className="p-2">
+                                    <Link to="/anime/studios" onClick={toggleDropdown}>
+                                        View all studios
+                                    </Link>
+                                </li>
+                                <li className="p-2">
+                                    <Link to="/anime/producers" onClick={toggleDropdown}>
+                                        View all producers
+                                    </Link>
+                                </li>
+                                <li className="p-2">
+                                    <Link to="/anime/seasons" onClick={toggleDropdown}>
+                                        View all seasons
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
             </div>
-            <div className="navbar-center">
-                <a className="btn btn-ghost text-xl">AnimeReccomendation</a>
+            <div className="xs:navbar-center">
+                <Link to="/" className="btn btn-ghost font-logo text-xl lg:text-3xl 2xl:text-4xl">
+                    Kelbrum
+                </Link>
             </div>
             <div className="navbar-end">
                 <Link to="/anime/search">

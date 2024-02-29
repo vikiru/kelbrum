@@ -1,10 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import data from '../../../reccomender/data/entries.json';
-import featureArray from '../../../reccomender/data/featureArray.json';
-import kmeans from '../../../reccomender/data/kmeans.json';
-import titleIDMap from '../../../reccomender/data/titleIDMap.json';
-import { returnFilteredData } from '../../../reccomender/utils/utils';
+import data from '../../../recommender/data/entries.json';
+import featureArray from '../../../recommender/data/featureArray.json';
+import kmeans from '../../../recommender/data/kmeans.json';
+import titleIDMap from '../../../recommender/data/titleIDMap.json';
+import { returnFilteredData } from '../../../recommender/utils/filter';
 
 const DataContext = createContext();
 
@@ -21,13 +21,25 @@ const DataProvider = ({ children }) => {
 
     useEffect(() => {
         const processData = async () => {
-            const filteredGenres = await returnFilteredData(data, 'genres');
-            const filteredThemes = await returnFilteredData(data, 'themes');
-            const filteredDemographics = await returnFilteredData(data, 'demographics');
-            const filteredProducers = await returnFilteredData(data, 'producers');
-            const filteredStudios = await returnFilteredData(data, 'studios');
-            const filteredLicensors = await returnFilteredData(data, 'licensors');
-            const filteredSeasons = await returnFilteredData(data, 'premiered');
+            const promises = [
+                returnFilteredData(data, 'genres'),
+                returnFilteredData(data, 'themes'),
+                returnFilteredData(data, 'demographics'),
+                returnFilteredData(data, 'producers'),
+                returnFilteredData(data, 'studios'),
+                returnFilteredData(data, 'licensors'),
+                returnFilteredData(data, 'premiered'),
+            ];
+
+            const [
+                filteredGenres,
+                filteredThemes,
+                filteredDemographics,
+                filteredProducers,
+                filteredStudios,
+                filteredLicensors,
+                filteredSeasons,
+            ] = await Promise.all(promises);
 
             setProcessedData({
                 filteredGenres,
@@ -41,7 +53,7 @@ const DataProvider = ({ children }) => {
         };
 
         processData();
-    }, [data]);
+    }, []);
 
     const state = useMemo(
         () => ({
@@ -51,7 +63,7 @@ const DataProvider = ({ children }) => {
             kmeans: kmeans,
             titleIDMap: titleIDMap,
         }),
-        [processedData, data, featureArray, kmeans, titleIDMap],
+        [processedData],
     );
 
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;

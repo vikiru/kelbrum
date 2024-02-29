@@ -25,14 +25,14 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
 
         miniSearch.addAll(valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })));
         return miniSearch;
-    }, [valueMap]);
+    }, [fields, storeFields, valueMap]);
 
     const debouncedSearch = useCallback(
         debounce((string) => {
             const results = miniSearch.search(string, { limit: 10 });
             setSuggestions(
                 results
-                    .slice(0, 6)
+                    .slice(0, 8)
                     .map((result) => ({ id: result.id, title: result.title, synonyms: result.synonyms })),
             );
             setActiveSuggestionIndex(0);
@@ -46,25 +46,22 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
         debouncedSearch(e.target.value);
     };
 
-    const handleOnSelect = useCallback((selectedItem) => {
+    const handleOnSelect = (selectedItem) => {
         setSuggestions([]);
         setInputValue(selectedItem.title);
         navigateToPage(selectedItem.id);
         setShowSuggestions(false);
-    }, []);
+    };
 
-    const handleKeyDown = useCallback(
-        (event) => {
-            if (event.key === 'ArrowDown') {
-                setActiveSuggestionIndex((prevIndex) => Math.min(prevIndex + 1, suggestions.length - 1));
-            } else if (event.key === 'ArrowUp') {
-                setActiveSuggestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-            } else if (event.key === 'Enter') {
-                handleOnSelect(suggestions[activeSuggestionIndex]);
-            }
-        },
-        [suggestions, activeSuggestionIndex],
-    );
+    const handleKeyDown = (event) => {
+        if (event.key === 'ArrowDown') {
+            setActiveSuggestionIndex((prevIndex) => Math.min(prevIndex + 1, suggestions.length - 1));
+        } else if (event.key === 'ArrowUp') {
+            setActiveSuggestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        } else if (event.key === 'Enter') {
+            handleOnSelect(suggestions[activeSuggestionIndex]);
+        }
+    };
 
     useEffect(() => {
         const activeSuggestionElement = suggestionRefs.current[activeSuggestionIndex];
@@ -93,18 +90,18 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                         value={inputValue}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        placeholder="Type to filter results..."
+                        placeholder="Enter an anime name..."
                         className="input input-bordered w-full p-4 pl-6 pr-6 text-sm sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg"
                     />
                 </div>
 
                 {suggestions.length > 0 && (
-                    <div className="mt-4 max-h-[60vh] overflow-y-scroll scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500">
+                    <div className="mt-4 max-h-[72vh] overflow-y-scroll scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500 xs:space-y-1 lg:space-y-2">
                         {suggestions.map((suggestion, index) => (
                             <div
                                 key={index}
                                 ref={(el) => (suggestionRefs.current[index] = el)}
-                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100' : ''}`}
+                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100' : 'bg-primary'}`}
                                 onClick={() => handleOnSelect(suggestion)}
                             >
                                 <div className="card-body p-2 sm:p-3 md:p-4">

@@ -1,0 +1,101 @@
+{
+    "root": true,
+    "env": {
+        "browser": true,
+        "es2020": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:react/jsx-runtime",
+        "plugin:react-hooks/recommended",
+        "prettier",
+        "plugin:prettier/recommended",
+        "plugin:import/errors",
+        "plugin:import/warnings",
+        "plugin:node/recommended",
+        "plugin:jsdoc/recommended",
+        "plugin:tailwindcss/recommended"
+    ],
+    "ignorePatterns": ["dist", ".eslintrc.cjs"],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "settings": {
+        "react": {
+            "version": "18.2"
+        }
+    },
+    "plugins": [
+        "react-refresh",
+        "prettier",
+        "import",
+        "node",
+        "jsdoc",
+        "tailwindcss",
+        "comment-length",
+        "sort-exports"
+    ],
+    "rules": {
+        "prettier/prettier": "off",
+        "jsdoc/require-returns-type": "off",
+        "jsdoc/require-returns-description": "off",
+        "react/no-unknown-property": "off",
+        "complexity": ["off", { "max": 10 }],
+        "consistent-return": "off",
+        "func-names": "off",
+        "global-require": "off",
+        "import/no-extraneous-dependencies": "off",
+        "import/no-unresolved": "off",
+        "import/order": [
+            "error",
+            {
+                "alphabetize": { "caseInsensitive": true, "order": "asc" },
+                "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+                "newlines-between": "always"
+            }
+        ],
+        "jsdoc/require-param-type": "off",
+        "jsdoc/require-param-description": "off",
+        "jsdoc/require-returns": "off",
+        "jsdoc/require-returns-check": "off",
+        "max-depth": ["warn", 5],
+        "mocha/no-setup-in-describe": "off",
+        "no-await-in-loop": "off",
+        "no-param-reassign": "off",
+        "no-plusplus": "off",
+        "no-restricted-syntax": "off",
+        "no-underscore-dangle": "off",
+        "no-unused-expressions": "off",
+        "node/no-missing-require": "off",
+        "node/no-unpublished-import": "off",
+        "node/no-missing-import": "off",
+        "react/prop-types": "off",
+        "no-console": "off",
+        "no-unused-vars": "off",
+        "node/no-unpublished-require": "off",
+        "prefer-destructuring": "off",
+        "security/detect-non-literal-fs-filename": "off",
+        "security/detect-object-injection": "off",
+        "sort-exports/sort-exports": [
+            "off",
+            {
+                "ignoreCase": true,
+                "sortDir": "asc",
+                "sortExportKindFirst": "type"
+            }
+        ],
+        "tailwindcss/no-custom-classname": "off",
+        "jsdoc/no-undefined-types": "off",
+        "react/no-unescaped-entities": "off",
+        "tailwindcss/migration-from-tailwind-2": "off",
+        "react-hooks/exhaustive-deps": "off",
+        "react-refresh/only-export-components": "off",
+        "node/no-unsupported-features/es-syntax": "off",
+        "no-undef": "off"
+    }
+}
