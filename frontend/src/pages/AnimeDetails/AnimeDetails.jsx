@@ -59,7 +59,7 @@ const AnimeDetails = () => {
 
     return (
         <div className="overflow-x-hidden">
-            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-2xl">
+            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-2xl dark:text-gray-100">
                 {anime.title}
             </h2>
             <div className="grid gap-4 lg:grid-cols-2">
@@ -76,21 +76,21 @@ const AnimeDetails = () => {
                         </figure>
                     </div>
                     <div>
-                        <h2 className="pt-4 text-left text-xl font-bold text-secondary underline">
+                        <h2 className="pt-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             General Information
                         </h2>
                         <div className="3xl:grid-cols-2 mt-4 grid gap-4 pb-4">
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Type</h2>
-                                <p className="text-base text-neutral">{anime.type}</p>
+                                <p className="text-base text-neutral dark:text-gray-100">{anime.type}</p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Source</h2>
-                                <p className="text-base text-neutral">{anime.source}</p>
+                                <p className="text-base text-neutral dark:text-gray-100">{anime.source}</p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Season</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {anime.season === 'Unknown' && anime.year === 'Unknown' ? (
                                         'Unknown'
                                     ) : (
@@ -103,19 +103,19 @@ const AnimeDetails = () => {
                                     )}
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Rating</h2>
-                                <p className="text-base text-neutral">{anime.rating}</p>
+                                <p className="text-base text-neutral dark:text-gray-100">{anime.rating}</p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Episodes</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {anime.episodes === 0 ? 'Unknown' : anime.episodes}
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Score</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {anime.score === 0 ? 'Unknown' : `${anime.score} /  10`}
                                 </p>
                             </div>
@@ -139,17 +139,19 @@ const AnimeDetails = () => {
             <div className="flex flex-col gap-4 lg:flex-row">
                 <div className="text-md mx-8 text-justify">
                     <div>
-                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Synopsis</h2>
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
+                            Synopsis
+                        </h2>
                         <p className="text-left">{anime.synopsis}</p>
                     </div>
                     <div>
-                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             Additional Information
                         </h2>
                         <div className="grid gap-4">
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
-                                <h2 className="text-lg font-bold text-secondary">Tags</h2>
-                                <p className="text-base text-neutral">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
+                                <h2 className="text-lg font-bold text-secondary ">Tags</h2>
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {anime.genres
                                         .filter((g) => g !== 'Unknown')
                                         .map((g, index) => (
@@ -176,9 +178,9 @@ const AnimeDetails = () => {
                                         ))}
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Studios</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {trimmedStudios.map((studio, index) => (
                                         <span key={index}>
                                             {studio}
@@ -187,9 +189,9 @@ const AnimeDetails = () => {
                                     ))}
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Producers</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {trimmedProducers.map((producer, index) => (
                                         <span key={index}>
                                             {producer}
@@ -198,9 +200,9 @@ const AnimeDetails = () => {
                                     ))}
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Licensors</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {trimmedLicensors.map((licensor, index) => (
                                         <span key={index}>
                                             {licensor}
@@ -209,9 +211,9 @@ const AnimeDetails = () => {
                                     ))}
                                 </p>
                             </div>
-                            <div className="rounded-lg bg-base-200 p-4 shadow-md">
+                            <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Synonyms</h2>
-                                <p className="text-base text-neutral">
+                                <p className="text-base text-neutral dark:text-gray-100">
                                     {anime.titles.map((synonym, index) => (
                                         <span key={index}>
                                             {synonym}
@@ -223,29 +225,31 @@ const AnimeDetails = () => {
                         </div>
                     </div>
                     <div>
-                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Statistics</h2>
-                        <div className="stats w-full bg-base-200 shadow xs:stats-vertical xl:stats-horizontal xl:w-auto">
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
+                            Statistics
+                        </h2>
+                        <div className="stats w-full bg-base-200 shadow xs:stats-vertical xl:stats-horizontal xl:w-auto dark:bg-gray-600">
                             <div className="stat">
                                 <div className="stat-title text-secondary">Rank</div>
-                                <div className="stat-value text-xl font-medium text-neutral">
+                                <div className="stat-value text-xl font-medium text-neutral dark:text-gray-100">
                                     {anime.rank === 0 ? 'Unknown' : `# ${anime.rank}`}
                                 </div>
                             </div>
                             <div className="stat">
                                 <div className="stat-title text-secondary">Popularity</div>
-                                <div className="stat-value text-xl font-medium text-neutral">
+                                <div className="stat-value text-xl font-medium text-neutral dark:text-gray-100">
                                     {anime.popularity === 0 ? 'Unknown' : `# ${anime.popularity}`}
                                 </div>
                             </div>
                             <div className="stat">
                                 <div className="stat-title text-secondary">Total Favourites</div>
-                                <div className="stat-value text-xl font-medium text-neutral">
+                                <div className="stat-value text-xl font-medium text-neutral dark:text-gray-100">
                                     {anime.favourites === 0 ? 'Unknown' : anime.favourites}
                                 </div>
                             </div>
                             <div className="stat">
                                 <div className="stat-title text-secondary">Total Members</div>
-                                <div className="stat-value text-xl font-medium text-neutral">
+                                <div className="stat-value text-xl font-medium text-neutral dark:text-gray-100">
                                     {anime.members === 0 ? 'Unknown' : anime.members}
                                 </div>
                             </div>
@@ -253,10 +257,12 @@ const AnimeDetails = () => {
                     </div>
 
                     <div className="pb-6">
-                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline">External Links</h2>
+                        <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
+                            External Links
+                        </h2>
                         <div className="flex space-x-2">
                             {anime.pageURL !== 'Unknown' && (
-                                <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
+                                <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400 dark:bg-gray-600">
                                     <a href={anime.pageURL} target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/myanimelist.svg"
@@ -267,7 +273,7 @@ const AnimeDetails = () => {
                                 </button>
                             )}
                             {anime.trailerURL !== 'Unknown' && (
-                                <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400">
+                                <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400 dark:bg-gray-600">
                                     <a href={anime.trailerURL} target="_blank" rel="noopener noreferrer">
                                         <img
                                             src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg"
