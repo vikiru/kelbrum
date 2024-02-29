@@ -9,13 +9,13 @@
             rel="preload"
             href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap"
             as="style"
-            onload="this.rel='stylesheet'"
+            onload="this.onload=null;this.rel='stylesheet'"
         />
-        <noscript
-            ><link
-                rel="stylesheet"
-                href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap"
-        /></noscript>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Kelbrum | Discover Your Next Favourite Anime</title>
         <meta
@@ -24,7 +24,8 @@
         />
         <meta http-equiv="Content-Language" content="en" />
     </head>
-    <body>
+    <body class="scrollbar scrollbar-track-blue-100 scrollbar-thumb-gray-500">
+        <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
         <script type="module" src="./frontend/src/main.jsx"></script>
     </body>

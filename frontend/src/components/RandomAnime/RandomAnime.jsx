@@ -27,8 +27,8 @@ const RandomAnime = ({ anime, allAnime }) => {
     const randomAnime = shuffledAnime.slice(0, 10);
 
     return (
-        <div className="bg-secondary pb-8">
-            <div className="space-2 grid w-full bg-secondary px-4 py-6 xs:grid-cols-1 xl:grid-cols-2">
+        <div className="w-full bg-secondary pb-8">
+            <div className="grid w-full bg-secondary px-4 py-6 xs:grid-cols-1 xl:grid-cols-2">
                 {randomAnime.map((anime, index) => (
                     <AnimeItem key={anime.title} anime={anime} index={index} />
                 ))}

@@ -1,3 +1,4 @@
+import { constructDataFile } from '../dataAccess/constructData.js';
 import { checkFileExists, readAndProcessFile } from '../dataAccess/readFile.js';
 import { filterAnimeData } from './filter.js';
 

@@ -29,7 +29,7 @@ const AnimeCard = ({ anime, index }) => {
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="object-fit h-auto w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl sm:h-48 md:h-64"
+                            className="h-auto w-full rounded-lg border-2 border-gray-300 object-cover shadow-sm transition-shadow duration-300 hover:shadow-xl sm:h-48 md:h-64"
                         />
                     )}
                 </div>

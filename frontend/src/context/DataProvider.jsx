@@ -53,7 +53,7 @@ const DataProvider = ({ children }) => {
         };
 
         processData();
-    }, [data]);
+    }, []);
 
     const state = useMemo(
         () => ({
@@ -63,7 +63,7 @@ const DataProvider = ({ children }) => {
             kmeans: kmeans,
             titleIDMap: titleIDMap,
         }),
-        [processedData, data, featureArray, kmeans, titleIDMap],
+        [processedData],
     );
 
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;

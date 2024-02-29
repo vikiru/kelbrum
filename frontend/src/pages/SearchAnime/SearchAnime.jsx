@@ -12,10 +12,7 @@ const SearchAnime = () => {
     }, []);
 
     return (
-        <div>
-            <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">
-                Search for an anime
-            </h2>
+        <div className="bg-secondary">
             <SearchBar valueMap={titleIDMap} path="" fields={fields} storeFields={fields} />
         </div>
     );

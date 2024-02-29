@@ -39,12 +39,11 @@ async function readJSONFile(filePath) {
 /**
  * Asynchronously reads a CSV file and parses the data.
  *
- * @param {string | File} filePathOrFile - The path to the CSV file or a File object.
+ * @param {string | File} filePath - The path to the CSV file or a File object.
  * @returns {object[]} The parsed data from the CSV file.
  */
-async function readCSVFile(filePathOrFile) {
-    const fileData = await readFile(filePathOrFile);
-    const results = Papa.parse(fileData, {
+async function readCSVFile(filePath) {
+    const results = Papa.parse(filePath, {
         header: true,
         skipEmptyLines: true,
     });

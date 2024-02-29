@@ -287,7 +287,6 @@ async function handleMissingData(data) {
                     if (animeResult) {
                         updateEntry(entry, animeResult);
                         console.info(`Entry for '${entry.title}' updated successfully.`);
-                        console.log(entry);
                     } else {
                         console.warn(
                             `Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`,

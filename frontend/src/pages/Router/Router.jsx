@@ -3,10 +3,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import TopScroller from '../../components/TopScroller/TopScroller';
 import Home from '../Home/Home';
-import RecommendationsPage from '../RecommendationsPage/RecommendationsPage';
 import Footer from './../../components/Footer/Footer';
 import NavBar from './../../components/NavBar/NavBar';
 
+const RecommendationsPage = React.lazy(() => import('../RecommendationsPage/RecommendationsPage'));
 const InfinitePagination = React.lazy(() => import('../InfinitePagination/InfinitePagination'));
 const AnimeDetails = React.lazy(() => import('../AnimeDetails/AnimeDetails'));
 const TopAnimePage = React.lazy(() => import('../TopAnimePage/TopAnimePage'));

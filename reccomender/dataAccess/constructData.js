@@ -1,7 +1,8 @@
-const { cleanDuration, cleanPremiered, cleanRating } = require('../utils/clean');
-const { handleMissingData } = require('../utils/fetchData');
-const { filterAnimeData, writeData } = require('../utils/utils');
-const { readAndProcessFile } = require('./readFile');
+import { writeData } from '../dataAccess/writeFile';
+import { cleanDuration, cleanPremiered, cleanRating } from '../utils/clean';
+import { handleMissingData } from '../utils/fetchData';
+import { filterAnimeData } from '../utils/filter';
+import { readAndProcessFile } from './readFile';
 
 /**
  * Construct data file by reading input csv file and processing the data.
@@ -25,3 +26,5 @@ async function constructDataFile() {
     await writeData('entries.json', filteredData);
     return filteredData;
 }
+
+export { constructDataFile };

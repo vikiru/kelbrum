@@ -28,9 +28,7 @@ const RecommendationsPage = () => {
                 const topResultsData = await retrieveAnimeData(reccs, data);
                 setTopResults(topResultsData);
             } catch (error) {
-                console.error('Failed to fetch data:', error);
                 setTopResults([]);
-                setHasError(true);
             }
         };
 
@@ -66,7 +64,7 @@ const RecommendationsPage = () => {
         setItems(newItems);
         setDisplayedItems(newItems.slice(0, itemsPerDisplay));
         setHasMore(newItems.length > itemsPerDisplay);
-    }, [currentPage, topResults.length]);
+    }, [currentPage, topResults]);
 
     const fetchMoreItems = () => {
         if (displayedItems.length < items.length) {

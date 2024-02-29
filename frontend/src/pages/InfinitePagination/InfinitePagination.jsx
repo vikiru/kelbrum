@@ -79,7 +79,7 @@ const InfinitePagination = () => {
         setItems(newItems);
         setDisplayedItems(newItems.slice(0, itemsPerDisplay));
         setHasMore(newItems.length > itemsPerDisplay);
-    }, [currentPage, sortedData.length]);
+    }, [currentPage, sortedData]);
 
     const fetchMoreItems = () => {
         if (displayedItems.length < items.length) {
