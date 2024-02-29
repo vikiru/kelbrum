@@ -92,7 +92,10 @@
         "tailwindcss/no-custom-classname": "off",
         "jsdoc/no-undefined-types": "off",
         "react/no-unescaped-entities": "off",
+        "tailwindcss/migration-from-tailwind-2": "off",
+        "react-hooks/exhaustive-deps": "off",
         "react-refresh/only-export-components": "off",
-        "node/no-unsupported-features/es-syntax": "off"
+        "node/no-unsupported-features/es-syntax": "off",
+        "no-undef": "off"
     }
 }
