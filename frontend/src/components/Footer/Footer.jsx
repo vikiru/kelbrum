@@ -36,7 +36,7 @@ function Footer() {
                 <nav>
                     <h6 className="footer-title text-xl">About</h6>
                     <a className="link-hover link text-lg" href="https://github.com/vikiru/">
-                        Acknowledgements
+                        Acknowledgments
                     </a>
                     <a className="link-hover link text-lg" href="https://github.com/vikiru/">
                         Documentation

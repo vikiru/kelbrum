@@ -17,7 +17,7 @@ This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [D
 -   [📝 Prerequisites](#-prerequisites)
 -   [⚡ Setup Instructions](#-setup-instructions)
 -   [📜 Available Scripts](#-available-scripts)
--   [✨ Acknowledgements](#-acknowledgements)
+-   [✨ Acknowledgments](#-Acknowledgments)
 -   [©️ License](#️-license)
 
 ## 🛠️ Tech Stack
@@ -97,7 +97,7 @@ npm run lint
 npm run prettier
 ```
 
-## ✨ Acknowledgements
+## ✨ Acknowledgments
 
 -   [csv-parse](https://github.com/adaltas/node-csv)
 -   [MiniSearch](https://github.com/lucaong/minisearch)
