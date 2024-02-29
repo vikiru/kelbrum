@@ -1,8 +1,8 @@
-<h2 align="center"> Anime Recommendation System </h2>
+<h2 align="center"> Kelbrum </h2>
 
-**[Placeholder NAME]** is an anime recommendation engine designed to suggest anime titles that are similar to those chosen by users.
+**Kelbrum** is an anime recommendation engine designed to suggest anime titles that are similar to those chosen by users. It employs K-means++ clustering in combination with a custom distance function, which uses Gower's distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to accurately compute the distance between two seperate anime.
 
-This project was bootstraped using [Create React App via Vite.js](https://vitejs.dev/), along with [ShadcnUI](https://ui.shadcn.com/), [TailwindCSS](https://tailwindcss.com/), [React](https://react.dev/).
+This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [DaisyUI](https://daisyui.com/), [TailwindCSS](https://tailwindcss.com/), [React](https://react.dev/), and [React Router](https://reactrouter.com/).
 
 > [!IMPORTANT]
 > The data used within this project was possible thanks to the following:
@@ -33,8 +33,9 @@ Backend:
 Frontend:
 
 -   [React](https://react.dev/)
+-   [React Router](https://reactrouter.com/)
 -   [Vite](https://vitejs.dev/)
--   [ShadcnUI](https://ui.shadcn.com/)
+-   [DaisyUI](https://daisyui.com/)
 -   [TailwindCSS](https://tailwindcss.com/)
 
 Dev Tools:
@@ -66,25 +67,31 @@ npm install
 
 ## 📜 Available Scripts
 
-1. Start the app in `development` environment.
+1. Start the app in the development environment.
 
 ```bash
 npm run dev
 ```
 
-2. Start the app in `production` env, without nodemon.
+2. Build the project files and optimize for production.
 
 ```bash
-npm preview
+npm run build
 ```
 
-3. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
+3. Start the app with files optimized for production.
+
+```bash
+npm run preview
+```
+
+4. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
 
 ```bash
 npm run lint
 ```
 
-4. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
+5. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
 
 ```bash
 npm run prettier
@@ -92,6 +99,11 @@ npm run prettier
 
 ## ✨ Acknowledgements
 
+-   [csv-parse](https://github.com/adaltas/node-csv)
+-   [MiniSearch](https://github.com/lucaong/minisearch)
+-   [PapaParse](https://www.papaparse.com/)
+-   [React Infinite Scroller](https://github.com/danbovey/react-infinite-scroller)
+-   [SimpleIcons](https://simpleicons.org/)
 -   [Tensorflow.js](https://www.tensorflow.org/js)
 -   [Tensorflow.js Documentation](https://js.tensorflow.org/api/latest/)
 -   [Machine Learning Crash Course by Google](https://developers.google.com/machine-learning/crash-course/)
@@ -107,10 +119,17 @@ npm run prettier
 
 Various web articles for research and learning, such as:
 
--   [What is unsupervised learning?](https://www.ibm.com/topics/unsupervised-learning)
 -   [17 types of similarity and dissimilarity measures used in data science](https://towardsdatascience.com/17-types-of-similarity-and-dissimilarity-measures-used-in-data-science-3eb914d2681)
--   [Types of recommendation systems & their use cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
+-   [Gower's Distance](https://medium.com/analytics-vidhya/gowers-distance-899f9c4bd553)
 -   [Introduction to similarity metrics](https://medium.com/analytics-vidhya/introduction-to-similarity-metrics-a882361c9be4)
+-   [Types of recommendation systems & their use cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
+-   [What is unsupervised learning?](https://www.ibm.com/topics/unsupervised-learning)
+
+Additionally, this project would not be possible without the following sources of information:
+
+-   [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset)
+-   [JikanAPI](https://github.com/jikan-me/jikan-rest)
+-   [MyAnimeList](https://myanimelist.net/)
 
 ## ©️ License
 
