@@ -44,7 +44,7 @@ This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [D
 > [!IMPORTANT]
 > The data used within this project was possible thanks to the following:
 >
-> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and proccessed into a custom JavaScript class known as [AnimeEntry](./reccomender/models/AnimeEntry.js).
+> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and proccessed into a custom JavaScript class known as [AnimeEntry](./recommender/models/AnimeEntry.js).
 > 2. [JikanAPI](https://github.com/jikan-me/jikan-rest) - Missing information such as `pageURL`, `imageURL`, `trailerURL` and other existing properties which may have needed updates were updated by making several API requests to JikanAPI, which contains anime information obtained from [MyAnimeList](https://myanimelist.net/).
 
 ## 📖 Table of Contents

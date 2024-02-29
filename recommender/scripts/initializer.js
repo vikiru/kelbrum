@@ -8,7 +8,7 @@ import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
-} from '../reccomender.js';
+} from '../recommender.js';
 import { createFeatureTensor } from '../utils/normalize.js';
 import { initializeDataFile } from '../utils/utils.js';
 
