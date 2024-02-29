@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
-import AnimeCard from '../AnimeCard/AnimeCard';
 import { Link } from 'react-router-dom';
+
 import { shuffleRandom } from '../../../../reccomender/reccomender';
+import AnimeCard from '../AnimeCard/AnimeCard';
 
 const AnimeItem = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
@@ -27,11 +27,13 @@ const RandomAnime = ({ anime, allAnime }) => {
     const randomAnime = shuffledAnime.slice(0, 10);
 
     return (
-        <div className="space-2 grid w-full bg-secondary px-4 py-6 xs:grid-cols-1 xl:grid-cols-2">
-            {randomAnime.map((anime, index) => (
-                <AnimeItem key={anime.title} anime={anime} index={index} />
-            ))}
-            <div className="mt-2 flex justify-center">
+        <div className="bg-secondary pb-8">
+            <div className="space-2 grid w-full bg-secondary px-4 py-6 xs:grid-cols-1 xl:grid-cols-2">
+                {randomAnime.map((anime, index) => (
+                    <AnimeItem key={anime.title} anime={anime} index={index} />
+                ))}
+            </div>
+            <div className="mt-2 flex items-center justify-center">
                 <Link
                     to={`/anime/recommendations/${anime.id}`}
                     className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
