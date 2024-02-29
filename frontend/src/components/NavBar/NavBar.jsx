@@ -56,7 +56,7 @@ function NavBar() {
                             </ul>
                         </li>
                         <li>
-                            <a onClick={toggleDropdown}>Information</a>
+                            <span>Information</span>
                             <ul className="p-2">
                                 <li className="p-2">
                                     <Link to="/anime/genres" onClick={toggleDropdown}>
@@ -87,8 +87,10 @@ function NavBar() {
                         </li>
                     </ul>
                 </div>
-                <Link to="/" className="btn btn-ghost lg:text-xl">
-                    AnimeRecommendation
+            </div>
+            <div className="xs:navbar-center lg:navbar-start">
+                <Link to="/" className="font-logo btn btn-ghost lg:text-xl">
+                    Kelbrum
                 </Link>
             </div>
             <div className="navbar-center z-50 hidden lg:flex">

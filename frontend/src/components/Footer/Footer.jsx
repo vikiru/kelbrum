@@ -53,9 +53,8 @@ function Footer() {
             </footer>
             <footer className="footer footer-center border-t border-base-300 bg-neutral px-10 py-4 text-base-content">
                 <div className="text-center text-lg text-neutral-content">
-                    &copy; {new Date().getFullYear()} Placeholder Name, built by vikiru. All images and text belong to
-                    their rightful owners.
-                    <span>Built with React, TailwindCSS, and DaisyUI.</span>
+                    &copy; {new Date().getFullYear()} Kelbrum, built by Visakan Kirubakaran. All images and text belong
+                    to their rightful owners.
                 </div>
             </footer>
         </div>

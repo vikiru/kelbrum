@@ -42,7 +42,8 @@ const AnimeCard = ({ anime, index }) => {
                             <span className="font-bold">Rating:</span> {anime.rating}
                         </div>
                         <div className="text-sm text-neutral sm:text-xs md:text-sm">
-                            <span className="font-bold">Episodes:</span> {anime.episodes}
+                            <span className="font-bold">Episodes:</span>{' '}
+                            {anime.episodes === 0 ? 'Unknown' : anime.episodes}
                         </div>
                         <div className="text-sm text-neutral sm:text-xs md:text-sm">
                             <span className="font-bold">Score:</span>{' '}

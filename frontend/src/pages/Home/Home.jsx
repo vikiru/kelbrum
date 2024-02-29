@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 import RandomAnime from '../../components/RandomAnime/RandomAnime';
 import { useData } from '../../context/DataProvider';
@@ -19,9 +20,9 @@ function Home() {
                             suggestions? Refresh and you'll be presented with even more!
                         </p>
                         <div className="flex justify-center space-x-4">
-                            <button className="btn btn-accent w-full rounded-lg px-6 py-3 text-white">
+                            <Link to="/anime/search" className="btn btn-accent w-full rounded-lg px-6 py-3 text-white">
                                 Start Your Journey
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

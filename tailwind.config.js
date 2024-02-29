@@ -44,6 +44,9 @@ const config = {
             screens: {
                 xs: '300px',
             },
+            fontFamily: {
+                logo: ['Cinzel Decorative', 'serif'],
+            },
         },
     },
     plugins: [require('daisyui'), require('tailwind-scrollbar')],
