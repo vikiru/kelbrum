@@ -136,7 +136,7 @@ const AnimeDetails = () => {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row">
                 <div className="text-md mx-8 text-justify">
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">Synopsis</h2>
@@ -146,7 +146,7 @@ const AnimeDetails = () => {
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline">
                             Additional Information
                         </h2>
-                        <div className="grid gap-4 lg:grid-cols-4">
+                        <div className="grid gap-4">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md">
                                 <h2 className="text-lg font-bold text-secondary">Tags</h2>
                                 <p className="text-base text-neutral">
