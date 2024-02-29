@@ -17,7 +17,7 @@ This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [D
 -   [📝 Prerequisites](#-prerequisites)
 -   [⚡ Setup Instructions](#-setup-instructions)
 -   [📜 Available Scripts](#-available-scripts)
--   [✨ Acknowledgments](#-Acknowledgments)
+-   [✨ Acknowledgments](#-acknowledgments)
 -   [©️ License](#️-license)
 
 ## 🛠️ Tech Stack
@@ -104,6 +104,7 @@ npm run prettier
 -   [PapaParse](https://www.papaparse.com/)
 -   [React Infinite Scroller](https://github.com/danbovey/react-infinite-scroller)
 -   [SimpleIcons](https://simpleicons.org/)
+-   [tailwind-scrollbar](https://github.com/adoxography/tailwind-scrollbar)
 -   [Tensorflow.js](https://www.tensorflow.org/js)
 -   [Tensorflow.js Documentation](https://js.tensorflow.org/api/latest/)
 -   [Machine Learning Crash Course by Google](https://developers.google.com/machine-learning/crash-course/)
