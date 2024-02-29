@@ -1,7 +1,8 @@
 import * as tf from '@tensorflow/tfjs';
 import { distance, similarity } from 'ml-distance';
 
-import { returnOptimalK } from '../dataAccess/train.js';
+import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
+import { writeData } from '../dataAccess/writeFile.js';
 import {
     customDistance,
     retrieveAnimeData,
@@ -20,18 +21,10 @@ async function main() {
             const uniqueTitles = Array.from(new Set(d.titles));
             return { title: d.title, synonyms: uniqueTitles, value: d.id };
         });
-        await returnOptimalK(featureArray, 100, customDistance, 'customDistance.json');
-
-        const kmeans = await returnKmeansModel(featureArray, 4, customDistance);
-        const id = data.findIndex((d) => d.malID === 4898); // 25013 - akayona, 6, 21
-        const entry = data[id];
-        const cluster = kmeans.clusters[entry.id];
-        const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, id);
-        const reccs = await returnRandomRecommendations(results);
-        const topResults = await retrieveAnimeData(reccs, data);
-        topResults.forEach((d) => {
-            console.log(d.title);
-        });
+        const kmeans = await returnKmeansModel(featureArray, 10, customDistance);
+        await writeData('featureArray.json', featureArray);
+        await writeData('titleIDMap.json', titleIDMap);
+        await writeData('kmeans.json', kmeans);
     } catch (err) {
         console.error('Error occured:', err);
     }
