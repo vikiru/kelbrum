@@ -1,7 +1,7 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { dirname } from 'path';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 

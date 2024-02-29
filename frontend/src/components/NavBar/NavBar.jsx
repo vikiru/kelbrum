@@ -89,7 +89,7 @@ function NavBar() {
                 </div>
             </div>
             <div className="xs:navbar-center">
-                <Link to="/" className="font-logo btn btn-ghost text-xl lg:text-3xl 2xl:text-4xl">
+                <Link to="/" className="btn btn-ghost font-logo text-xl lg:text-3xl 2xl:text-4xl">
                     Kelbrum
                 </Link>
             </div>
