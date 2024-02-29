@@ -1,4 +1,3 @@
-import * as tf from '@tensorflow/tfjs';
 import { distance, similarity } from 'ml-distance';
 
 /**
@@ -36,9 +35,8 @@ async function shuffleRandom(arr) {
  * @param {Array} similarities - The array of similarities to filter and use for recommendations
  * @returns {Array} An array of recommended items sorted by similarity
  */
-async function returnRandomRecommendations(similarities) {
+async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
     const MIN_THRESHOLD = 0.9;
-    const MAX_ANIME = 100;
 
     const filteredSimilarities = similarities.filter((s) => 1 - s.similarity >= MIN_THRESHOLD);
     filteredSimilarities.sort((a, b) => a.similarity - b.similarity);
@@ -56,9 +54,6 @@ async function returnRandomRecommendations(similarities) {
             recommendations.push(item);
         }
     }
-
-    console.log(recommendations);
-
     return Array.from(recommendations).sort((a, b) => a.similarity - b.similarity);
 }
 
@@ -81,7 +76,6 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
     }, []);
 
     if (otherAnimeIndices.length === 0) {
-        console.log('No other anime found in the specified cluster.');
         return [];
     }
 

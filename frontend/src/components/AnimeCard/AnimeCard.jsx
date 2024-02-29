@@ -5,10 +5,14 @@ const AnimeCard = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
-        const img = new Image();
-        img.src = anime.imageURL;
-        img.onerror = () => setHasError(true);
-        img.onload = () => setHasError(false);
+        if (anime.imageURL === 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png') {
+            setHasError(true);
+        } else {
+            const img = new Image();
+            img.src = anime.imageURL;
+            img.onerror = () => setHasError(true);
+            img.onload = () => setHasError(false);
+        }
     }, [anime.imageURL]);
 
     return (
@@ -46,7 +50,7 @@ const AnimeCard = ({ anime, index }) => {
                         </div>
                     </div>
 
-                    <div className="mt-2 flex flex-wrap">
+                    <div className="mt-2 flex flex-wrap justify-center sm:justify-start">
                         {anime.genres
                             .filter((g) => g !== 'Unknown')
                             .map((g) => (
@@ -72,7 +76,6 @@ const AnimeCard = ({ anime, index }) => {
                     <div className="mt-2 flex justify-center sm:justify-start lg:justify-start">
                         <Link
                             to={`/anime/${anime.id}`}
-                            target="_blank"
                             className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
                         >
                             Read more

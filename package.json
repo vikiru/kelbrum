@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --fix-dry-run",
     "prettier": "eslint --ext js,jsx --fix && prettier --write ."
@@ -24,6 +24,7 @@
     "big-integer": "^1.6.52",
     "buffer": "^6.0.3",
     "cmdk": "^0.2.1",
+    "cross-env": "^7.0.3",
     "csv": "^6.3.6",
     "csv-parse": "^5.5.3",
     "csv-parser": "^3.0.0",

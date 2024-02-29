@@ -3,24 +3,39 @@ import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import {
+    retrieveAnimeData,
+    returnClusterSimilarities,
+    returnRandomRecommendations,
+} from '../../../../reccomender/reccomender';
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
 import { useData } from '../../context/DataProvider';
 
-const InfinitePagination = () => {
+const RecommendationsPage = () => {
+    const { data, featureArray, kmeans } = useData();
     const { id } = useParams();
+    const anime = data[id];
     const location = useLocation();
     const navigate = useNavigate();
-    const parentPathSegments = location.pathname.split('/');
-    const parentPath = parentPathSegments[2];
-    const {
-        filteredGenres,
-        filteredThemes,
-        filteredDemographics,
-        filteredProducers,
-        filteredStudios,
-        filteredLicensors,
-        filteredSeasons,
-    } = useData();
+    const [topResults, setTopResults] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const cluster = kmeans.clusters[anime.id];
+                const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id);
+                const reccs = await returnRandomRecommendations(results, 1000);
+                const topResultsData = await retrieveAnimeData(reccs, data);
+                setTopResults(topResultsData);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                setTopResults([]);
+                setHasError(true);
+            }
+        };
+
+        fetchData();
+    }, [anime.id, data, featureArray, kmeans.clusters]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [items, setItems] = useState([]);
@@ -36,50 +51,22 @@ const InfinitePagination = () => {
         setCurrentPage(page);
     }, [location.search]);
 
-    let data;
-    switch (parentPath) {
-        case 'genres':
-            data = filteredGenres[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        case 'themes':
-            data = filteredThemes[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        case 'demographics':
-            data = filteredDemographics[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        case 'producers':
-            data = filteredProducers[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        case 'studios':
-            data = filteredStudios[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        case 'licensors':
-            data = filteredLicensors[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        case 'seasons':
-            data = filteredSeasons[id ? parseInt(id, 10) - 1 : 0];
-            break;
-        default:
-            data = null;
-    }
-
-    const title = `Top ${data.key} Anime`;
-    const sortedData = data.values.sort((a, b) => b.score - a.score);
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+    const title = `Top Recommendations for ${anime.title}`;
+    const totalPages = Math.ceil(topResults.length / itemsPerPage);
 
     useEffect(() => {
-        const allItemsLoaded = items.length >= sortedData.length;
+        const allItemsLoaded = items.length >= topResults.length;
         setHasMore(!allItemsLoaded);
-    }, [items, sortedData.length]);
+    }, [items, topResults.length]);
 
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
-        const newItems = sortedData.slice(startIndex, endIndex);
+        const newItems = topResults.slice(startIndex, endIndex);
         setItems(newItems);
         setDisplayedItems(newItems.slice(0, itemsPerDisplay));
         setHasMore(newItems.length > itemsPerDisplay);
-    }, [currentPage, sortedData.length]);
+    }, [currentPage, topResults.length]);
 
     const fetchMoreItems = () => {
         if (displayedItems.length < items.length) {
@@ -99,12 +86,12 @@ const InfinitePagination = () => {
         }
     };
 
-    const actualItemsForCurrentPage = Math.min(itemsPerPage, sortedData.length - (currentPage - 1) * itemsPerPage);
+    const actualItemsForCurrentPage = Math.min(itemsPerPage, topResults.length - (currentPage - 1) * itemsPerPage);
     const allItemsForCurrentPageDisplayed = displayedItems.length >= actualItemsForCurrentPage;
 
     return (
         <div className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold capitalize text-primary underline">
+            <h2 className="bg-secondary pb-4 pt-6 text-center text-xl font-bold capitalize text-primary underline lg:text-4xl">
                 {title}
             </h2>
             <InfiniteScroll
@@ -151,4 +138,4 @@ const InfinitePagination = () => {
     );
 };
 
-export default React.memo(InfinitePagination);
+export default React.memo(RecommendationsPage);

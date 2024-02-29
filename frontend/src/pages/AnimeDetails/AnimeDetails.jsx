@@ -1,13 +1,13 @@
+import { Link, useParams } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../../../reccomender/reccomender';
-import { useData } from '../../context/DataProvider';
+
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
+import { useData } from '../../context/DataProvider';
 
 const AnimeDetails = () => {
     const { data, featureArray, kmeans } = useData();
@@ -29,10 +29,14 @@ const AnimeDetails = () => {
     }, [anime.licensors]);
 
     useEffect(() => {
-        const img = new Image();
-        img.src = anime.imageURL;
-        img.onerror = () => setHasError(true);
-        img.onload = () => setHasError(false);
+        if (anime.imageURL === 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png') {
+            setHasError(true);
+        } else {
+            const img = new Image();
+            img.src = anime.imageURL;
+            img.onerror = () => setHasError(true);
+            img.onload = () => setHasError(false);
+        }
     }, [anime.imageURL]);
 
     useEffect(() => {
@@ -55,7 +59,9 @@ const AnimeDetails = () => {
 
     return (
         <div className="overflow-x-hidden">
-            <h2 className="bg-secondary py-4 text-center text-2xl font-bold text-primary underline">{anime.title}</h2>
+            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-2xl">
+                {anime.title}
+            </h2>
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
                     <div className="mx-4 mt-4 lg:hidden">
@@ -279,7 +285,7 @@ const AnimeDetails = () => {
                 <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">
                     Unique Random Suggestions
                 </h2>
-                <RandomAnime allAnime={topResults} />
+                <RandomAnime anime={anime} allAnime={topResults} />
             </div>
         </div>
     );

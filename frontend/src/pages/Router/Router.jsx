@@ -1,7 +1,9 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import TopScroller from '../../components/TopScroller/TopScroller';
 import Home from '../Home/Home';
+import RecommendationsPage from '../RecommendationsPage/RecommendationsPage';
 import Footer from './../../components/Footer/Footer';
 import NavBar from './../../components/NavBar/NavBar';
 
@@ -18,6 +20,7 @@ const SeasonsPage = React.lazy(() => import('../SeasonsPage/SeasonsPage'));
 function Router() {
     return (
         <BrowserRouter>
+            <TopScroller />
             <NavBar />
             <Suspense
                 fallback={
@@ -53,6 +56,7 @@ function Router() {
                         <Route path="seasons" element={<SeasonsPage />}>
                             <Route path=":id" element={<InfinitePagination />} />
                         </Route>
+                        <Route path="recommendations/:id" element={<RecommendationsPage />} />
                     </Route>
                 </Routes>
             </Suspense>
