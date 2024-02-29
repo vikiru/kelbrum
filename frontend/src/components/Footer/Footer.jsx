@@ -35,15 +35,15 @@ function Footer() {
                 </nav>
                 <nav>
                     <h6 className="footer-title text-xl">About</h6>
-                    <a className="link-hover link text-lg" href="https://github.com/vikiru/">
+                    <a className="link-hover link text-lg" href="https://vikiru.github.io/kelbrum/acknowledgments/">
                         Acknowledgments
                     </a>
-                    <a className="link-hover link text-lg" href="https://github.com/vikiru/">
+                    <a className="link-hover link text-lg" href="https://vikiru.github.io/kelbrum/">
                         Documentation
                     </a>
                     <a
                         className="link-hover link text-lg"
-                        href="https://github.com/vikiru/"
+                        href="https://github.com/vikiru/kelbrum/"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
