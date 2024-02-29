@@ -1,4 +1,4 @@
-import { distance, similarity } from 'ml-distance';
+import { distance } from 'ml-distance';
 
 /**
  * Asynchronously retrieves anime data based on recommendations and input data.
