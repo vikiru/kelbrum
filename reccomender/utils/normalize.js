@@ -179,29 +179,29 @@ function checkArrayDimension(arr) {
 async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const normalizationFunctions = [
-        { func: encodeCombination, isCategorical: true, property: 'type' },
+        { func: encodeCategorical, isCategorical: true, property: 'type' },
         { func: encodeCombination, isCategorical: true, property: 'source' },
-        { func: encodeCombination, isCategorical: true, property: 'status' },
-        { func: encodeCombination, isCategorical: true, property: 'rating' },
+        //{ func: encodeCombination, isCategorical: true, property: 'status' },
+        { func: encodeCategorical, isCategorical: true, property: 'rating' },
         // { func: encodeCombination, isCategorical: true, property: 'premiered'},
-        { func: encodeCombination, isCategorical: true, property: 'season' },
-        { func: encodeCombination, isCategorical: true, property: 'year' },
-        { func: encodeCombination, isCategorical: true, property: 'genres' },
-        { func: encodeCombination, isCategorical: true, property: 'demographics' },
-        { func: encodeCombination, isCategorical: true, property: 'themes' },
+        //{ func: encodeCombination, isCategorical: true, property: 'season' },
+        //{ func: encodeCombination, isCategorical: true, property: 'year' },
+        { func: encodeCategorical, isCategorical: true, property: 'genres' },
+        { func: encodeCategorical, isCategorical: true, property: 'demographics' },
+        { func: encodeCategorical, isCategorical: true, property: 'themes' },
         { func: encodeCombination, isCategorical: true, property: 'producers' },
         { func: encodeCombination, isCategorical: true, property: 'studios' },
         { func: encodeCombination, isCategorical: true, property: 'licensors' },
 
-        { func: minMaxScale, isCategorical: false, property: 'rank' },
-        { func: minMaxScale, isCategorical: false, property: 'popularity' },
+        //{ func: minMaxScale, isCategorical: false, property: 'rank' },
+        // { func: minMaxScale, isCategorical: false, property: 'popularity' },
 
         { func: minMaxScale, isCategorical: false, property: 'score' },
-        { func: minMaxScale, isCategorical: false, property: 'scoredBy' },
+        //{ func: minMaxScale, isCategorical: false, property: 'scoredBy' },
         { func: minMaxScale, isCategorical: false, property: 'favourites' },
-        { func: minMaxScale, isCategorical: false, property: 'members' },
+        //{ func: minMaxScale, isCategorical: false, property: 'members' },
 
-        { func: minMaxScale, isCategorical: false, property: 'durationMinutes' },
+        //{ func: minMaxScale, isCategorical: false, property: 'durationMinutes' },
         { func: minMaxScale, isCategorical: false, property: 'episodes' },
     ];
 
