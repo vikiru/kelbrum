@@ -1,6 +1,7 @@
 import { checkFileExists, readAndProcessFile } from '../dataAccess/readFile.js';
 import { cleanDuration, cleanPremiered, cleanRating } from './clean.js';
 import { handleMissingData } from './fetchData.js';
+import { filterAnimeData } from './filter.js';
 import { createMapping } from './stats.js';
 
 /**
@@ -66,4 +67,4 @@ async function initializeDataFile() {
     }
 }
 
-export { findMax, findMin, sortData, returnUniqueArray, initializeDataFile };
+export { findMax, findMin, sortData, initializeDataFile };
