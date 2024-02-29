@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { shuffleRandom } from '../../../../reccomender/reccomender';
+import { shuffleRandom } from '../../../../recommender/recommender';
 import AnimeCard from '../AnimeCard/AnimeCard';
 
 const AnimeItem = ({ anime, index }) => {

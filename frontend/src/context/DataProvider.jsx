@@ -1,10 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import data from '../../../reccomender/data/entries.json';
-import featureArray from '../../../reccomender/data/featureArray.json';
-import kmeans from '../../../reccomender/data/kmeans.json';
-import titleIDMap from '../../../reccomender/data/titleIDMap.json';
-import { returnFilteredData } from '../../../reccomender/utils/filter';
+import data from '../../../recommender/data/entries.json';
+import featureArray from '../../../recommender/data/featureArray.json';
+import kmeans from '../../../recommender/data/kmeans.json';
+import titleIDMap from '../../../recommender/data/titleIDMap.json';
+import { returnFilteredData } from '../../../recommender/utils/filter';
 
 const DataContext = createContext();
 

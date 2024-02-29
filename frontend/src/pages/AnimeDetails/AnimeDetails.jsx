@@ -5,7 +5,7 @@ import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
-} from '../../../../reccomender/reccomender';
+} from '../../../../recommender/recommender';
 import { useData } from '../../context/DataProvider';
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
