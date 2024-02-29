@@ -55,8 +55,8 @@ Ensure that the following dependencies are installed onto your machine by follow
 1. Clone this repository to your local machine.
 
 ```bash
-git clone https://github.com/vikiru/anime-reccomender.git
-cd anime-reccomender
+git clone https://github.com/vikiru/kelbrum.git
+cd kelbrum
 ```
 
 2. Download and install all required dependencies.
@@ -130,6 +130,8 @@ Additionally, this project would not be possible without the following sources o
 -   [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset)
 -   [JikanAPI](https://github.com/jikan-me/jikan-rest)
 -   [MyAnimeList](https://myanimelist.net/)
+
+All external images and text used within this app belong to their respective owners.
 
 ## ©️ License
 
