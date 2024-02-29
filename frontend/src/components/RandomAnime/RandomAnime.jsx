@@ -33,14 +33,16 @@ const RandomAnime = ({ anime, allAnime }) => {
                     <AnimeItem key={anime.title} anime={anime} index={index} />
                 ))}
             </div>
-            <div className="mt-2 flex items-center justify-center">
-                <Link
-                    to={`/anime/recommendations/${anime.id}`}
-                    className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
-                >
-                    View all recommendations
-                </Link>
-            </div>
+            {anime !== undefined && (
+                <div className="mt-2 flex items-center justify-center">
+                    <Link
+                        to={`/anime/recommendations/${anime.id}`}
+                        className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
+                    >
+                        View all recommendations
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };
