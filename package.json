@@ -1,8 +1,33 @@
 {
-  "name": "anime-reccomender",
-  "private": true,
+  "name": "kelbrum",
+  "description": "An anime recommendation engine designed to recommend anime that is similar to user-selected anime.",
+  "author": "Visakan Kirubakaran",
   "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vikiru/kelbrum"
+  },
+  "keywords": [
+    "anime",
+    "recommendation",
+    "engine",
+    "machine-learning",
+    "tensorflow",
+    "kelbrum",
+    "similarity",
+    "kmeans",
+    "react",
+    "react router",
+    "tailwindcss",
+    "daisyui"
+  ],
+  "homepage": "https://vikiru.github.io/kelbrum/",
+  "bugs": {
+    "url": "https://github.com/vikiru/kelbrum/issues"
+  },
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vite build",
