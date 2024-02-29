@@ -1,5 +1,42 @@
 <h2 align="center"> Kelbrum </h2>
 
+<div align="center" id="badges">
+<br/>
+<a href="https://vikiru.github.io/kelbrum/">
+	<img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation"/>
+</a>
+<a href="">
+    <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="kelbrum API hosted via Render"/>
+</a>
+<br/>
+ <a href="https://wakatime.com/@vikiru/projects/ioitawlsqa">
+  <img src="https://wakatime.com/badge/user/5e62f99d-3a1e-4fd2-8f37-77919d626a67/project/018d6816-57f1-4009-a823-d00889610f66.svg"
+  alt="Wakatime Coding Stats for Kelbrum"/>
+ </a>
+ <a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge"/>
+ </a>
+ <a href="https://github.com/prettier/prettier">
+  <img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style - Prettier"/>
+ </a>
+<br/>
+ <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
+  <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues"/>
+ </a>
+ <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
+  <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs"/>
+ </a>
+  <a href="https://github.com/vikiru/kelbrum/releases">
+  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
+ </a>
+<br/>
+ <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">
+  <img src="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml/badge.svg" alt="GitHub Lint Action Workflow Status"/>
+ </a>
+</div>
+
+---
+
 **Kelbrum** is an anime recommendation engine designed to suggest anime titles that are similar to those chosen by users. It employs K-means++ clustering in combination with a custom distance function, which uses Gower's distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to accurately compute the distance between two seperate anime.
 
 This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [DaisyUI](https://daisyui.com/), [TailwindCSS](https://tailwindcss.com/), [React](https://react.dev/), and [React Router](https://reactrouter.com/).
