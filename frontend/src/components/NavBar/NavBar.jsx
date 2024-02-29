@@ -49,7 +49,9 @@ function NavBar() {
                             <span>Discover</span>
                             <ul>
                                 <li>
-                                    <a onClick={toggleDropdown}>View top 100 anime</a>
+                                    <Link to="anime/top" onClick={toggleDropdown}>
+                                        View top 100 anime
+                                    </Link>
                                 </li>
                             </ul>
                         </li>

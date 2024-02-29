@@ -1,8 +1,5 @@
 import { checkFileExists, readAndProcessFile } from '../dataAccess/readFile.js';
-import { cleanDuration, cleanPremiered, cleanRating } from './clean.js';
-import { handleMissingData } from './fetchData.js';
 import { filterAnimeData } from './filter.js';
-import { createMapping } from './stats.js';
 
 /**
  * Finds the maximum value of a specified property in the given data array.
