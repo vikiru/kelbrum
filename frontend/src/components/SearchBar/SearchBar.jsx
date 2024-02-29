@@ -91,7 +91,7 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Enter an anime name..."
-                        className="input input-bordered w-full p-4 pl-6 pr-6 text-sm sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg"
+                        className="input input-bordered w-full bg-white p-4 pl-6 pr-6 text-sm text-gray-900 sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg dark:bg-gray-800 dark:text-gray-100"
                     />
                 </div>
 
@@ -101,11 +101,13 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                             <div
                                 key={index}
                                 ref={(el) => (suggestionRefs.current[index] = el)}
-                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100' : 'bg-primary'}`}
+                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100 dark:bg-blue-500' : 'bg-white dark:bg-gray-800'}`}
                                 onClick={() => handleOnSelect(suggestion)}
                             >
                                 <div className="card-body p-2 sm:p-3 md:p-4">
-                                    <p className="card-title text-xs sm:text-sm md:text-base">{suggestion.title}</p>
+                                    <p className="card-title text-xs text-gray-900 sm:text-sm md:text-base dark:text-gray-100">
+                                        {suggestion.title}
+                                    </p>
                                 </div>
                             </div>
                         ))}

@@ -22,14 +22,13 @@ function NavBar() {
     }, [location]);
 
     return (
-        <div className="navbar bg-base-100">
+        <div className="navbar bg-base-100 text-gray-100 dark:bg-gray-800 dark:text-gray-100">
             <div className="navbar-start">
-                <div className="dropdown">
+                <div className="dropdown rounded-full dark:bg-gray-700">
                     <div tabIndex={0} role="button" className="btn btn-ghost" onClick={toggleDropdown}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
+                            className="h-5 w-5 fill-current text-gray-100 dark:text-gray-100"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                         >
@@ -43,7 +42,7 @@ function NavBar() {
                     </div>
                     <ul
                         tabIndex={0}
-                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow ${isDropdownVisible ? '' : 'hidden'}`}
+                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow dark:bg-gray-700 ${isDropdownVisible ? '' : 'hidden'}`}
                     >
                         <li>
                             <span>Discover</span>
@@ -89,8 +88,16 @@ function NavBar() {
                 </div>
             </div>
             <div className="xs:navbar-center">
-                <Link to="/" className="btn btn-ghost font-logo text-xl lg:text-3xl 2xl:text-4xl">
-                    Kelbrum
+                <Link
+                    to="/"
+                    className="btn btn-ghost font-logo text-xl text-gray-100 lg:text-3xl 2xl:text-4xl dark:text-gray-100"
+                    role="button"
+                    alt="Visit Kelbrum Homepage"
+                >
+                    <p>
+                        <span className="inline whitespace-nowrap text-[#00ffff]">Kel</span>
+                        <span className="inline whitespace-nowrap text-[#ffa500]">brum</span>
+                    </p>
                 </Link>
             </div>
             <div className="navbar-end">
@@ -98,8 +105,7 @@ function NavBar() {
                     <button className="btn btn-circle btn-ghost">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
+                            className="h-5 w-5 fill-current text-gray-100 dark:text-gray-100"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                         >
