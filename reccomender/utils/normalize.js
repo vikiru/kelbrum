@@ -1,7 +1,8 @@
 import * as tf from '@tensorflow/tfjs';
 
+import { returnUniqueArray } from './filter.js';
 import { calculateStatistics, createMapping } from './stats.js';
-import { returnUniqueArray, sortData } from './utils.js';
+import { sortData } from './utils.js';
 
 /**
  * Encodes the combination of data based on the given property using a unique value mapping.
@@ -180,7 +181,7 @@ async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const normalizationFunctions = [
         { func: encodeCategorical, isCategorical: true, property: 'type' },
-        { func: encodeCombination, isCategorical: true, property: 'source' },
+        { func: encodeCategorical, isCategorical: true, property: 'source' },
         //{ func: encodeCombination, isCategorical: true, property: 'status' },
         { func: encodeCategorical, isCategorical: true, property: 'rating' },
         // { func: encodeCombination, isCategorical: true, property: 'premiered'},
@@ -189,16 +190,16 @@ async function createFeatureTensor(data) {
         { func: encodeCategorical, isCategorical: true, property: 'genres' },
         { func: encodeCategorical, isCategorical: true, property: 'demographics' },
         { func: encodeCategorical, isCategorical: true, property: 'themes' },
-        { func: encodeCombination, isCategorical: true, property: 'producers' },
-        { func: encodeCombination, isCategorical: true, property: 'studios' },
-        { func: encodeCombination, isCategorical: true, property: 'licensors' },
+        //{ func: encodeCategorical, isCategorical: true, property: 'producers' },
+        { func: encodeCategorical, isCategorical: true, property: 'studios' },
+        //{ func: encodeCombination, isCategorical: true, property: 'licensors' },
 
         //{ func: minMaxScale, isCategorical: false, property: 'rank' },
         // { func: minMaxScale, isCategorical: false, property: 'popularity' },
 
         { func: minMaxScale, isCategorical: false, property: 'score' },
         //{ func: minMaxScale, isCategorical: false, property: 'scoredBy' },
-        { func: minMaxScale, isCategorical: false, property: 'favourites' },
+        // { func: minMaxScale, isCategorical: false, property: 'favourites' },
         //{ func: minMaxScale, isCategorical: false, property: 'members' },
 
         //{ func: minMaxScale, isCategorical: false, property: 'durationMinutes' },

@@ -1,7 +1,7 @@
-import fs from 'fs';
 import { dirname } from 'path';
-import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -51,7 +51,7 @@ async function writeData(fileName, data) {
     try {
         const dataString = JSON.stringify(data, null);
         await fs.promises.writeFile(filePath, dataString, 'utf8');
-        const stats = await fs.stat(filePath);
+        const stats = await fs.promises.stat(filePath);
         const fileSizeInBytes = stats.size;
         console.log(`Data successfully written to ${filePath}. \nFile size: ${formatFileSize(fileSizeInBytes)}`);
     } catch (err) {

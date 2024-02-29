@@ -1,10 +1,16 @@
 import { distance, similarity } from 'ml-distance';
 import { kmeans } from 'ml-kmeans';
+import { dirname } from 'path';
+import path from 'path';
 import * as ss from 'simple-statistics';
+import { fileURLToPath } from 'url';
 
 import { checkFileExists, readJSONFile } from './readFile.js';
 import { writeData } from './writeFile.js';
 
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = dirname(__filename);
 /**
  * Asynchronously computes the optimal value of k for k-means clustering using the given feature array, maximum value of
  * k, distance function, and file name.
@@ -25,8 +31,7 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
             });
             const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
             const assignments = result.clusters;
-            const silhouetteScore = ss.silhouetteMetric(featureArray, assignments);
-            results.push({ k, wcss, silhouetteScore });
+            results.push({ k, wcss });
         } catch (error) {
             console.error(`Error computing KMeans for k=${k}:`, error);
             await writeData(fileName, results);

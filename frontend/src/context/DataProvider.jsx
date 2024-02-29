@@ -4,7 +4,7 @@ import data from '../../../reccomender/data/entries.json';
 import featureArray from '../../../reccomender/data/featureArray.json';
 import kmeans from '../../../reccomender/data/kmeans.json';
 import titleIDMap from '../../../reccomender/data/titleIDMap.json';
-import { returnFilteredData } from '../../../reccomender/utils/utils';
+import { returnFilteredData } from '../../../reccomender/utils/filter';
 
 const DataContext = createContext();
 

@@ -37,26 +37,27 @@ async function shuffleRandom(arr) {
  * @returns {Array} An array of recommended items sorted by similarity
  */
 async function returnRandomRecommendations(similarities) {
-    const MIN_THRESHOLD = 0.8;
+    const MIN_THRESHOLD = 0.9;
     const MAX_ANIME = 100;
 
-    const filteredSimilarities = similarities.filter((s) => s.similarity >= MIN_THRESHOLD);
+    const filteredSimilarities = similarities.filter((s) => 1 - s.similarity >= MIN_THRESHOLD);
     filteredSimilarities.sort((a, b) => a.similarity - b.similarity);
-
-    shuffleRandom(filteredSimilarities);
 
     const selectedIds = new Set();
     const recommendations = [];
 
     for (const item of filteredSimilarities) {
+        const similarity = 1 - item.similarity;
         if (recommendations.length === MAX_ANIME) {
             break;
         }
-        if (!selectedIds.has(item.index)) {
+        if (!selectedIds.has(item.index) && similarity >= MIN_THRESHOLD) {
             selectedIds.add(item.index);
             recommendations.push(item);
         }
     }
+
+    console.log(recommendations);
 
     return Array.from(recommendations).sort((a, b) => a.similarity - b.similarity);
 }
@@ -112,19 +113,23 @@ function customDistance(tensorA, tensorB) {
     let tensorDistance = 0;
     let weightSum = 0;
 
-    const numCategoricalFeatures = 11;
+    const categoricalWeight = 0.7;
+    const numericalWeight = 1 - categoricalWeight;
+
+    const numCategoricalFeatures = 7;
 
     const categoricalA = tensorA.slice(0, numCategoricalFeatures);
     const categoricalB = tensorB.slice(0, numCategoricalFeatures);
     const continuousA = tensorA.slice(numCategoricalFeatures);
     const continuousB = tensorB.slice(numCategoricalFeatures);
 
-    const categoricalDistance = similarity.cosine(categoricalA, categoricalB) * 0.8;
-    const numericalDistance = similarity.cosine(continuousA, continuousB) * 0.2;
+    const categoricalDistance = distance.gower(categoricalA, categoricalB) * categoricalWeight;
+    const numericalDistance = distance.gower(continuousA, continuousB) * numericalWeight;
 
     tensorDistance = categoricalDistance + numericalDistance;
 
-    weightSum = numCategoricalFeatures * 0.8 + (tensorA.length - numCategoricalFeatures) * 0.2;
+    weightSum =
+        numCategoricalFeatures * categoricalWeight + (tensorA.length - numCategoricalFeatures) * numericalWeight;
 
     if (weightSum === 0) {
         console.error('Weight sum is zero, cannot divide by zero');
@@ -135,7 +140,7 @@ function customDistance(tensorA, tensorB) {
 }
 
 function compareTensors(tensorA, tensorB) {
-    return similarity.cosine(tensorA, tensorB);
+    return customDistance(tensorA, tensorB);
 }
 
 export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };

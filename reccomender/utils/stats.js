@@ -1,6 +1,6 @@
 import * as ss from 'simple-statistics';
 
-import { returnUniqueArray } from './utils.js';
+import { returnUniqueArray } from './filter';
 
 /**
  * Create a mapping of unique values to integers, starting from 0.
