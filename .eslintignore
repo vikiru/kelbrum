@@ -7,3 +7,7 @@ package.json
 .eslintrc.cjs
 .eslintrc.json
 .prettierrc
+build/**
+dist/**
+firebase.json
+recommender/data/*.json
