@@ -39,9 +39,9 @@
 
 ---
 
-**Kelbrum** is an anime recommendation engine designed to suggest anime titles that are similar to those chosen by users. It employs K-means++ clustering in combination with a custom distance function, which uses Gower's distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to accurately compute the distance between two seperate anime.
+**Kelbrum** is an anime recommendation system designed to suggest anime titles that are similar to those chosen by users. It employs K-means++ clustering in combination with a custom distance function, which uses Gower's distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to accurately compute the distance between two separate anime.
 
-This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [DaisyUI](https://daisyui.com/), [TailwindCSS](https://tailwindcss.com/), [React](https://react.dev/), and [React Router](https://reactrouter.com/).
+This project was initially set up using [Vite.js](https://vitejs.dev/) for development purposes, but it has since transitioned to utilize [Create React App](https://create-react-app.dev/), in conjunction with  [DaisyUI](https://daisyui.com/), [TailwindCSS](https://tailwindcss.com/),  [React](https://react.dev/), and [React Router](https://reactrouter.com/).
 
 > [!IMPORTANT]
 > The data used within this project was possible thanks to the following:
@@ -51,13 +51,13 @@ This project was bootstraped using [Vite.js](https://vitejs.dev/), along with [D
 
 ## 📖 Table of Contents
 
--   [📖 Table of Contents](#-table-of-contents)
--   [🛠️ Tech Stack](#️-tech-stack)
--   [📝 Prerequisites](#-prerequisites)
--   [⚡ Setup Instructions](#-setup-instructions)
--   [📜 Available Scripts](#-available-scripts)
--   [✨ Acknowledgments](#-acknowledgments)
--   [©️ License](#️-license)
+- [📖 Table of Contents](#-table-of-contents)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📝 Prerequisites](#-prerequisites)
+- [⚡ Setup Instructions](#-setup-instructions)
+- [📜 Available Scripts](#-available-scripts)
+- [✨ Acknowledgments](#-acknowledgments)
+- [©️ License](#️-license)
 
 ## 🛠️ Tech Stack
 
@@ -73,9 +73,21 @@ Frontend:
 
 -   [React](https://react.dev/)
 -   [React Router](https://reactrouter.com/)
--   [Vite](https://vitejs.dev/)
 -   [DaisyUI](https://daisyui.com/)
 -   [TailwindCSS](https://tailwindcss.com/)
+
+Hosting:
+
+- [Firebase](https://firebase.google.com/)
+  - Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/) (Based on recommended Firebase config).
+
+
+Documentation:
+
+-   Docs are built using [Docusaurus](https://docusaurus.io/)
+    -   Search functionality provided by: [docusaurus-lunr-search](https://github.com/praveenn77/docusaurus-lunr-search)
+    -   Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/)
+-   Documentation site hosted via [GitHub Pages](https://pages.github.com/)
 
 Dev Tools:
 
@@ -109,7 +121,7 @@ npm install
 1. Start the app in the development environment.
 
 ```bash
-npm run dev
+npm start
 ```
 
 2. Build the project files and optimize for production.
@@ -118,19 +130,13 @@ npm run dev
 npm run build
 ```
 
-3. Start the app with files optimized for production.
-
-```bash
-npm run preview
-```
-
-4. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
+3. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
 
 ```bash
 npm run lint
 ```
 
-5. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
+4. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
 
 ```bash
 npm run prettier

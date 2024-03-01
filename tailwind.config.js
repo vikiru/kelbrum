@@ -3,7 +3,7 @@
 const colors = require('tailwindcss/colors');
 
 const config = {
-    content: ['./frontend/src/**/*.{js,ts,jsx,tsx}'],
+    content: ['./src/**/*.{js,ts,jsx,tsx}'],
     daisyui: {
         themes: [
             {
