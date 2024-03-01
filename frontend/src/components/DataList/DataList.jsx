@@ -24,7 +24,7 @@ const DataList = ({ title, data, path, customSort, capitalizeTitle = false }) =>
     return (
         <div className="bg-secondary">
             <h2
-                className={`bg-secondary bg-opacity-50 pb-2 pt-4 text-center text-2xl font-bold text-primary underline`}
+                className={`bg-secondary bg-opacity-50 pb-2 pt-4 text-center text-xl font-bold text-primary underline lg:text-4xl`}
             >
                 {title}
             </h2>

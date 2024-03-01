@@ -89,9 +89,7 @@ const RecommendationsPage = () => {
 
     return (
         <div className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6 text-center font-bold text-primary underline xs:text-lg lg:text-4xl">
-                {title}
-            </h2>
+            <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold text-primary underline">{title}</h2>
             <InfiniteScroll
                 pageStart={0}
                 loadMore={debounce(fetchMoreItems, 1000)}

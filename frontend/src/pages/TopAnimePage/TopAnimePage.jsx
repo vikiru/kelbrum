@@ -1,9 +1,9 @@
-import { debounce } from 'lodash/lodash.min.js';
 import React, { useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 
-import { useData } from '../../context/DataProvider';
 import AnimeCard from './../../components/AnimeCard/AnimeCard';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash/lodash.min.js';
+import { useData } from '../../context/DataProvider';
 
 const TopAnimePage = () => {
     const { data } = useData();
@@ -32,7 +32,7 @@ const TopAnimePage = () => {
 
     return (
         <div className="bg-secondary pb-6">
-            <h2 className="bg-secondary py-4 text-center text-4xl font-bold text-primary underline">Top 100 Anime</h2>
+            <h2 className="bg-secondary py-4 text-center text-xl lg:text-4xl font-bold text-primary underline">Top 100 Anime</h2>
             <InfiniteScroll
                 pageStart={0}
                 loadMore={debounce(fetchMoreData, 1000)}

@@ -58,8 +58,8 @@ const AnimeDetails = () => {
     }, [anime.id, data, featureArray, kmeans.clusters]);
 
     return (
-        <div className="overflow-x-hidden">
-            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-2xl dark:text-gray-100">
+        <div className="overflow-x-hidden dark:bg-gray-900">
+            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl dark:text-gray-100">
                 {anime.title}
             </h2>
             <div className="grid gap-4 lg:grid-cols-2">
@@ -123,7 +123,7 @@ const AnimeDetails = () => {
                     </div>
                 </div>
 
-                <div className="container mx-4 mt-14 xs:hidden lg:block">
+                <div className="mx-4 mt-14 xs:hidden lg:block">
                     <figure>
                         {!hasError && (
                             <img
@@ -142,7 +142,7 @@ const AnimeDetails = () => {
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             Synopsis
                         </h2>
-                        <p className="text-left">{anime.synopsis}</p>
+                        <p className="text-left dark:text-gray-100">{anime.synopsis}</p>
                     </div>
                     <div>
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">

@@ -10,7 +10,7 @@ const DataCard = ({ path, index, value, capitalizeTitle = false }) => {
         >
             <div className="card-body m-0.5 flex items-center justify-center p-2">
                 <h2
-                    className={`card-title text-center font-semibold leading-tight text-secondary xs:text-xs dark:text-gray-100 ${capitalizeTitle ? 'capitalize' : ''}`}
+                    className={`card-title text-center font-semibold leading-tight text-secondary xs:text-xs lg:text-lg dark:text-gray-100 ${capitalizeTitle ? 'capitalize' : ''}`}
                 >
                     {value.key} ({value.values.length})
                 </h2>
