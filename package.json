@@ -1,6 +1,6 @@
 {
   "name": "kelbrum",
-  "description": "An anime recommendation engine designed to recommend anime that is similar to user-selected anime.",
+  "description": "An anime recommendation system designed to recommend anime that is similar to user-selected anime.",
   "author": "Visakan Kirubakaran",
   "version": "1.0.0",
   "type": "module",
@@ -12,6 +12,7 @@
     "anime",
     "recommendation",
     "engine",
+    "system",
     "machine-learning",
     "tensorflow",
     "kelbrum",
