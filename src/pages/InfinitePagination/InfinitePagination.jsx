@@ -1,9 +1,9 @@
+import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
-import { debounce } from 'lodash';
 import { useData } from '../../context/DataProvider';
 
 const InfinitePagination = () => {

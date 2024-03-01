@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-
-import AnimeCard from './../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
 import { debounce } from 'lodash';
+import React, { useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+
 import { useData } from '../../context/DataProvider';
+import AnimeCard from './../../components/AnimeCard/AnimeCard';
 
 const TopAnimePage = () => {
     const { data } = useData();
@@ -45,7 +45,7 @@ const TopAnimePage = () => {
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 grid-cols-1 lg:grid-cols-2">
+                <div className="3xl:grid-cols-3 m-8 grid grid-cols-1 gap-4 p-2 lg:grid-cols-2">
                     {items.map((item, index) => (
                         <AnimeCard key={item.id} anime={item} index={index + 1} />
                     ))}

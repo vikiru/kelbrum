@@ -16,10 +16,7 @@
         "plugin:jsdoc/recommended",
         "plugin:tailwindcss/recommended"
     ],
-    "ignorePatterns": [
-        "dist",
-        ".eslintrc.cjs"
-    ],
+    "ignorePatterns": ["dist", ".eslintrc.cjs"],
     "parserOptions": {
         "ecmaFeatures": {
             "jsx": true
@@ -57,14 +54,7 @@
                     "caseInsensitive": true,
                     "order": "asc"
                 },
-                "groups": [
-                    "builtin",
-                    "external",
-                    "internal",
-                    "parent",
-                    "sibling",
-                    "index"
-                ],
+                "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
                 "newlines-between": "always"
             }
         ],
@@ -80,10 +70,7 @@
         "jsdoc/require-returns-description": "off",
         "jsdoc/require-returns-type": "off",
         "jsdoc/tag-lines": "off",
-        "max-depth": [
-            "warn",
-            5
-        ],
+        "max-depth": ["warn", 5],
         "mocha/no-setup-in-describe": "off",
         "no-await-in-loop": "off",
         "no-console": "off",
