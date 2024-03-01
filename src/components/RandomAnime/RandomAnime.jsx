@@ -28,7 +28,7 @@ const RandomAnime = ({ anime, allAnime }) => {
 
     return (
         <div className="w-full  bg-secondary pb-8 dark:bg-gray-900">
-            <div className="grid w-full px-4 py-6 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 3xl:grid-cols-4">
+            <div className="grid w-full px-4 py-6 grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
                 {randomAnime.map((anime, index) => (
                     <AnimeItem key={anime.title} anime={anime} index={index} />
                 ))}
