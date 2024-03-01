@@ -1,8 +1,8 @@
-import { writeData } from '../dataAccess/writeFile';
-import { cleanDuration, cleanPremiered, cleanRating } from '../utils/clean';
-import { handleMissingData } from '../utils/fetchData';
-import { filterAnimeData } from '../utils/filter';
-import { readAndProcessFile } from './readFile';
+import { cleanDuration, cleanPremiered, cleanRating } from '../utils/clean.js';
+import { handleMissingData } from '../utils/fetchData.js';
+import { filterAnimeData } from '../utils/filter.js';
+import { readAndProcessFile } from './readFile.js';
+import { writeData } from './writeFile.js';
 
 /**
  * Construct data file by reading input csv file and processing the data.

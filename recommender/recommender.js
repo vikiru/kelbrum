@@ -1,4 +1,4 @@
-import gower from 'ml-distance/src/distances/gower';
+import { distance } from 'ml-distance';
 
 /**
  * Asynchronously retrieves anime data based on recommendations and input data.
@@ -117,8 +117,8 @@ function customDistance(tensorA, tensorB) {
     const continuousA = tensorA.slice(numCategoricalFeatures);
     const continuousB = tensorB.slice(numCategoricalFeatures);
 
-    const categoricalDistance = gower(categoricalA, categoricalB) * categoricalWeight;
-    const numericalDistance = gower(continuousA, continuousB) * numericalWeight;
+    const categoricalDistance = distance.gower(categoricalA, categoricalB) * categoricalWeight;
+    const numericalDistance = distance.gower(continuousA, continuousB) * numericalWeight;
 
     tensorDistance = categoricalDistance + numericalDistance;
 
