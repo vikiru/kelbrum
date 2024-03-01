@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 
 function NavBar() {
-    // Mobile Dropdown States
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const toggleDropdown = () => {
         setIsDropdownVisible(!isDropdownVisible);
