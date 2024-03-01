@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -18,7 +19,7 @@ const AnimeCard = ({ anime, index }) => {
     return (
         <div
             key={anime.title}
-            className="card min-h-full w-full cursor-default rounded-lg bg-primary p-1 dark:bg-gray-800"
+            className="card min-h-full w-full cursor-default rounded-lg bg-primary p-1 dark:bg-gray-800 flex flex-col justify-between"
         >
             <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-3 text-white">
                 {index}
@@ -78,16 +79,15 @@ const AnimeCard = ({ anime, index }) => {
                                 </span>
                             ))}
                     </div>
-
-                    <div className="mt-2 flex justify-center sm:justify-start lg:justify-start">
-                        <Link
-                            to={`/anime/${anime.id}`}
-                            className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
-                        >
-                            Read more
-                        </Link>
-                    </div>
                 </div>
+            </div>
+            <div className="mt-2 flex justify-center">
+                <Link
+                    to={`/anime/${anime.id}`}
+                    className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
+                >
+                    Read more
+                </Link>
             </div>
         </div>
     );

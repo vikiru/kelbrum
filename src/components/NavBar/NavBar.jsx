@@ -23,8 +23,8 @@ function NavBar() {
     return (
         <div className="navbar bg-base-100 text-gray-100 dark:bg-gray-800 dark:text-gray-100">
             <div className="navbar-start">
-                <div className="dropdown rounded-full dark:bg-gray-700">
-                    <div tabIndex={0} role="button" className="btn btn-ghost" onClick={toggleDropdown}>
+                <div className="dropdown rounded-full dark:bg-gray-800">
+                    <div tabIndex={0} role="button" className="btn btn-ghost rounded-full" onClick={toggleDropdown}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 fill-current text-gray-100 dark:text-gray-100"
@@ -41,7 +41,7 @@ function NavBar() {
                     </div>
                     <ul
                         tabIndex={0}
-                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow dark:bg-gray-700 ${isDropdownVisible ? '' : 'hidden'}`}
+                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box shadow bg-base-100 p-2 dark:bg-gray-800 ${isDropdownVisible ? '' : 'hidden'}`}
                     >
                         <li>
                             <span>Discover</span>
