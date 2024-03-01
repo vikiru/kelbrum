@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-import MiniSearch from 'minisearch';
 import { debounce } from 'lodash';
+import MiniSearch from 'minisearch';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
