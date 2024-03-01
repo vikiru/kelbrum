@@ -1,5 +1,6 @@
 */data/*.json
 .history/
+build/
 *.csv
 
 # Logs

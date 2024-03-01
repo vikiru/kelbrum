@@ -1,7 +1,32 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "kelbrum",
+  "description": "An anime recommendation engine designed to recommend anime that is similar to user-selected anime.",
+  "author": "Visakan Kirubakaran",
+  "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vikiru/kelbrum"
+  },
+  "keywords": [
+    "anime",
+    "recommendation",
+    "engine",
+    "machine-learning",
+    "tensorflow",
+    "kelbrum",
+    "similarity",
+    "kmeans",
+    "react",
+    "react router",
+    "tailwindcss",
+    "daisyui"
+  ],
+  "homepage": "https://vikiru.github.io/kelbrum/",
+  "bugs": {
+    "url": "https://github.com/vikiru/kelbrum/issues"
+  },
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -33,14 +58,20 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
+      "defaults",
+      ">0.01%",
       "not dead",
-      "not op_mini all"
+      "not op_mini all",
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "defaults",
+      ">0.01%",
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
     ]
   },
   "devDependencies": {
@@ -79,8 +110,9 @@
     "prettier-plugin-tailwindcss": "^0.5.11",
     "simple-statistics": "^7.8.3",
     "tailwind-scrollbar": "^3.1.0",
-    "tailwindcss": "^3.4.1",
-    "vite": "^5.1.4",
-    "vite-plugin-top-level-await": "^1.4.1"
+    "tailwindcss": "^3.4.1"
+  },
+  "engines": {
+    "node": ">=16.9"
   }
 }
