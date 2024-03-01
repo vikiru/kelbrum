@@ -59,7 +59,7 @@
     "big-integer": "^1.6.52",
     "cmdk": "^0.2.1",
     "cross-env": "^7.0.3",
-    "csv-parse": "^5.5.3",
+    "csv-parse": "^5.5.5",
     "lodash": "^4.17.21",
     "minisearch": "^6.3.0",
     "ml-distance": "^4.0.1",
