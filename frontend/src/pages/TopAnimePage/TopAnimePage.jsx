@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import { debounce } from 'lodash/lodash.min.js';
 import React, { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 
