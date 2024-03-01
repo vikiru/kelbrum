@@ -4,3 +4,4 @@ package-lock.json
 package.json
 .eslintrc
 .prettierrc
+src/recommender/data/*.json
