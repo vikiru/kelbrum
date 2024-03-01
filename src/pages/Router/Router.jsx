@@ -1,11 +1,10 @@
-import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import React, { Suspense } from 'react';
 
-import TopScroller from '../../components/TopScroller/TopScroller';
-import { useData } from '../../context/DataProvider';
-import Home from '../Home/Home';
 import Footer from './../../components/Footer/Footer';
+import Home from '../Home/Home';
 import NavBar from './../../components/NavBar/NavBar';
+import TopScroller from '../../components/TopScroller/TopScroller';
 
 const RecommendationsPage = React.lazy(() => import('../RecommendationsPage/RecommendationsPage'));
 const InfinitePagination = React.lazy(() => import('../InfinitePagination/InfinitePagination'));
@@ -19,10 +18,8 @@ const StudiosPage = React.lazy(() => import('../StudiosPage/StudiosPage'));
 const SeasonsPage = React.lazy(() => import('../SeasonsPage/SeasonsPage'));
 
 function Router() {
-    const { filteredGenres } = useData();
-
     return (
-        <BrowserRouter>
+        <BrowserRouter basename='/'>
             <TopScroller />
             <NavBar />
             <Suspense

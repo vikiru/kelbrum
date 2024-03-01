@@ -39,48 +39,51 @@ const AnimeCard = ({ anime, index }) => {
                         />
                     )}
                 </div>
-                <div className="flex flex-col justify-between rounded-lg p-2">
-                    <div>
-                        <div className="text-sm text-neutral sm:text-xs md:text-sm dark:text-gray-100">
-                            <span className="font-bold">Type:</span> {anime.type}
-                        </div>
-                        <div className="text-sm text-neutral sm:text-xs md:text-sm dark:text-gray-100">
-                            <span className="font-bold">Rating:</span> {anime.rating}
-                        </div>
-                        <div className="text-sm text-neutral sm:text-xs md:text-sm dark:text-gray-100">
-                            <span className="font-bold">Episodes:</span>{' '}
-                            {anime.episodes === 0 ? 'Unknown' : anime.episodes}
-                        </div>
-                        <div className="text-sm text-neutral sm:text-xs md:text-sm dark:text-gray-100">
-                            <span className="font-bold">Score:</span>{' '}
-                            {anime.score === 0 ? 'Unknown' : `${anime.score} /   10`}
-                        </div>
-                    </div>
-
-                    <div className="mt-2 flex flex-wrap justify-center sm:justify-start">
-                        {anime.genres
-                            .filter((g) => g !== 'Unknown')
-                            .map((g) => (
-                                <span
-                                    className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs"
-                                    key={g}
-                                >
-                                    {g}
-                                </span>
-                            ))}
-                        {anime.demographics
-                            .filter((d) => d !== 'Unknown')
-                            .map((d) => (
-                                <span
-                                    className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs"
-                                    key={d}
-                                >
-                                    {d}
-                                </span>
-                            ))}
-                    </div>
-                </div>
+                <div className="rounded-lg flex justify-center items-center p-4 bg-gray-100 dark:bg-gray-800">
+    <div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <span className="font-bold">Type:</span> {anime.type}
+        </div>
+        <div className="text-sm font-semibold capitalize text-gray-700 dark:text-gray-300">
+            <span className="font-bold ">Season:</span> {anime.premiered}
+        </div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <span className="font-bold">Rating:</span> {anime.rating}
+        </div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <span className="font-bold">Episodes:</span>{' '}
+            {anime.episodes === 0 ? 'Unknown' : anime.episodes}
+        </div>
+        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <span className="font-bold">Score:</span>{' '}
+            {anime.score === 0 ? 'Unknown' : `${anime.score} /   10`}
+        </div>
+    </div>
+</div>
             </div>
+            
+            <div className="mt-1/2 flex flex-wrap justify-center">
+    {anime.genres
+        .filter((g) => g !== 'Unknown')
+        .map((g) => (
+            <span
+                className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs"
+                key={g}
+            >
+                {g}
+            </span>
+        ))}
+    {anime.demographics
+        .filter((d) => d !== 'Unknown')
+        .map((d) => (
+            <span
+                className="sm:text-xxs badge badge-neutral mb-1 mr-1 bg-neutral p-2 text-xs"
+                key={d}
+            >
+                {d}
+            </span>
+        ))}
+</div>
             <div className="mt-2 flex justify-center">
                 <Link
                     to={`/anime/${anime.id}`}
