@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import AnimeCard from './../../components/AnimeCard/AnimeCard';
 import InfiniteScroll from 'react-infinite-scroller';
-import { debounce } from 'lodash/lodash.min.js';
+import { debounce } from 'lodash';
 import { useData } from '../../context/DataProvider';
 
 const TopAnimePage = () => {
