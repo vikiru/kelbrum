@@ -32,7 +32,9 @@ const TopAnimePage = () => {
 
     return (
         <div className="bg-secondary pb-6">
-            <h2 className="bg-secondary py-4 text-center text-xl lg:text-4xl font-bold text-primary underline">Top 100 Anime</h2>
+            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl">
+                Top 100 Anime
+            </h2>
             <InfiniteScroll
                 pageStart={0}
                 loadMore={debounce(fetchMoreData, 1000)}
@@ -43,7 +45,7 @@ const TopAnimePage = () => {
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2">
+                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 grid-cols-1 lg:grid-cols-2">
                     {items.map((item, index) => (
                         <AnimeCard key={item.id} anime={item} index={index + 1} />
                     ))}

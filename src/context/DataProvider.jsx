@@ -3,8 +3,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import data from '../recommender/data/entries.json';
 import featureArray from '../recommender/data/featureArray.json';
 import kmeans from '../recommender/data/kmeans.json';
-import { returnFilteredData } from '../recommender/utils/filter';
 import titleIDMap from '../recommender/data/titleIDMap.json';
+import { returnFilteredData } from '../recommender/utils/filter';
 
 const DataContext = createContext();
 
@@ -15,7 +15,7 @@ const DataProvider = ({ children }) => {
         filteredDemographics: [],
         filteredProducers: [],
         filteredStudios: [],
-        filteredLicensors: [], 
+        filteredLicensors: [],
         filteredSeasons: [],
     });
 

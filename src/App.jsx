@@ -1,5 +1,6 @@
-import { DataProvider } from './context/DataProvider';
 import React from 'react';
+
+import { DataProvider } from './context/DataProvider';
 import Router from './pages/Router/Router';
 
 function App() {

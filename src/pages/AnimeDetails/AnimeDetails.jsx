@@ -1,13 +1,13 @@
-import { Link, useParams } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+
+import { useData } from '../../context/DataProvider';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
-
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
-import { useData } from '../../context/DataProvider';
 
 const AnimeDetails = () => {
     const { data, featureArray, kmeans } = useData();

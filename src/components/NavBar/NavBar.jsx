@@ -1,5 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 function NavBar() {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -41,7 +41,7 @@ function NavBar() {
                     </div>
                     <ul
                         tabIndex={0}
-                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box shadow bg-base-100 p-2 dark:bg-gray-800 ${isDropdownVisible ? '' : 'hidden'}`}
+                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow dark:bg-gray-800 ${isDropdownVisible ? '' : 'hidden'}`}
                     >
                         <li>
                             <span>Discover</span>

@@ -1,10 +1,10 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import Footer from './../../components/Footer/Footer';
-import Home from '../Home/Home';
-import NavBar from './../../components/NavBar/NavBar';
 import TopScroller from '../../components/TopScroller/TopScroller';
+import Home from '../Home/Home';
+import Footer from './../../components/Footer/Footer';
+import NavBar from './../../components/NavBar/NavBar';
 
 const RecommendationsPage = React.lazy(() => import('../RecommendationsPage/RecommendationsPage'));
 const InfinitePagination = React.lazy(() => import('../InfinitePagination/InfinitePagination'));
@@ -19,7 +19,7 @@ const SeasonsPage = React.lazy(() => import('../SeasonsPage/SeasonsPage'));
 
 function Router() {
     return (
-        <BrowserRouter basename='/'>
+        <BrowserRouter basename="/">
             <TopScroller />
             <NavBar />
             <Suspense
@@ -35,19 +35,19 @@ function Router() {
                     <Route path="anime/top" element={<TopAnimePage />} />
                     <Route path="anime/search" element={<SearchAnime />} />
                     <Route path="anime/genres" element={<GenresPage />} />
-                    <Route path="anime/genres/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/genres/:id" element={<InfinitePagination />} />
                     <Route path="anime/demographics" element={<GenresPage />} />
-                    <Route path="anime/demographics/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/demographics/:id" element={<InfinitePagination />} />
                     <Route path="anime/themes" element={<GenresPage />} />
-                    <Route path="anime/themes/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/themes/:id" element={<InfinitePagination />} />
                     <Route path="anime/licensors" element={<LicensorsPage />} />
-                    <Route path="anime/licensors/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/licensors/:id" element={<InfinitePagination />} />
                     <Route path="anime/producers" element={<ProducersPage />} />
-                    <Route path="anime/producers/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/producers/:id" element={<InfinitePagination />} />
                     <Route path="anime/studios" element={<StudiosPage />} />
-                    <Route path="anime/studios/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/studios/:id" element={<InfinitePagination />} />
                     <Route path="anime/seasons" element={<SeasonsPage />} />
-                    <Route path="anime/seasons/:id" element={<InfinitePagination />}/>
+                    <Route path="anime/seasons/:id" element={<InfinitePagination />} />
                     <Route path="anime/recommendations/:id" element={<RecommendationsPage />} />
                 </Routes>
             </Suspense>
