@@ -41,7 +41,7 @@ const Details = ({ anime }) => {
                                     src={`${anime.imageURL}`}
                                     alt={`${anime.title} image`}
                                     loading="lazy"
-                                    className="h-[80%] w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                                    className="h-[80%] w-full rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                                     onError={handleImageError}
                                 />
                             </picture>
@@ -117,7 +117,7 @@ const Details = ({ anime }) => {
                             <img
                                 src={`${anime.imageURL}`}
                                 alt={`${anime.title} image`}
-                                className="h-[50%] w-[80%] max-w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                                className="h-[50%] w-[80%] max-w-full rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                             />
                         </picture>
                     )}

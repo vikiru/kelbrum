@@ -2,6 +2,7 @@
 .history/
 build/
 *.csv
+.firebase/
 
 # Logs
 logs
