@@ -14,7 +14,7 @@ const config = {
     title: 'Kelbrum',
 
     tagline: 'An anime recommendation system designed to recommend anime that is similar to user-selected anime.',
-    favicon: 'public/favicon.ico',
+    favicon: 'favicon.ico',
     staticDirectories: ['public', 'static'],
     trailingSlash: true,
 
@@ -85,10 +85,9 @@ const config = {
                 },
             ],
             navbar: {
-                hideOnScroll: true,
                 logo: {
                     alt: 'Kelbrum Logo',
-                    src: './public/logo.png',
+                    src: 'logo.png',
                 },
                 items: [
                     {
@@ -98,7 +97,7 @@ const config = {
                     },
                     {
                         position: 'left',
-                        label: 'Development',
+                        label: 'Motivation',
                         href: '/motivation',
                     },
                 ],
