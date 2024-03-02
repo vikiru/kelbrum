@@ -17,13 +17,14 @@ const DataProvider = ({ children }) => {
         filteredStudios: [],
         filteredLicensors: [],
         filteredSeasons: [],
+        processed: false
     });
 
     const dataRef = useRef(data);
     const featureArrayRef = useRef(featureArray);
     const kmeansRef = useRef(kmeans);
     const titleIDMapRef = useRef(titleIDMap);
-    const topAnime = [...data].sort((a, b) => b.score - a.score).slice(0, 100);
+    const topAnime = [...dataRef.current].sort((a, b) => b.score - a.score).slice(0, 100);
     const topAnimeRef = useRef(topAnime);
 
     useEffect(() => {
@@ -48,7 +49,6 @@ const DataProvider = ({ children }) => {
                 filteredSeasons,
             ] = await Promise.all(promises);
 
-
             processedDataRef.current = {
                 filteredGenres,
                 filteredThemes,
@@ -57,10 +57,11 @@ const DataProvider = ({ children }) => {
                 filteredStudios,
                 filteredLicensors,
                 filteredSeasons,
+                processed: true,
             };
         };
 
-        if (!processedDataRef.current) {
+        if (!processedDataRef.current.processed) {
             processData();
         }
     }, []);
@@ -74,7 +75,7 @@ const DataProvider = ({ children }) => {
             titleIDMap: titleIDMapRef.current,
             topAnime: topAnimeRef.current
         }),
-        [processedDataRef.current],
+        [],
     );
 
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;

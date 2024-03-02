@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
 
-    useEffect(() => {
-        if (anime.imageURL === 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png') {
-            setHasError(true);
-        } else {
-            const img = new Image();
-            img.src = anime.imageURL;
-            img.onerror = () => setHasError(true);
-            img.onload = () => setHasError(false);
-        }
-    }, [anime.imageURL]);
+    const handleImageError = () => {
+        setHasError(true);
+    };
 
     return (
         <section id='anime-card'
@@ -37,6 +30,7 @@ const AnimeCard = ({ anime, index }) => {
                             alt={`${anime.title} image`}
                             className="h-auto w-auto rounded-lg object-contain"
                             loading='lazy'
+                            onError={handleImageError}
                         />
                     )}
                 </div>

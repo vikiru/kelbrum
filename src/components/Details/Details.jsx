@@ -15,16 +15,9 @@ const Details = ({ anime }) => {
         return anime.licensors.length === 0 ? ['Unknown'] : anime.licensors.map((licensor) => licensor.trim());
     }, [anime.licensors]);
 
-    useEffect(() => {
-        if (anime.imageURL === 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png') {
-            setHasError(true);
-        } else {
-            const img = new Image();
-            img.src = anime.imageURL;
-            img.onerror = () => setHasError(true);
-            img.onload = () => setHasError(false);
-        }
-    }, [anime.imageURL]);
+    const handleImageError = () => {
+        setHasError(true);
+    };
 
     return (
         <section id="anime-details">
@@ -35,12 +28,14 @@ const Details = ({ anime }) => {
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
                     <section id='anime-image' className="mx-4 mt-4 lg:hidden">
-                        <figure>
+                    <figure>
                             {!hasError && (
                                 <img
                                     src={anime.imageURL}
                                     alt={`${anime.title} image`}
+                                    loading='lazy'
                                     className="h-[80%] w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                                    onError={handleImageError}
                                 />
                             )}
                         </figure>

@@ -20,7 +20,7 @@ const AnimeDetails = () => {
         const fetchData = async () => {
             try {
                 const cluster = kmeans.clusters[anime.id];
-                const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, [anime.id]);
+                const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id, [anime.id]);
                 const reccs = await returnRandomRecommendations(results);
                 const topResultsData = await retrieveAnimeData(reccs, data);
                 setTopResults(topResultsData);
