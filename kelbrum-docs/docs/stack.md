@@ -22,7 +22,7 @@ Frontend:
 Hosting:
 
 -   [Firebase](https://firebase.google.com/)
-    -   Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/) (Based on recommended Firebase config).
+    -   Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/) (Based on recommended Firebase config)
 
 Documentation:
 
