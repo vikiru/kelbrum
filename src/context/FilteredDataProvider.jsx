@@ -67,4 +67,3 @@ export const FilteredDataProvider = ({ children }) => {
 };
 
 export const useFilteredData = () => useContext(FilteredDataContext);
-

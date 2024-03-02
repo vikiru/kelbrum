@@ -18,4 +18,3 @@ export const KMeansProvider = ({ children }) => {
 };
 
 export const useKMeans = () => useContext(KMeansContext);
-

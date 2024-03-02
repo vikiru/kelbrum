@@ -1,8 +1,8 @@
-import { Outlet, useLocation } from 'react-router-dom';
 import React, { useMemo } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
-import DataList from './../../components/DataList/DataList';
 import { useFilteredData } from '../../context/FilteredDataProvider';
+import DataList from './../../components/DataList/DataList';
 
 function SeasonsPage() {
     const { filteredSeasons } = useFilteredData();

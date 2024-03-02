@@ -1,9 +1,9 @@
+import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
-import { debounce } from 'lodash';
 import { useFilteredData } from '../../context/FilteredDataProvider';
 
 const InfinitePagination = () => {

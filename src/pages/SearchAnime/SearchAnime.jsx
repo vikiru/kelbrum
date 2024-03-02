@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-import SearchBar from './../../components/SearchBar/SearchBar';
 import { useTitleIDMap } from '../../context/TitleIDMapProvider';
+import SearchBar from './../../components/SearchBar/SearchBar';
 
 const SearchAnime = () => {
     const { titleIDMap } = useTitleIDMap();

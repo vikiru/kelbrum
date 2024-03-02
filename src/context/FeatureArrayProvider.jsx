@@ -18,4 +18,3 @@ export const FeatureArrayProvider = ({ children }) => {
 };
 
 export const useFeatureArray = () => useContext(FeatureArrayContext);
-

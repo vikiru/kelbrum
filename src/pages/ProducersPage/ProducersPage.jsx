@@ -1,8 +1,8 @@
+import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import DataList from './../../components/DataList/DataList';
-import React from 'react';
 import { useFilteredData } from '../../context/FilteredDataProvider';
+import DataList from './../../components/DataList/DataList';
 
 function ProducersPage() {
     const { filteredProducers } = useFilteredData();
