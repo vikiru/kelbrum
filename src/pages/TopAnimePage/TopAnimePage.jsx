@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import AnimeCard from './../../components/AnimeCard/AnimeCard';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -11,22 +11,23 @@ const TopAnimePage = () => {
     const [items, setItems] = useState([]);
     const [hasMore, setHasMore] = useState(true);
 
-    const fetchAnimeItems = () => {
-        const nextIndex = items.length;
-        const newItems = topAnime.slice(nextIndex, nextIndex + 10);
+    const fetchAnimeItems = useMemo(() => {
+        return () => {
+            const nextIndex = items.length;
+            const newItems = topAnime.slice(nextIndex, nextIndex + 10);
 
-        if (newItems.length === 0) {
-            setHasMore(false);
-        }
+            if (newItems.length === 0) {
+                setHasMore(false);
+            }
 
-        return newItems;
-    };
+            return newItems;
+        };
+    }, [items, topAnime]);
 
-    const fetchMoreData = () => {
+    const fetchMoreData = useCallback(() => {
         const newItems = fetchAnimeItems();
-        setItems(items.concat(newItems));
-    };
-    const percentageLoaded = Math.floor((items.length / 100) * 100);
+        setItems(prevItems => [...prevItems, ...newItems]);
+    }, [fetchAnimeItems]);
 
     return (
         <section id='top-anime' className="bg-secondary pb-6">

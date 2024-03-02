@@ -1,25 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import AnimeCard from '../AnimeCard/AnimeCard';
 import { Link } from 'react-router-dom';
 import { shuffleRandom } from '../../recommender/recommender';
-
-const AnimeItem = ({ anime, index }) => {
-    const [hasError, setHasError] = useState(false);
-
-    useEffect(() => {
-        const img = new Image();
-        img.src = anime.imageURL;
-        img.onerror = () => setHasError(true);
-        img.onload = () => setHasError(false);
-    }, [anime.imageURL]);
-
-    return (
-        <div key={anime.title} className="m-4 flex flex-col justify-start">
-            <AnimeCard anime={anime} index={index + 1} />
-        </div>
-    );
-};
 
 const RandomAnime = ({ anime, allAnime }) => {
     const shuffledAnime = useMemo(() => {
@@ -32,7 +15,9 @@ const RandomAnime = ({ anime, allAnime }) => {
         <section id='random-anime' className="w-full bg-secondary pb-8 dark:bg-gray-900">
             <div className="3xl:grid-cols-3 grid w-full grid-cols-1 px-4 py-6 lg:grid-cols-2">
                 {shuffledAnime.map((anime, index) => (
-                    <AnimeItem key={anime.title} anime={anime} index={index} />
+                    <div key={anime.title} className="m-4 flex flex-col justify-start">
+                        <AnimeCard anime={anime} index={index + 1} />
+                    </div>
                 ))}
             </div>
             {anime !== undefined && (
