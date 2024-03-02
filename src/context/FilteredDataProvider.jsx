@@ -14,7 +14,7 @@ const FilteredDataProvider = ({ children }) => {
         filteredStudios: [],
         filteredLicensors: [],
         filteredSeasons: [],
-        processed: false
+        processed: false,
     });
 
     useEffect(() => {
@@ -68,4 +68,4 @@ const FilteredDataProvider = ({ children }) => {
 
 const useFilteredData = () => useContext(FilteredDataContext);
 
-export {FilteredDataProvider, useFilteredData };
+export { FilteredDataProvider, useFilteredData };

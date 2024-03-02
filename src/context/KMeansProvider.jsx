@@ -19,4 +19,4 @@ const KMeansProvider = ({ children }) => {
 
 const useKMeans = () => useContext(KMeansContext);
 
-export {KMeansProvider, useKMeans };
+export { KMeansProvider, useKMeans };
