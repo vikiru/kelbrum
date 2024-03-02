@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { AppProvider } from './context/AppProvider';
+import React from 'react';
 import Router from './pages/Router/Router';
 
 function App() {
@@ -11,4 +10,4 @@ function App() {
     );
 }
 
-export default { App };
+export { App };

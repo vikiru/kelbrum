@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 
 import data from '../recommender/data/entries.json';
 import { returnFilteredData } from '../recommender/utils/filter';
@@ -39,7 +39,7 @@ export const FilteredDataProvider = ({ children }) => {
                 filteredSeasons,
             ] = await Promise.all(promises);
 
-            processedData = {
+            processedDataRef.current = {
                 filteredGenres,
                 filteredThemes,
                 filteredDemographics,
@@ -51,7 +51,7 @@ export const FilteredDataProvider = ({ children }) => {
             };
         };
 
-        if (!processedData.current.processed) {
+        if (!processedDataRef.current.processed) {
             processData();
         }
     }, []);

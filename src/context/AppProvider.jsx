@@ -1,12 +1,12 @@
-import DataProvider from './DataProvider';
-import FeatureArrayProvider from './FeatureArrayProvider';
-import FilteredDataProvider from './FilteredDataProvider';
-import KMeansProvider from './KMeansProvider';
+import {DataProvider} from './DataProvider';
+import {FeatureArrayProvider} from './FeatureArrayProvider';
+import {FilteredDataProvider} from './FilteredDataProvider';
+import {KMeansProvider} from './KMeansProvider';
 import React from 'react';
-import TitleIDMapProvider from './TitleIDMapProvider';
-import TopAnimeProvider from './TopAnimeProvider';
+import {TitleIDMapProvider} from './TitleIDMapProvider';
+import {TopAnimeProvider} from './TopAnimeProvider';
 
-const AppProvider = ({ children }) => {
+export const AppProvider = ({ children }) => {
     return (
         <DataProvider>
             <FeatureArrayProvider>
@@ -22,4 +22,3 @@ const AppProvider = ({ children }) => {
     );
 };
 
-export default AppProvider;
