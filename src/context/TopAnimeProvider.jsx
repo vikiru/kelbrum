@@ -1,22 +1,15 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import data from '../recommender/data/entries.json';
 
 const TopAnimeContext = createContext();
 
 export const TopAnimeProvider = ({ children }) => {
-    const dataRef = useRef(data);
-    const topAnime = [...dataRef.current].sort((a, b) => b.score - a.score).slice(0, 100);
-    const topAnimeRef = useRef(topAnime);
+    const topAnime = useMemo(() => {
+        return [...data].sort((a, b) => b.score - a.score).slice(0, 100);
+    }, []);
 
-    const state = useMemo(
-        () => ({
-            topAnime: topAnimeRef.current,
-        }),
-        [],
-    );
-
-    return <TopAnimeContext.Provider value={state}>{children}</TopAnimeContext.Provider>;
+    return <TopAnimeContext.Provider value={{ topAnime }}>{children}</TopAnimeContext.Provider>;
 };
 
 export const useTopAnime = () => useContext(TopAnimeContext);

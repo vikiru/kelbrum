@@ -52,7 +52,7 @@ export const FilteredDataProvider = ({ children }) => {
         };
 
         processData();
-    }, []);
+    }, [data]);
 
     return <FilteredDataContext.Provider value={processedDataRef.current}>{children}</FilteredDataContext.Provider>;
 };

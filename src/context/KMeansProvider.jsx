@@ -1,18 +1,13 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import kmeans from '../recommender/data/kmeans.json';
 
 const KMeansContext = createContext();
 
 export const KMeansProvider = ({ children }) => {
-    const kmeansRef = useRef(kmeans);
-
-    const state = useMemo(
-        () => ({
-            kmeans: kmeansRef.current,
-        }),
-        [],
-    );
+    const state = useMemo(() => ({
+        kmeans: kmeans,
+    }), []);
 
     return <KMeansContext.Provider value={state}>{children}</KMeansContext.Provider>;
 };

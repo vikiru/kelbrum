@@ -1,18 +1,13 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import titleIDMap from '../recommender/data/titleIDMap.json';
 
 const TitleIDMapContext = createContext();
 
 export const TitleIDMapProvider = ({ children }) => {
-    const titleIDMapRef = useRef(titleIDMap);
-
-    const state = useMemo(
-        () => ({
-            titleIDMap: titleIDMapRef.current,
-        }),
-        [],
-    );
+    const state = useMemo(() => ({
+        titleIDMap: titleIDMap,
+    }), []);
 
     return <TitleIDMapContext.Provider value={state}>{children}</TitleIDMapContext.Provider>;
 };

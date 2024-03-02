@@ -1,18 +1,13 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import featureArray from '../recommender/data/featureArray.json';
 
 const FeatureArrayContext = createContext();
 
 export const FeatureArrayProvider = ({ children }) => {
-    const featureArrayRef = useRef(featureArray);
-
-    const state = useMemo(
-        () => ({
-            featureArray: featureArrayRef.current,
-        }),
-        [],
-    );
+    const state = useMemo(() => ({
+        featureArray: featureArray,
+    }), []);
 
     return <FeatureArrayContext.Provider value={state}>{children}</FeatureArrayContext.Provider>;
 };

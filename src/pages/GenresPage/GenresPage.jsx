@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { useFilteredData } from '../../context/FilteredDataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function GenresPage() {
     const { filteredGenres, filteredThemes, filteredDemographics } = useFilteredData();
