@@ -56,7 +56,6 @@ Upon combining these two parts, the project comes together in the form, that is,
 >
 > All external images and text used within this app belong to their respective owners.
 
-
 ## 📖 Table of Contents
 
 -   [📖 Table of Contents](#-table-of-contents)
