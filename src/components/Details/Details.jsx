@@ -2,6 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 const Details = ({ anime }) => {
     const [hasError, setHasError] = useState(false);
+    const [webPURL, setWebPURL] = useState(anime.imageURL);
+
+    useEffect(() => {
+        setImageURL(anime.imageURL.replace('.jpg', '.webp'));
+    });
 
     const trimmedStudios = useMemo(() => {
         return anime.studios.length === 0 ? ['Unknown'] : anime.studios.map((studio) => studio.trim());
@@ -28,17 +33,19 @@ const Details = ({ anime }) => {
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
                     <section id="anime-image" className="mx-4 mt-4 lg:hidden">
-                        <figure>
-                            {!hasError && (
+                        {!hasError && (
+                            <picture>
+                                <source srcSet={`${webPURL}`} type="image/webp" />
+                                <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
                                 <img
-                                    src={anime.imageURL}
+                                    src={`${anime.imageURL}`}
                                     alt={`${anime.title} image`}
                                     loading="lazy"
                                     className="h-[80%] w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                                     onError={handleImageError}
                                 />
-                            )}
-                        </figure>
+                            </picture>
+                        )}
                     </section>
 
                     <section id="anime-general-info">
@@ -102,17 +109,19 @@ const Details = ({ anime }) => {
                     </section>
                 </div>
 
-                <div className="mx-4 mt-14 xs:hidden lg:block">
-                    <figure>
-                        {!hasError && (
+                <section id="anime-image" className="mx-4 mt-14 xs:hidden lg:block">
+                    {!hasError && (
+                        <picture>
+                            <source srcSet={`${webPURL}`} type="image/webp" />
+                            <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
                             <img
-                                src={anime.imageURL}
+                                src={`${anime.imageURL}`}
                                 alt={`${anime.title} image`}
                                 className="h-[50%] w-[80%] max-w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                             />
-                        )}
-                    </figure>
-                </div>
+                        </picture>
+                    )}
+                </section>
             </div>
 
             <div className="flex flex-col gap-4 lg:flex-row">
@@ -276,7 +285,7 @@ const Details = ({ anime }) => {
                             External Links
                         </h2>
 
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2  pb-6">
                             {anime.pageURL !== 'Unknown' && (
                                 <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400 dark:bg-gray-600">
                                     <a href={anime.pageURL} target="_blank" rel="noopener noreferrer">

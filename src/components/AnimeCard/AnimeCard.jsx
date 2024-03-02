@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
+    const [webPURL, setWebPURL] = useState(anime.imageURL);
+
+    useEffect(() => {
+        setImageURL(anime.imageURL.replace('.jpg', '.webp'));
+    });
 
     const handleImageError = () => {
         setHasError(true);
@@ -25,13 +31,17 @@ const AnimeCard = ({ anime, index }) => {
             <section id="image" className="grid grid-cols-1 gap-2">
                 <div className="flex justify-center rounded-lg p-2">
                     {!hasError && (
-                        <img
-                            src={anime.imageURL}
-                            alt={`${anime.title} image`}
-                            className="h-auto w-auto rounded-lg object-contain"
-                            loading="lazy"
-                            onError={handleImageError}
-                        />
+                        <picture>
+                            <source srcSet={`${webPURL}`} type="image/webp" />
+                            <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
+                            <img
+                                src={`${anime.imageURL}`}
+                                alt={`${anime.title} image`}
+                                className="h-auto w-auto rounded-lg object-contain"
+                                loading="lazy"
+                                onError={handleImageError}
+                            />
+                        </picture>
                     )}
                 </div>
             </section>
