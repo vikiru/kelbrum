@@ -1,12 +1,12 @@
-import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 
-import { useData } from '../../context/DataProvider';
 import AnimeCard from './../../components/AnimeCard/AnimeCard';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash';
+import { useTopAnime } from '../../context/TopAnimeProvider';
 
 const TopAnimePage = () => {
-    const { topAnime } = useData();
+    const { topAnime } = useTopAnime();
 
     const [items, setItems] = useState([]);
     const [hasMore, setHasMore] = useState(true);

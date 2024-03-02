@@ -1,14 +1,14 @@
 import React from 'react';
 
-import { DataProvider } from './context/DataProvider';
+import { AppProvider } from './context/AppProvider';
 import Router from './pages/Router/Router';
 
 function App() {
     return (
-        <DataProvider>
+        <AppProvider>
             <Router />
-        </DataProvider>
+        </AppProvider>
     );
 }
 
-export { App };
+export default { App };

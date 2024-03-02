@@ -5,7 +5,7 @@ import { returnFilteredData } from '../recommender/utils/filter';
 
 const FilteredDataContext = createContext();
 
-const FilteredDataProvider = ({ children }) => {
+export const FilteredDataProvider = ({ children }) => {
     const processedDataRef = useRef({
         filteredGenres: [],
         filteredThemes: [],
@@ -66,6 +66,5 @@ const FilteredDataProvider = ({ children }) => {
     return <FilteredDataContext.Provider value={state}>{children}</FilteredDataContext.Provider>;
 };
 
-const useFilteredData = () => useContext(FilteredDataContext);
+export const useFilteredData = () => useContext(FilteredDataContext);
 
-export { FilteredDataProvider, useFilteredData };

@@ -1,11 +1,11 @@
-import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import React from 'react';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function ProducersPage() {
-    const { filteredProducers } = useData();
+    const { filteredProducers } = useFilteredData();
     const location = useLocation();
     const isProducerDetailPage = location.pathname === '/anime/producers';
     return (

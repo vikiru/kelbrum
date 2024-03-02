@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function LicensorsPage() {
-    const { filteredLicensors } = useData();
+    const { filteredLicensors } = useFilteredData();
     const location = useLocation();
     const isLicensorDetailPage = location.pathname === '/anime/licensors';
     return (

@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import SearchBar from './../../components/SearchBar/SearchBar';
+import { useTitleIDMap } from '../../context/TitleIDMapProvider';
 
 const SearchAnime = () => {
-    const { titleIDMap } = useData();
+    const { titleIDMap } = useTitleIDMap();
     const fields = ['title', 'synonyms'];
 
     useEffect(() => {

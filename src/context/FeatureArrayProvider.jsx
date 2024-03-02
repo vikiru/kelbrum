@@ -4,7 +4,7 @@ import featureArray from '../recommender/data/featureArray.json';
 
 const FeatureArrayContext = createContext();
 
-const FeatureArrayProvider = ({ children }) => {
+export const FeatureArrayProvider = ({ children }) => {
     const featureArrayRef = useRef(featureArray);
 
     const state = useMemo(
@@ -17,6 +17,5 @@ const FeatureArrayProvider = ({ children }) => {
     return <FeatureArrayContext.Provider value={state}>{children}</FeatureArrayContext.Provider>;
 };
 
-const useFeatureArray = () => useContext(FeatureArrayContext);
+export const useFeatureArray = () => useContext(FeatureArrayContext);
 
-export { FeatureArrayProvider, useFeatureArray };

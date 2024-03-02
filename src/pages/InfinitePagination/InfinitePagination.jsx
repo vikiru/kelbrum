@@ -1,10 +1,10 @@
-import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import { useData } from '../../context/DataProvider';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 const InfinitePagination = () => {
     const { id } = useParams();
@@ -20,7 +20,7 @@ const InfinitePagination = () => {
         filteredStudios,
         filteredLicensors,
         filteredSeasons,
-    } = useData();
+    } = useFilteredData();
 
     const [currentPage, setCurrentPage] = useState(1);
     const [state, setState] = useState({

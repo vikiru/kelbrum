@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import React, { useMemo } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function SeasonsPage() {
-    const { filteredSeasons } = useData();
+    const { filteredSeasons } = useFilteredData();
     const location = useLocation();
     const isSeasonDetailPage = location.pathname === '/anime/seasons';
 

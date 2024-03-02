@@ -4,7 +4,7 @@ import data from '../recommender/data/entries.json';
 
 const DataContext = createContext();
 
-const DataProvider = ({ children }) => {
+export const DataProvider = ({ children }) => {
     const dataRef = useRef(data);
 
     const state = useMemo(
@@ -17,6 +17,5 @@ const DataProvider = ({ children }) => {
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;
 };
 
-const useData = () => useContext(DataContext);
+export const useData = () => useContext(DataContext);
 
-export { DataProvider, useData };

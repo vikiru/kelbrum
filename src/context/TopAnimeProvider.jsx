@@ -4,7 +4,7 @@ import data from '../recommender/data/entries.json';
 
 const TopAnimeContext = createContext();
 
-const TopAnimeProvider = ({ children }) => {
+export const TopAnimeProvider = ({ children }) => {
     const dataRef = useRef(data);
     const topAnime = [...dataRef.current].sort((a, b) => b.score - a.score).slice(0, 100);
     const topAnimeRef = useRef(topAnime);
@@ -19,6 +19,4 @@ const TopAnimeProvider = ({ children }) => {
     return <TopAnimeContext.Provider value={state}>{children}</TopAnimeContext.Provider>;
 };
 
-const useTopAnime = () => useContext(TopAnimeContext);
-
-export { TopAnimeProvider, useTopAnime };
+export const useTopAnime = () => useContext(TopAnimeContext);

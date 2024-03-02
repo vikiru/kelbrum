@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { useData } from '../../context/DataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function GenresPage() {
-    const { filteredGenres, filteredThemes, filteredDemographics } = useData();
+    const { filteredGenres, filteredThemes, filteredDemographics } = useFilteredData();
     const location = useLocation();
     const allowedUrls = ['/anime/genres', '/anime/themes', '/anime/demographics'];
     const isGenreDetailPage = allowedUrls.includes(location.pathname);
