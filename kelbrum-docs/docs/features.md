@@ -1,8 +1,8 @@
 ---
-title: 🌟Features
+title: 🌟 Features
 ---
 
-## 🌟Features
+## 🌟 Features
 
 -   The ability to search for any anime within the existing dataset via a SearchBar
 -   A homepage featuring a hero section that encourages users to search for an anime and displays 10 anime randomly selected that meet a minimum average score, providing users with immediate recommendations
