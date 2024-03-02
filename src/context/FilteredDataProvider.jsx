@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import data from '../recommender/data/entries.json';
 import { returnFilteredData } from '../recommender/utils/filter';
@@ -6,7 +6,7 @@ import { returnFilteredData } from '../recommender/utils/filter';
 const FilteredDataContext = createContext();
 
 export const FilteredDataProvider = ({ children }) => {
-    let processedData = {
+    const [processedData, setProcessedData] = useState({
         filteredGenres: [],
         filteredThemes: [],
         filteredDemographics: [],
@@ -15,7 +15,7 @@ export const FilteredDataProvider = ({ children }) => {
         filteredLicensors: [],
         filteredSeasons: [],
         processed: false,
-    };
+    });
 
     useEffect(() => {
         const processData = async () => {
@@ -39,7 +39,7 @@ export const FilteredDataProvider = ({ children }) => {
                 filteredSeasons,
             ] = await Promise.all(promises);
 
-            processedData = {
+            setProcessedData({
                 filteredGenres,
                 filteredThemes,
                 filteredDemographics,
@@ -48,17 +48,22 @@ export const FilteredDataProvider = ({ children }) => {
                 filteredLicensors,
                 filteredSeasons,
                 processed: true,
-            };
+            });
         };
 
-        if (!processedData.processed){
+        if (!processedData.processed) {
             processData();
         }
-    }, []);
+    }, [data, processedData]);
 
-    const processedDataRef = useRef(processedData);
+    
+    const memoizedProcessedData = useMemo(() => processedData, [processedData]);
 
-    return <FilteredDataContext.Provider value={processedDataRef.current}>{children}</FilteredDataContext.Provider>;
+    return (
+        <FilteredDataContext.Provider value={memoizedProcessedData}>
+            {children}
+        </FilteredDataContext.Provider>
+    );
 };
 
 export const useFilteredData = () => useContext(FilteredDataContext);
