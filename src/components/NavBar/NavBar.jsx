@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 
 function NavBar() {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -7,21 +7,8 @@ function NavBar() {
         setIsDropdownVisible(!isDropdownVisible);
     };
 
-    const location = useLocation();
-    const [openDropdowns, setOpenDropdowns] = useState({
-        discover: false,
-        information: false,
-    });
-
-    useEffect(() => {
-        setOpenDropdowns({
-            discover: false,
-            information: false,
-        });
-    }, [location]);
-
     return (
-        <div className="navbar bg-base-100 text-gray-100 dark:bg-gray-800 dark:text-gray-100">
+        <section id='navbar' className="navbar bg-base-100 text-gray-100 dark:bg-gray-800 dark:text-gray-100">
             <div className="navbar-start">
                 <div className="dropdown rounded-full dark:bg-gray-800">
                     <div tabIndex={0} role="button" className="btn btn-ghost rounded-full" onClick={toggleDropdown}>
@@ -118,7 +105,7 @@ function NavBar() {
                     </button>
                 </Link>
             </div>
-        </div>
+        </section>
     );
 }
 

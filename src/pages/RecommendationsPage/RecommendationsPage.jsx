@@ -1,15 +1,15 @@
-import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import { useData } from '../../context/DataProvider';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
+import AnimeCard from '../../components/AnimeCard/AnimeCard';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash';
+import { useData } from '../../context/DataProvider';
 
 const RecommendationsPage = () => {
     const { data, featureArray, kmeans } = useData();
@@ -88,7 +88,7 @@ const RecommendationsPage = () => {
     const allItemsForCurrentPageDisplayed = displayedItems.length >= actualItemsForCurrentPage;
 
     return (
-        <div className="bg-secondary pb-6">
+        <section id={`top-recommendations-page-${currentPage}`} className="bg-secondary pb-6">
             <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold text-primary underline">{title}</h2>
             <InfiniteScroll
                 pageStart={0}
@@ -130,7 +130,7 @@ const RecommendationsPage = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </section>
     );
 };
 

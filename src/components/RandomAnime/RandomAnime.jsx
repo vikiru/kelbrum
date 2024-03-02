@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { shuffleRandom } from '../../recommender/recommender';
 import AnimeCard from '../AnimeCard/AnimeCard';
+import { Link } from 'react-router-dom';
+import { shuffleRandom } from '../../recommender/recommender';
 
 const AnimeItem = ({ anime, index }) => {
     const [hasError, setHasError] = useState(false);
@@ -22,14 +22,16 @@ const AnimeItem = ({ anime, index }) => {
 };
 
 const RandomAnime = ({ anime, allAnime }) => {
-    const shuffledAnime = [...allAnime];
-    shuffleRandom(shuffledAnime);
-    const randomAnime = shuffledAnime.slice(0, 10);
+    const shuffledAnime = useMemo(() => {
+        const shuffled = [...allAnime];
+        shuffleRandom(shuffled);
+        return shuffled.slice(0, 10);
+    }, [allAnime]);
 
     return (
-        <div className="w-full  bg-secondary pb-8 dark:bg-gray-900">
+        <section id='random-anime' className="w-full bg-secondary pb-8 dark:bg-gray-900">
             <div className="3xl:grid-cols-3 grid w-full grid-cols-1 px-4 py-6 lg:grid-cols-2">
-                {randomAnime.map((anime, index) => (
+                {shuffledAnime.map((anime, index) => (
                     <AnimeItem key={anime.title} anime={anime} index={index} />
                 ))}
             </div>
@@ -43,7 +45,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     </Link>
                 </div>
             )}
-        </div>
+        </section>
     );
 };
 

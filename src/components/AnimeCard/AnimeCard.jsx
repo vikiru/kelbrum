@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -16,7 +17,7 @@ const AnimeCard = ({ anime, index }) => {
     }, [anime.imageURL]);
 
     return (
-        <div
+        <section id='anime-card'
             key={anime.title}
             className="card flex min-h-full w-full cursor-default flex-col justify-between rounded-lg bg-primary p-1 dark:bg-gray-800"
         >
@@ -35,6 +36,7 @@ const AnimeCard = ({ anime, index }) => {
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
                             className="h-auto w-auto rounded-lg object-contain"
+                            loading='lazy'
                         />
                     )}
                 </div>
@@ -64,7 +66,7 @@ const AnimeCard = ({ anime, index }) => {
                     Read more
                 </Link>
             </div>
-        </div>
+        </section>
     );
 };
 

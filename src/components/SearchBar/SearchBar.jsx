@@ -1,6 +1,7 @@
-import { debounce } from 'lodash';
-import MiniSearch from 'minisearch';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import MiniSearch from 'minisearch';
+import { debounce } from 'lodash';
 import { useNavigate } from 'react-router-dom';
 
 const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
@@ -13,8 +14,10 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
     const navigate = useNavigate();
     const navigateToPage = (id) => navigate(`/anime/${path}${id}`);
 
-    const miniSearch = useMemo(() => {
-        const miniSearch = new MiniSearch({
+    const miniSearchRef = useRef();
+
+    if (!miniSearchRef.current) {
+        miniSearchRef.current = new MiniSearch({
             fields: fields,
             storeFields: storeFields,
             searchOptions: {
@@ -22,10 +25,10 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                 fuzzy: 0.2,
             },
         });
+        miniSearchRef.current.addAll(valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })));
+    }
 
-        miniSearch.addAll(valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })));
-        return miniSearch;
-    }, [fields, storeFields, valueMap]);
+    const miniSearch = miniSearchRef.current;
 
     const debouncedSearch = useCallback(
         debounce((string) => {
@@ -41,10 +44,10 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
         [miniSearch],
     );
 
-    const handleInputChange = (e) => {
+    const handleInputChange = useCallback((e) => {
         setInputValue(e.target.value);
         debouncedSearch(e.target.value);
-    };
+    }, [debouncedSearch]);
 
     const handleOnSelect = (selectedItem) => {
         setSuggestions([]);

@@ -1,15 +1,15 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 
 import data from '../recommender/data/entries.json';
 import featureArray from '../recommender/data/featureArray.json';
 import kmeans from '../recommender/data/kmeans.json';
-import titleIDMap from '../recommender/data/titleIDMap.json';
 import { returnFilteredData } from '../recommender/utils/filter';
+import titleIDMap from '../recommender/data/titleIDMap.json';
 
 const DataContext = createContext();
 
 const DataProvider = ({ children }) => {
-    const [processedData, setProcessedData] = useState({
+    const processedDataRef = useRef({
         filteredGenres: [],
         filteredThemes: [],
         filteredDemographics: [],
@@ -19,16 +19,23 @@ const DataProvider = ({ children }) => {
         filteredSeasons: [],
     });
 
+    const dataRef = useRef(data);
+    const featureArrayRef = useRef(featureArray);
+    const kmeansRef = useRef(kmeans);
+    const titleIDMapRef = useRef(titleIDMap);
+    const topAnime = [...data].sort((a, b) => b.score - a.score).slice(0, 100);
+    const topAnimeRef = useRef(topAnime);
+
     useEffect(() => {
         const processData = async () => {
             const promises = [
-                returnFilteredData(data, 'genres'),
-                returnFilteredData(data, 'themes'),
-                returnFilteredData(data, 'demographics'),
-                returnFilteredData(data, 'producers'),
-                returnFilteredData(data, 'studios'),
-                returnFilteredData(data, 'licensors'),
-                returnFilteredData(data, 'premiered'),
+                returnFilteredData(dataRef.current, 'genres'),
+                returnFilteredData(dataRef.current, 'themes'),
+                returnFilteredData(dataRef.current, 'demographics'),
+                returnFilteredData(dataRef.current, 'producers'),
+                returnFilteredData(dataRef.current, 'studios'),
+                returnFilteredData(dataRef.current, 'licensors'),
+                returnFilteredData(dataRef.current, 'premiered'),
             ];
 
             const [
@@ -41,7 +48,8 @@ const DataProvider = ({ children }) => {
                 filteredSeasons,
             ] = await Promise.all(promises);
 
-            setProcessedData({
+
+            processedDataRef.current = {
                 filteredGenres,
                 filteredThemes,
                 filteredDemographics,
@@ -49,21 +57,24 @@ const DataProvider = ({ children }) => {
                 filteredStudios,
                 filteredLicensors,
                 filteredSeasons,
-            });
+            };
         };
 
-        processData();
+        if (!processedDataRef.current) {
+            processData();
+        }
     }, []);
 
     const state = useMemo(
         () => ({
-            ...processedData,
-            data: data,
-            featureArray: featureArray,
-            kmeans: kmeans,
-            titleIDMap: titleIDMap,
+            ...processedDataRef.current,
+            data: dataRef.current,
+            featureArray: featureArrayRef.current,
+            kmeans: kmeansRef.current,
+            titleIDMap: titleIDMapRef.current,
+            topAnime: topAnimeRef.current
         }),
-        [processedData],
+        [processedDataRef.current],
     );
 
     return <DataContext.Provider value={state}>{children}</DataContext.Provider>;
