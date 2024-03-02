@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -7,7 +7,7 @@ const AnimeCard = ({ anime, index }) => {
     const [webPURL, setWebPURL] = useState(anime.imageURL);
 
     useEffect(() => {
-        setImageURL(anime.imageURL.replace('.jpg', '.webp'));
+        setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
     });
 
     const handleImageError = () => {

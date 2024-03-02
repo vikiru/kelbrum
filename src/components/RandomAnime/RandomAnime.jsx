@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 
-import { shuffleRandom } from '../../recommender/recommender';
 import AnimeCard from '../AnimeCard/AnimeCard';
+import { Link } from 'react-router-dom';
+import { shuffleRandom } from '../../recommender/recommender';
 
 const RandomAnime = ({ anime, allAnime }) => {
     const shuffledAnime = useMemo(() => {

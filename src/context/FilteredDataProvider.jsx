@@ -54,14 +54,7 @@ export const FilteredDataProvider = ({ children }) => {
         processData();
     }, []);
 
-    const state = useMemo(
-        () => ({
-            ...processedDataRef.current,
-        }),
-        [],
-    );
-
-    return <FilteredDataContext.Provider value={state}>{children}</FilteredDataContext.Provider>;
+    return <FilteredDataContext.Provider value={processedDataRef.current}>{children}</FilteredDataContext.Provider>;
 };
 
 export const useFilteredData = () => useContext(FilteredDataContext);

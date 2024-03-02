@@ -5,7 +5,7 @@ const Details = ({ anime }) => {
     const [webPURL, setWebPURL] = useState(anime.imageURL);
 
     useEffect(() => {
-        setImageURL(anime.imageURL.replace('.jpg', '.webp'));
+        setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
     });
 
     const trimmedStudios = useMemo(() => {
