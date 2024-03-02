@@ -6,7 +6,7 @@ import { returnFilteredData } from '../recommender/utils/filter';
 const FilteredDataContext = createContext();
 
 export const FilteredDataProvider = ({ children }) => {
-    const processedDataRef = useRef({
+    let processedData = {
         filteredGenres: [],
         filteredThemes: [],
         filteredDemographics: [],
@@ -15,7 +15,7 @@ export const FilteredDataProvider = ({ children }) => {
         filteredLicensors: [],
         filteredSeasons: [],
         processed: false,
-    });
+    };
 
     useEffect(() => {
         const processData = async () => {
@@ -39,7 +39,7 @@ export const FilteredDataProvider = ({ children }) => {
                 filteredSeasons,
             ] = await Promise.all(promises);
 
-            processedDataRef.current = {
+            processedData = {
                 filteredGenres,
                 filteredThemes,
                 filteredDemographics,
@@ -51,8 +51,12 @@ export const FilteredDataProvider = ({ children }) => {
             };
         };
 
-        processData();
-    }, [data]);
+        if (!processedData.processed){
+            processData();
+        }
+    }, []);
+
+    const processedDataRef = useRef(processedData);
 
     return <FilteredDataContext.Provider value={processedDataRef.current}>{children}</FilteredDataContext.Provider>;
 };
