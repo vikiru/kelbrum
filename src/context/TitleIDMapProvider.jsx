@@ -5,9 +5,12 @@ import titleIDMap from '../recommender/data/titleIDMap.json';
 const TitleIDMapContext = createContext();
 
 export const TitleIDMapProvider = ({ children }) => {
-    const state = useMemo(() => ({
-        titleIDMap: titleIDMap,
-    }), []);
+    const state = useMemo(
+        () => ({
+            titleIDMap: titleIDMap,
+        }),
+        [],
+    );
 
     return <TitleIDMapContext.Provider value={state}>{children}</TitleIDMapContext.Provider>;
 };

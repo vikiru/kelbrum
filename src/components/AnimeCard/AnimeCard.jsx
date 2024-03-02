@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -8,7 +7,7 @@ const AnimeCard = ({ anime, index }) => {
 
     useEffect(() => {
         setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
-    });
+    }, [anime.imageURL]);
 
     const handleImageError = () => {
         setHasError(true);
@@ -17,7 +16,7 @@ const AnimeCard = ({ anime, index }) => {
     return (
         <section
             id="anime-card"
-            key={anime.title}
+            key={anime.id}
             className="card flex min-h-full w-full cursor-default flex-col justify-between rounded-lg bg-primary p-1 dark:bg-gray-800"
         >
             <span className="bg-accent-darker badge badge-accent absolute left-1 top-1 rounded-full p-3 text-white">
@@ -66,6 +65,7 @@ const AnimeCard = ({ anime, index }) => {
                 <Link
                     to={`/anime/${anime.id}`}
                     className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
+                    aria-label={`Read more about ${anime.title}`}
                 >
                     Read more
                 </Link>
