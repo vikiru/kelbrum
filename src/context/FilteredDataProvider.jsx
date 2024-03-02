@@ -56,14 +56,9 @@ export const FilteredDataProvider = ({ children }) => {
         }
     }, [data, processedData]);
 
-    
     const memoizedProcessedData = useMemo(() => processedData, [processedData]);
 
-    return (
-        <FilteredDataContext.Provider value={memoizedProcessedData}>
-            {children}
-        </FilteredDataContext.Provider>
-    );
+    return <FilteredDataContext.Provider value={memoizedProcessedData}>{children}</FilteredDataContext.Provider>;
 };
 
 export const useFilteredData = () => useContext(FilteredDataContext);
