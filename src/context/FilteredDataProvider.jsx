@@ -51,9 +51,7 @@ export const FilteredDataProvider = ({ children }) => {
             };
         };
 
-        if (!processedDataRef.current.processed) {
-            processData();
-        }
+        processData();
     }, []);
 
     const state = useMemo(

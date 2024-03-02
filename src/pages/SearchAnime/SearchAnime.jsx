@@ -12,9 +12,9 @@ const SearchAnime = () => {
     }, []);
 
     return (
-        <div className="bg-secondary">
+        <section id="anime-search" className="bg-secondary">
             <SearchBar valueMap={titleIDMap} path="" fields={fields} storeFields={fields} />
-        </div>
+        </section>
     );
 };
 

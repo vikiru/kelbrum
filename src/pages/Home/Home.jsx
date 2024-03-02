@@ -8,8 +8,11 @@ function Home() {
     const { data } = useData();
 
     return (
-        <div>
-            <div className="hero flex min-h-screen items-center justify-center bg-primary dark:bg-secondary">
+        <section id="home">
+            <section
+                id="hero"
+                className="hero flex min-h-screen items-center justify-center bg-primary dark:bg-secondary"
+            >
                 <div className="hero-content text-center">
                     <div className="mx-auto max-w-md xl:max-w-xl">
                         <h1 className="text-xl font-bold lg:text-5xl dark:text-gray-100">
@@ -31,14 +34,14 @@ function Home() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
             <div className="bg-secondary px-4 dark:bg-gray-900">
                 <h2 className="py-4 text-center text-4xl font-bold text-primary underline md:text-5xl lg:text-6xl">
                     Random Anime
                 </h2>
                 <RandomAnime allAnime={data.filter((a) => a.score >= 7)} />
             </div>
-        </div>
+        </section>
     );
 }
 

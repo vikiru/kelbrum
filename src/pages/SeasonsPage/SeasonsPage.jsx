@@ -38,17 +38,8 @@ function SeasonsPage() {
         };
     }, []);
 
-    const groupBySeason = useMemo(() => {
-        const uniqueSeasons = [...new Set(filteredSeasons.map((season) => season.key.split(' ')[0]))];
-
-        return uniqueSeasons.map((seasonName) => ({
-            key: seasonName,
-            values: filteredSeasons.filter((season) => season.key.includes(seasonName)),
-        }));
-    }, [filteredSeasons]);
-
     return (
-        <div className="min-h-screen bg-secondary pb-16">
+        <section id="seasons" className="min-h-screen bg-secondary pb-16">
             {isSeasonDetailPage && (
                 <DataList
                     title="Seasons"
@@ -59,7 +50,7 @@ function SeasonsPage() {
                 />
             )}
             <Outlet />
-        </div>
+        </section>
     );
 }
 

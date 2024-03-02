@@ -9,10 +9,10 @@ function LicensorsPage() {
     const location = useLocation();
     const isLicensorDetailPage = location.pathname === '/anime/licensors';
     return (
-        <div className="min-h-screen bg-secondary pb-16">
+        <section id="licensors" className="min-h-screen bg-secondary pb-16">
             {isLicensorDetailPage && <DataList title="Licensors" data={filteredLicensors} path="licensors" />}
             <Outlet />
-        </div>
+        </section>
     );
 }
 

@@ -22,7 +22,7 @@ const AnimeCard = ({ anime, index }) => {
                     {anime.title}
                 </h2>
             </div>
-            <div className="grid grid-cols-1 gap-2">
+            <section id="image" className="grid grid-cols-1 gap-2">
                 <div className="flex justify-center rounded-lg p-2">
                     {!hasError && (
                         <img
@@ -34,9 +34,9 @@ const AnimeCard = ({ anime, index }) => {
                         />
                     )}
                 </div>
-            </div>
+            </section>
 
-            <div className="mt-1/2 flex flex-wrap justify-center">
+            <section id="genres" className="mt-1/2 flex flex-wrap justify-center">
                 {anime.genres
                     .filter((g) => g !== 'Unknown')
                     .map((g) => (
@@ -51,15 +51,15 @@ const AnimeCard = ({ anime, index }) => {
                             {d}
                         </span>
                     ))}
-            </div>
-            <div className="mt-2 flex justify-center">
+            </section>
+            <section id="read-more" className="mt-2 flex justify-center">
                 <Link
                     to={`/anime/${anime.id}`}
                     className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white"
                 >
                     Read more
                 </Link>
-            </div>
+            </section>
         </section>
     );
 };

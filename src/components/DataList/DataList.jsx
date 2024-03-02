@@ -30,7 +30,13 @@ const DataList = ({ title, data, path, customSort, capitalizeTitle = false }) =>
             </h2>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {sortedData.map((item, index) => (
-                    <DataCard key={index} path={path} index={data.indexOf(item)} value={item} capitalizeTitle={true} />
+                    <DataCard
+                        key={index}
+                        path={path}
+                        index={data.indexOf(item)}
+                        value={item}
+                        capitalizeTitle={capitalizeTitle}
+                    />
                 ))}
             </div>
         </div>
