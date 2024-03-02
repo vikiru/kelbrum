@@ -1,10 +1,10 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import Footer from './../../components/Footer/Footer';
-import Home from '../Home/Home';
-import NavBar from './../../components/NavBar/NavBar';
 import TopScroller from '../../components/TopScroller/TopScroller';
+import Home from '../Home/Home';
+import Footer from './../../components/Footer/Footer';
+import NavBar from './../../components/NavBar/NavBar';
 
 const RecommendationsPage = React.lazy(() => import('../RecommendationsPage/RecommendationsPage'));
 const InfinitePagination = React.lazy(() => import('../InfinitePagination/InfinitePagination'));
@@ -24,9 +24,9 @@ function Router() {
             <NavBar />
             <Suspense
                 fallback={
-                    <div className="flex items-center justify-center min-h-screen">
-                    <div className="loading loading-lg bg-secondary dark:bg-gray-100" />
-                </div>
+                    <div className="flex min-h-screen items-center justify-center">
+                        <div className="loading loading-lg bg-secondary dark:bg-gray-100" />
+                    </div>
                 }
             >
                 <Routes>

@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
-
-import AnimeCard from './../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
 import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+
 import { useData } from '../../context/DataProvider';
+import AnimeCard from './../../components/AnimeCard/AnimeCard';
 
 const TopAnimePage = () => {
     const { topAnime } = useData();
@@ -26,11 +26,11 @@ const TopAnimePage = () => {
 
     const fetchMoreData = useCallback(() => {
         const newItems = fetchAnimeItems();
-        setItems(prevItems => [...prevItems, ...newItems]);
+        setItems((prevItems) => [...prevItems, ...newItems]);
     }, [fetchAnimeItems]);
 
     return (
-        <section id='top-anime' className="bg-secondary pb-6">
+        <section id="top-anime" className="bg-secondary pb-6">
             <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl">
                 Top 100 Anime
             </h2>

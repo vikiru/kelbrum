@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-import MiniSearch from 'minisearch';
 import { debounce } from 'lodash';
+import MiniSearch from 'minisearch';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
@@ -25,7 +24,9 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                 fuzzy: 0.2,
             },
         });
-        miniSearchRef.current.addAll(valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })));
+        miniSearchRef.current.addAll(
+            valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })),
+        );
     }
 
     const miniSearch = miniSearchRef.current;
@@ -44,10 +45,13 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
         [miniSearch],
     );
 
-    const handleInputChange = useCallback((e) => {
-        setInputValue(e.target.value);
-        debouncedSearch(e.target.value);
-    }, [debouncedSearch]);
+    const handleInputChange = useCallback(
+        (e) => {
+            setInputValue(e.target.value);
+            debouncedSearch(e.target.value);
+        },
+        [debouncedSearch],
+    );
 
     const handleOnSelect = (selectedItem) => {
         setSuggestions([]);

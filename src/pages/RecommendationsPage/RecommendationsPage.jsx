@@ -1,15 +1,15 @@
+import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
+import AnimeCard from '../../components/AnimeCard/AnimeCard';
+import { useData } from '../../context/DataProvider';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
-import { debounce } from 'lodash';
-import { useData } from '../../context/DataProvider';
 
 const RecommendationsPage = () => {
     const { data, featureArray, kmeans } = useData();

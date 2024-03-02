@@ -27,13 +27,13 @@ const Details = ({ anime }) => {
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
-                    <section id='anime-image' className="mx-4 mt-4 lg:hidden">
-                    <figure>
+                    <section id="anime-image" className="mx-4 mt-4 lg:hidden">
+                        <figure>
                             {!hasError && (
                                 <img
                                     src={anime.imageURL}
                                     alt={`${anime.title} image`}
-                                    loading='lazy'
+                                    loading="lazy"
                                     className="h-[80%] w-full rounded-lg border-2 border-gray-300 object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                                     onError={handleImageError}
                                 />
@@ -41,7 +41,7 @@ const Details = ({ anime }) => {
                         </figure>
                     </section>
 
-                    <section id='anime-general-info'>
+                    <section id="anime-general-info">
                         <h2 className="pt-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             General Information
                         </h2>
@@ -117,7 +117,7 @@ const Details = ({ anime }) => {
 
             <div className="flex flex-col gap-4 lg:flex-row">
                 <div className="text-md mx-8 text-justify">
-                    <section id='anime-synopsis'>
+                    <section id="anime-synopsis">
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             Synopsis
                         </h2>
@@ -125,7 +125,7 @@ const Details = ({ anime }) => {
                         <p className="text-left dark:text-gray-100">{anime.synopsis}</p>
                     </section>
 
-                    <section id='anime-additional-info'>
+                    <section id="anime-additional-info">
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             Additional Information
                         </h2>
@@ -231,7 +231,7 @@ const Details = ({ anime }) => {
                         </div>
                     </section>
 
-                    <section id='anime-statistics'>
+                    <section id="anime-statistics">
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             Statistics
                         </h2>
@@ -271,7 +271,7 @@ const Details = ({ anime }) => {
                         </div>
                     </section>
 
-                    <section id='anime-external-links'>
+                    <section id="anime-external-links">
                         <h2 className="py-4 text-left text-xl font-bold text-secondary underline dark:text-gray-100">
                             External Links
                         </h2>

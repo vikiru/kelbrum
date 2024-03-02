@@ -1,9 +1,9 @@
+import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
-import { debounce } from 'lodash';
 import { useData } from '../../context/DataProvider';
 
 const InfinitePagination = () => {
@@ -73,14 +73,14 @@ const InfinitePagination = () => {
 
     useEffect(() => {
         const allItemsLoaded = state.items.length >= sortedData.length;
-        setState(prevState => ({ ...prevState, hasMore: !allItemsLoaded }));
+        setState((prevState) => ({ ...prevState, hasMore: !allItemsLoaded }));
     }, [sortedData.length, state.items]);
 
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const newItems = sortedData.slice(startIndex, endIndex);
-        setState(prevState => ({
+        setState((prevState) => ({
             ...prevState,
             items: newItems,
             displayedItems: newItems.slice(0, itemsPerDisplay),
@@ -88,26 +88,32 @@ const InfinitePagination = () => {
         }));
     }, [currentPage, sortedData]);
 
-    const fetchMoreItems = useCallback(debounce(() => {
-        if (state.displayedItems.length < state.items.length) {
-            const newDisplayedItems = state.displayedItems.concat(
-                state.items.slice(state.displayedItems.length, state.displayedItems.length + itemsPerDisplay),
-            );
-            setState(prevState => ({
-                ...prevState,
-                displayedItems: newDisplayedItems,
-                hasMore: state.displayedItems.length + itemsPerDisplay < state.items.length,
-            }));
-        }
-    }, 1000), [state.displayedItems, state.items, itemsPerDisplay]);
+    const fetchMoreItems = useCallback(
+        debounce(() => {
+            if (state.displayedItems.length < state.items.length) {
+                const newDisplayedItems = state.displayedItems.concat(
+                    state.items.slice(state.displayedItems.length, state.displayedItems.length + itemsPerDisplay),
+                );
+                setState((prevState) => ({
+                    ...prevState,
+                    displayedItems: newDisplayedItems,
+                    hasMore: state.displayedItems.length + itemsPerDisplay < state.items.length,
+                }));
+            }
+        }, 1000),
+        [state.displayedItems, state.items, itemsPerDisplay],
+    );
 
-    const handlePageChange = useCallback((newPage) => {
-        if (newPage >= 1 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-            navigate(`?page=${newPage}`);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }, [navigate, totalPages]);
+    const handlePageChange = useCallback(
+        (newPage) => {
+            if (newPage >= 1 && newPage <= totalPages) {
+                setCurrentPage(newPage);
+                navigate(`?page=${newPage}`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        },
+        [navigate, totalPages],
+    );
 
     const actualItemsForCurrentPage = Math.min(itemsPerPage, sortedData.length - (currentPage - 1) * itemsPerPage);
     const allItemsForCurrentPageDisplayed = state.displayedItems.length >= actualItemsForCurrentPage;
@@ -135,7 +141,7 @@ const InfinitePagination = () => {
                 </div>
             </InfiniteScroll>
             {allItemsForCurrentPageDisplayed && (
-                <section id='pagination' className="flex justify-center bg-secondary pb-6">
+                <section id="pagination" className="flex justify-center bg-secondary pb-6">
                     <div className="join">
                         <button
                             className="btn join-item"

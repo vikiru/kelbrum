@@ -1,8 +1,8 @@
-import { Outlet, useLocation } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
-import DataList from './../../components/DataList/DataList';
 import { useData } from '../../context/DataProvider';
+import DataList from './../../components/DataList/DataList';
 
 function GenresPage() {
     const { filteredGenres, filteredThemes, filteredDemographics } = useData();
@@ -11,7 +11,7 @@ function GenresPage() {
     const isGenreDetailPage = allowedUrls.includes(location.pathname);
 
     return (
-        <section id='genres' className="min-h-screen bg-secondary pb-16">
+        <section id="genres" className="min-h-screen bg-secondary pb-16">
             {isGenreDetailPage && (
                 <>
                     <DataList title="Genres" data={filteredGenres} path="genres" />
