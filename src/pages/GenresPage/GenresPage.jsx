@@ -11,7 +11,7 @@ function GenresPage() {
     const isGenreDetailPage = allowedUrls.includes(location.pathname);
 
     return (
-        <section id="genres" className="min-h-screen bg-secondary pb-16">
+        <section id="genres" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isGenreDetailPage && (
                 <>
                     <DataList title="Genres" data={filteredGenres} path="genres" />

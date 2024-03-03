@@ -92,8 +92,10 @@ const RecommendationsPage = () => {
     const allItemsForCurrentPageDisplayed = displayedItems.length >= actualItemsForCurrentPage;
 
     return (
-        <section id={`top-recommendations-page-${currentPage}`} className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold text-primary underline">{title}</h2>
+        <section id={`top-recommendations-page-${currentPage}`} className="bg-secondary pb-6 dark:bg-gray-900">
+            <h2 className="bg-secondary pb-4 pt-6 text-center  xs:text-lg  text-xl lg:text-4xl font-bold text-primary underline dark:bg-gray-900">
+                {title}
+            </h2>
             <InfiniteScroll
                 pageStart={0}
                 loadMore={debounce(fetchMoreItems, 1000)}
@@ -112,7 +114,7 @@ const RecommendationsPage = () => {
                 </div>
             </InfiniteScroll>
             {allItemsForCurrentPageDisplayed && (
-                <div className="flex justify-center bg-secondary pb-6">
+                <div className="flex justify-center bg-secondary pb-6 dark:bg-gray-900">
                     <div className="join">
                         <button
                             className="btn join-item"

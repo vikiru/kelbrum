@@ -9,7 +9,7 @@ function StudiosPage() {
     const location = useLocation();
     const isStudioDetailPage = location.pathname === '/anime/studios';
     return (
-        <section id="studios" className="min-h-screen bg-secondary pb-16">
+        <section id="studios" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isStudioDetailPage && <DataList title="Studios" data={filteredStudios} path="studios" />}
             <Outlet />
         </section>

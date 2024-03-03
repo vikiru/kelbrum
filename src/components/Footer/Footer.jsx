@@ -10,6 +10,9 @@ function Footer() {
             >
                 <nav>
                     <h6 className="footer-title text-xl">Discover</h6>
+                    <Link to="/" className="link-hover link text-lg">
+                        Home
+                    </Link>
                     <Link to="/anime/search" className="link-hover link text-lg">
                         Search for an anime
                     </Link>

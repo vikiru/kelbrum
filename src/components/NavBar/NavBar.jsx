@@ -76,7 +76,7 @@ function NavBar() {
             <div className="xs:navbar-center">
                 <Link
                     to="/"
-                    className="btn btn-ghost font-logo text-xl text-gray-100 lg:text-3xl 2xl:text-4xl dark:text-gray-100"
+                    className="btn btn-ghost font-logo text-xl text-gray-100 lg:text-4xl dark:text-gray-100"
                     role="button"
                     alt="Visit Kelbrum Homepage"
                 >

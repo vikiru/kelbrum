@@ -9,7 +9,7 @@ function ProducersPage() {
     const location = useLocation();
     const isProducerDetailPage = location.pathname === '/anime/producers';
     return (
-        <section id="producers" className="min-h-screen bg-secondary pb-16">
+        <section id="producers" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isProducerDetailPage && <DataList title="Producers" data={filteredProducers} path="producers" />}
             <Outlet />
         </section>

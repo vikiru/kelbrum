@@ -120,7 +120,7 @@ const InfinitePagination = () => {
 
     return (
         <section id={`top-${data.key}-page-${currentPage}`} className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold capitalize text-primary underline">
+            <h2 className="bg-secondary pb-4 pt-6  xs:text-lg  text-center text-xl lg:text-4xl font-bold capitalize text-primary underline">
                 {title}
             </h2>
             <InfiniteScroll
@@ -129,7 +129,7 @@ const InfinitePagination = () => {
                 hasMore={state.hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {state.hasMore && <div className="loading loading-lg bg-primary" />}
+                        {state.hasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
                     </div>
                 }
             >

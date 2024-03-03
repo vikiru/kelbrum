@@ -39,7 +39,7 @@ function SeasonsPage() {
     }, []);
 
     return (
-        <section id="seasons" className="min-h-screen bg-secondary pb-16">
+        <section id="seasons" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isSeasonDetailPage && (
                 <DataList
                     title="Seasons"

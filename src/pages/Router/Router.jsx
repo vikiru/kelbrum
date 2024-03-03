@@ -25,7 +25,7 @@ function Router() {
             <Suspense
                 fallback={
                     <div className="flex min-h-screen items-center justify-center">
-                        <div className="loading loading-lg bg-secondary" />
+                        <div className="loading loading-lg bg-secondary dark:bg-gray-900" />
                     </div>
                 }
             >
