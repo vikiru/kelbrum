@@ -26,7 +26,7 @@ const Details = ({ anime }) => {
 
     return (
         <section id="anime-details">
-            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl dark:text-gray-100">
+            <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl dark:bg-gray-900 dark:text-gray-100">
                 {anime.title}
             </h2>
 
@@ -69,19 +69,7 @@ const Details = ({ anime }) => {
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-lg font-bold text-secondary">Season</h2>
 
-                                <p className="text-base text-neutral dark:text-gray-100">
-                                    {anime.season === 'Unknown' && anime.year === 'Unknown' ? (
-                                        'Unknown'
-                                    ) : (
-                                        <>
-                                            <span className="capitalize">{anime.season}</span>
-
-                                            <span className="capitalize">
-                                                {anime.year !== 'Unknown' && ` ${anime.year}`}
-                                            </span>
-                                        </>
-                                    )}
-                                </p>
+                                <p className="text-base text-neutral dark:text-gray-100">{anime.premiered}</p>
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">

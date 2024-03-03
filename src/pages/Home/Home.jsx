@@ -11,7 +11,7 @@ function Home() {
         <section id="home">
             <section
                 id="hero"
-                className="hero flex min-h-screen items-center justify-center bg-primary dark:bg-secondary"
+                className="hero flex min-h-screen items-center justify-center bg-primary dark:bg-gray-900"
             >
                 <div className="hero-content text-center">
                     <div className="mx-auto max-w-md xl:max-w-xl">
