@@ -103,16 +103,16 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                 </div>
 
                 {suggestions.length > 0 && (
-                    <div className="mt-4 max-h-[72vh] overflow-y-scroll scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500 xs:space-y-1 lg:space-y-2">
+                    <div className="mt-4 max-h-[72vh] overflow-y-auto scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500 xs:space-y-1 lg:space-y-2 4xl:max-h-screen dark:bg-gray-800">
                         {suggestions.map((suggestion, index) => (
                             <div
                                 key={index}
                                 ref={(el) => (suggestionRefs.current[index] = el)}
-                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100 dark:bg-blue-500' : 'bg-white dark:bg-gray-800'}`}
+                                className={`cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100 dark:bg-blue-500' : 'bg-white dark:bg-gray-800'}`}
                                 onClick={() => handleOnSelect(suggestion)}
                             >
                                 <div className="card-body p-2 sm:p-3 md:p-4">
-                                    <p className="card-title text-xs text-gray-900 sm:text-sm md:text-base dark:text-gray-100">
+                                    <p className="card-title text-xl text-gray-900 sm:text-sm dark:text-gray-100">
                                         {suggestion.title}
                                     </p>
                                 </div>

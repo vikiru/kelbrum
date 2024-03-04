@@ -44,7 +44,7 @@ const AnimeDetails = () => {
         <div className="overflow-x-hidden dark:bg-gray-900">
             <Details anime={anime} />
             <section id="anime-recommendations">
-                <h2 className="bg-secondary py-4 text-center text-xl lg:text-4xl font-bold text-primary underline dark:bg-gray-900">
+                <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl dark:bg-gray-900">
                     Unique Random Suggestions
                 </h2>
                 <RandomAnime anime={anime} allAnime={topResults} />

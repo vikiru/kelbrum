@@ -28,43 +28,43 @@ function NavBar() {
                     </div>
                     <ul
                         tabIndex={0}
-                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow dark:bg-gray-800 ${isDropdownVisible ? '' : 'hidden'}`}
+                        className={`menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow 2xl:w-60 dark:bg-gray-800 ${isDropdownVisible ? '' : 'hidden'}`}
                     >
                         <li>
-                            <span>Discover</span>
+                            <span className="2xl:text-2xl">Discover</span>
                             <ul>
                                 <li>
-                                    <Link to="anime/top" onClick={toggleDropdown}>
+                                    <Link to="anime/top" className="2xl:text-xl" onClick={toggleDropdown}>
                                         View top 100 anime
                                     </Link>
                                 </li>
                             </ul>
                         </li>
                         <li>
-                            <span>Information</span>
+                            <span className="2xl:text-2xl">Information</span>
                             <ul className="p-2">
                                 <li className="p-2">
-                                    <Link to="/anime/genres" onClick={toggleDropdown}>
+                                    <Link to="/anime/genres" className="2xl:text-xl" onClick={toggleDropdown}>
                                         View all genres
                                     </Link>
                                 </li>
                                 <li className="p-2">
-                                    <Link to="/anime/licensors" onClick={toggleDropdown}>
+                                    <Link to="/anime/licensors" className="2xl:text-xl" onClick={toggleDropdown}>
                                         View all licensors
                                     </Link>
                                 </li>
                                 <li className="p-2">
-                                    <Link to="/anime/studios" onClick={toggleDropdown}>
+                                    <Link to="/anime/studios" className="2xl:text-xl" onClick={toggleDropdown}>
                                         View all studios
                                     </Link>
                                 </li>
                                 <li className="p-2">
-                                    <Link to="/anime/producers" onClick={toggleDropdown}>
+                                    <Link to="/anime/producers" className="2xl:text-xl" onClick={toggleDropdown}>
                                         View all producers
                                     </Link>
                                 </li>
                                 <li className="p-2">
-                                    <Link to="/anime/seasons" onClick={toggleDropdown}>
+                                    <Link to="/anime/seasons" className="2xl:text-xl" onClick={toggleDropdown}>
                                         View all seasons
                                     </Link>
                                 </li>

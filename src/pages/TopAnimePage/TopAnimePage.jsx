@@ -31,7 +31,7 @@ const TopAnimePage = () => {
 
     return (
         <section id="top-anime" className="bg-secondary pb-6 dark:bg-gray-900">
-            <h2 className="bg-secondary py-4 text-center  xs:text-lg  text-xl font-bold text-primary underline lg:text-4xl dark:bg-gray-900">
+            <h2 className="bg-secondary py-4 text-center  text-xl  font-bold text-primary underline xs:text-lg lg:text-4xl dark:bg-gray-900">
                 Top 100 Anime
             </h2>
             <InfiniteScroll
@@ -44,7 +44,7 @@ const TopAnimePage = () => {
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid grid-cols-1 gap-4 p-2 lg:grid-cols-2">
+                <div className="m-8 grid grid-cols-1 gap-4 p-2 lg:grid-cols-2 3xl:grid-cols-3">
                     {items.map((item, index) => (
                         <AnimeCard key={item.id} anime={item} index={index + 1} />
                     ))}

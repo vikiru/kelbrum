@@ -120,7 +120,7 @@ const InfinitePagination = () => {
 
     return (
         <section id={`top-${data.key}-page-${currentPage}`} className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6  xs:text-lg  text-center text-xl lg:text-4xl font-bold capitalize text-primary underline">
+            <h2 className="bg-secondary pb-4 pt-6  text-center  text-xl font-bold capitalize text-primary underline xs:text-lg lg:text-4xl">
                 {title}
             </h2>
             <InfiniteScroll
@@ -133,7 +133,7 @@ const InfinitePagination = () => {
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2">
+                <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
                     {state.displayedItems.map((item, index) => {
                         const globalIndex = (currentPage - 1) * itemsPerPage + (index + 1);
                         return <AnimeCard key={item.title} anime={item} index={globalIndex} />;

@@ -93,7 +93,7 @@ const RecommendationsPage = () => {
 
     return (
         <section id={`top-recommendations-page-${currentPage}`} className="bg-secondary pb-6 dark:bg-gray-900">
-            <h2 className="bg-secondary pb-4 pt-6 text-center  xs:text-lg  text-xl lg:text-4xl font-bold text-primary underline dark:bg-gray-900">
+            <h2 className="bg-secondary pb-4 pt-6 text-center  text-xl  font-bold text-primary underline xs:text-lg lg:text-4xl dark:bg-gray-900">
                 {title}
             </h2>
             <InfiniteScroll
@@ -106,7 +106,7 @@ const RecommendationsPage = () => {
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2">
+                <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
                     {displayedItems.map((item, index) => {
                         const globalIndex = (currentPage - 1) * itemsPerPage + (index + 1);
                         return <AnimeCard key={item.title} anime={item} index={globalIndex} />;
