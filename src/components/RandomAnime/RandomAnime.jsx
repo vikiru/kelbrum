@@ -1,13 +1,12 @@
+import React, { useMemo, useRef } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { Link } from 'react-router-dom';
+import Slider from 'react-slick';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 
-import React, { useMemo, useRef } from 'react';
-
-import AnimeCard from '../AnimeCard/AnimeCard';
-import { Link } from 'react-router-dom';
-import Slider from 'react-slick';
 import { shuffleRandom } from '../../recommender/recommender';
-import { useInView } from 'react-intersection-observer';
+import AnimeCard from '../AnimeCard/AnimeCard';
 
 const RandomAnime = ({ anime, allAnime }) => {
     const shuffledAnime = useMemo(() => {
@@ -22,8 +21,9 @@ const RandomAnime = ({ anime, allAnime }) => {
         infinite: true,
         autoplay: false,
         swipeToSlide: true,
-        slidesToShow: 2,
+        slidesToShow: 3,
         slidesToScroll: 1,
+        initialSlide: 0,
         speed: 500,
         autoplaySpeed: 2000,
         cssEase: 'linear',
@@ -79,7 +79,7 @@ const RandomAnime = ({ anime, allAnime }) => {
             {
                 breakpoint: 2560,
                 settings: {
-                    slidesToShow: 3,
+                    slidesToShow: 2,
                     slidesToScroll: 1,
                     infinite: true,
                 },

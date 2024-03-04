@@ -6,7 +6,7 @@ function Footer() {
         <section id="footer" className="bottom-0">
             <footer
                 id="navigation-footer"
-                className="footer flex justify-between bg-neutral p-10 text-neutral-content lg:grid-cols-2 dark:bg-gray-800"
+                className="footer grid justify-between bg-neutral p-10 text-neutral-content lg:grid-cols-2 dark:bg-gray-800"
             >
                 <nav>
                     <h6 className="footer-title text-xl">Discover</h6>
