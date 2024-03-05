@@ -153,16 +153,14 @@ function weightedDistance(tensorA, tensorB){
     const synopsisTensorA = tensorA.slice(synopsisStart, synopsisEnd);
     const synopsisTensorB = tensorB.slice(synopsisStart, synopsisEnd);
     
-    const synopsisWeight = 0.9; 
-    const themesWeight = 0.6; 
-    const genresWeight = 0.6; 
-    const demographicsWeight = 0.1; 
-    const typeWeight = 0.6; 
-    const sourceWeight = 0.3; 
-    const ratingWeight = 0.8; 
-    
-    
-    
+    const synopsisWeight = 0.1; 
+    const themesWeight = 0.4;
+    const genresWeight = 0.4;
+    const demographicsWeight = 0.1;
+    const typeWeight = 1;
+    const sourceWeight = 1;
+    const ratingWeight = 1;
+
     const typeLength = 4;
     const sourceLength = 17;
     const ratingLength = 6;
@@ -174,12 +172,12 @@ function weightedDistance(tensorA, tensorB){
     const weightSum = (typeLength * typeWeight) + (sourceLength * sourceWeight) + (ratingLength * ratingWeight) + (genresWeight * genresLength) +
     (genresWeight * demographicsLength) + (genresWeight * themesLength) + (synopsisWeight * synopsisLength);
 
-    const typeDistance = distance.manhattan(typeTensorA, typeTensorB) * typeWeight;
-    const sourceDistance = distance.manhattan(sourceTensorA, sourceTensorB) * sourceWeight;
-    const ratingDistance = distance.manhattan(ratingTensorA, ratingTensorB) * ratingWeight;
-    const genresDistance = distance.manhattan(genresTensorA, genresTensorB) * genresWeight;
-    const demographicsDistance = distance.manhattan(demographicsTensorA, demographicsTensorB) * demographicsWeight;
-    const themeDistance = distance.manhattan(themesTensorA, themesTensorB) * themesWeight;
+    const typeDistance = distance.squaredEuclidean(typeTensorA, typeTensorB) * typeWeight;
+    const sourceDistance = distance.squaredEuclidean(sourceTensorA, sourceTensorB) * sourceWeight;
+    const ratingDistance = distance.squaredEuclidean(ratingTensorA, ratingTensorB) * ratingWeight;
+    const genresDistance = distance.squaredEuclidean(genresTensorA, genresTensorB) * genresWeight;
+    const themeDistance = distance.squaredEuclidean(themesTensorA, themesTensorB) * themesWeight;
+    const demographicsDistance = distance.squaredEuclidean(demographicsTensorA, demographicsTensorB) * demographicsWeight;
     const synopsisDistance = distance.jaccard(synopsisTensorA, synopsisTensorB) * synopsisWeight;
 
    
