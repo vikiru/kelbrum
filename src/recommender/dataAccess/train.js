@@ -1,12 +1,11 @@
+import { distance, similarity } from 'ml-distance';
+import { kmeans } from 'ml-kmeans';
+import { dirname } from 'path';
+import path from 'path';
 import * as ss from 'simple-statistics';
+import { fileURLToPath } from 'url';
 
 import { checkFileExists, readJSONFile } from './readFile.js';
-import { distance, similarity } from 'ml-distance';
-
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { kmeans } from 'ml-kmeans';
-import path from 'path';
 import { writeData } from './writeFile.js';
 
 const __filename = fileURLToPath(import.meta.url);
