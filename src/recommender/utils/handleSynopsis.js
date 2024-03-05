@@ -1,10 +1,11 @@
 import fs from 'fs';
-import { initializeDataFile } from './utils.js';
 import { lemmatizer } from 'lemmatizer';
 import natural from 'natural';
-import { readJSONFile } from '../dataAccess/readFile.js';
 import sw from 'remove-stopwords';
 import wordList from 'word-list';
+
+import { readJSONFile } from '../dataAccess/readFile.js';
+import { initializeDataFile } from './utils.js';
 
 const tfidf = new natural.TfIdf();
 const wordArray = fs.readFileSync(wordList, 'utf8').split('\n');
@@ -25,12 +26,9 @@ function cleanSynopsis(synopsis, keywords) {
     synopsistfIDF.addDocument(tokens.join(' '));
     const terms = synopsistfIDF.listTerms(0);
 
-    let topTerms = terms
-        .sort((a, b) => b.tfidf - a.tfidf)
-        .map((term) => term.term);
+    let topTerms = terms.sort((a, b) => b.tfidf - a.tfidf).map((term) => term.term);
     return topTerms.join(' ');
 }
-
 
 async function constructTFIDF(data, keywords) {
     data.forEach((entry) => {
@@ -49,8 +47,7 @@ function returnTopTerms() {
             topTerms.set(term.term, currentScore + term.tfidf);
         });
     }
-    const sortedTerms = Array.from(topTerms.entries())
-        .sort((a, b) => b[1] - a[1]);
+    const sortedTerms = Array.from(topTerms.entries()).sort((a, b) => b[1] - a[1]);
     return sortedTerms;
 }
 
@@ -59,15 +56,14 @@ function constructVector(keywords) {
     for (let i = 0; i < tfidf.documents.length; i++) {
         const terms = tfidf.listTerms(i);
         const vector = [];
-        keywords.forEach(keyword => {
-            const isKeywordPresent = terms.some(t => t.term === keyword);
+        keywords.forEach((keyword) => {
+            const isKeywordPresent = terms.some((t) => t.term === keyword);
             vector.push(isKeywordPresent ? 1 : 0);
         });
         normalizedVectors.push(vector);
     }
     return normalizedVectors;
 }
-
 
 async function normalizeSynopsis(data) {
     const keywords = await readJSONFile('../data/includedKeywords.json');
@@ -76,9 +72,4 @@ async function normalizeSynopsis(data) {
     return vector;
 }
 
-export {
-    returnTopTerms,
-    constructTFIDF,
-    cleanSynopsis,
-    normalizeSynopsis,
-}
+export { returnTopTerms, constructTFIDF, cleanSynopsis, normalizeSynopsis };
