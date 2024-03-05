@@ -36,8 +36,7 @@ async function shuffleRandom(arr) {
  * @returns {Array} An array of recommended items sorted by similarity
  */
 async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
-    const filteredSimilarities = similarities
-        .sort((a, b) => a.similarity - b.similarity);
+    const filteredSimilarities = similarities.sort((a, b) => a.similarity - b.similarity);
     console.log(similarities);
     const recommendations = filteredSimilarities.slice(0, MAX_ANIME);
     return recommendations;
@@ -54,8 +53,6 @@ async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
  * @returns {array} Sorted array of objects containing index and similarity
  */
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
-    const MAX_THRESHOLD = Infinity;
-
     const excludedSet = new Set(excludedIds);
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
         if (cluster === clusterNumber && index !== id && !excludedSet.has(index)) {
@@ -82,13 +79,31 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         }),
     );
 
-    return similarityResults.filter((result) => result !== null && result.similarity <= MAX_THRESHOLD).sort((a, b) => a.similarity - b.similarity);
+    return similarityResults
+        .filter((result) => result !== null)
+        .sort((a, b) => a.similarity - b.similarity);
 }
 
+/**
+ * Slices a given tensor from the start index to the end index.
+ *
+ * @param {Tensor} tensor - the tensor to be sliced
+ * @param {number} start - the start index of the slice
+ * @param {number} end - the end index of the slice
+ * @return {Tensor} the sliced tensor
+ */
 function sliceTensor(tensor, start, end) {
     return tensor.slice(start, end);
 }
 
+/**
+ * Calculate the distance between two tensors based on the given property.
+ *
+ * @param {string} property - The property based on which the distance is calculated.
+ * @param {Tensor} tensorA - The first tensor.
+ * @param {Tensor} tensorB - The second tensor.
+ * @return {number} The distance between the two tensors.
+ */
 function getDistance(property, tensorA, tensorB) {
     switch (property) {
         case 'type':
@@ -112,6 +127,13 @@ function getDistance(property, tensorA, tensorB) {
     }
 }
 
+/**
+ * Calculate the weighted distance between two tensors based on the specified indices and weights.
+ *
+ * @param {Object} tensorA - the first tensor
+ * @param {Object} tensorB - the second tensor
+ * @return {number} the weighted distance between the two tensors
+ */
 function weightedDistance(tensorA, tensorB) {
     const indices = {
         type: [0, 1],
@@ -122,7 +144,7 @@ function weightedDistance(tensorA, tensorB) {
         themes: [39, 90],
         synopsis: [90, 339],
         duration: [339, 340],
-        score: [340, 341]
+        score: [340, 341],
     };
 
     const weights = {
@@ -134,7 +156,7 @@ function weightedDistance(tensorA, tensorB) {
         themes: 0.1,
         synopsis: 0.2,
         duration: 0.5,
-        score: 0.5
+        score: 0.5,
     };
     const weightSum = Object.values(weights).reduce((sum, currentValue) => sum + currentValue, 0);
 
@@ -146,14 +168,19 @@ function weightedDistance(tensorA, tensorB) {
         const weight = weights[feature];
         const distance = getDistance(feature, firstTensor, secondTensor);
         //console.log(`Feature: ${feature}, Raw Distance: ${distance}, Weighted Distance: ${distance * weight}`);
-
         distanceSum += distance * weight;
     }
 
     return distanceSum / weightSum;
 }
 
-
+/**
+ * Compares two tensors using a given distance function.
+ *
+ * @param {type} tensorA - the first tensor
+ * @param {type} tensorB - the second tensor
+ * @return {type} the result of the comparison
+ */
 async function compareTensors(tensorA, tensorB) {
     return weightedDistance(tensorA, tensorB);
 }
