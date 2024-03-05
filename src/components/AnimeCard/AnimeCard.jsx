@@ -18,7 +18,7 @@ const AnimeCard = ({ anime, index }) => {
         <section
             id="anime-card"
             key={anime.id}
-            className="rounded-lg card mx-auto flex flex-col w-[80%] cursor-default overflow-hidden bg-primary p-1 pb-4 xs:min-h-[60vh] 2xl:w-[60%] dark:bg-gray-800"
+            className="rounded-lg card mx-auto flex flex-col w-[80%] cursor-default overflow-hidden bg-primary p-1 pb-4 xs:min-h-[60vh] 2xl:w-[70%] dark:bg-gray-800"
         >
             <div className="flex min-h-[10vh] items-center justify-center xs:pb-0 lg:pt-4 2xl:pb-2">
                 <h2 className="text-center text-lg font-semibold text-neutral xs:text-sm lg:text-2xl dark:text-gray-100">
@@ -48,7 +48,7 @@ const AnimeCard = ({ anime, index }) => {
                     .filter((g) => g !== 'Unknown')
                     .map((g) => (
                         <span
-                            className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2 lg:text-lg 2xl:p-4  4xl:text-2xl"
+                            className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2 lg:text-lg"
                             key={g}
                         >
                             {g}
@@ -59,7 +59,7 @@ const AnimeCard = ({ anime, index }) => {
                     .filter((d) => d !== 'Unknown')
                     .map((d) => (
                         <span
-                            className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2  lg:text-lg 2xl:p-4 4xl:text-2xl"
+                            className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2  lg:text-lg"
                             key={d}
                         >
                             {d}

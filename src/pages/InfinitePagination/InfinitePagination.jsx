@@ -1,9 +1,9 @@
-import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash';
 import { useFilteredData } from '../../context/FilteredDataProvider';
 
 const InfinitePagination = () => {
@@ -69,12 +69,15 @@ const InfinitePagination = () => {
     const sortedData = useMemo(() => {
         return data.values.sort((a, b) => b.score - a.score);
     }, [data]);
+
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+    const isLastPage = currentPage === totalPages;
+    const allItemsForCurrentPageDisplayed = state.displayedItems.length >= itemsPerPage;
+    const adjustedHasMore = !(isLastPage && allItemsForCurrentPageDisplayed);
 
     useEffect(() => {
-        const allItemsLoaded = state.items.length >= sortedData.length;
-        setState((prevState) => ({ ...prevState, hasMore: !allItemsLoaded }));
-    }, [sortedData.length, state.items]);
+        setState((prevState) => ({ ...prevState, hasMore: adjustedHasMore }));
+    }, [adjustedHasMore]);
 
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -90,18 +93,18 @@ const InfinitePagination = () => {
 
     const fetchMoreItems = useCallback(
         debounce(() => {
-            if (state.displayedItems.length < state.items.length) {
-                const newDisplayedItems = state.displayedItems.concat(
-                    state.items.slice(state.displayedItems.length, state.displayedItems.length + itemsPerDisplay),
-                );
+            if (adjustedHasMore) {
+                const remainingItemsToDisplay = itemsPerPage - state.displayedItems.length;
+                const startIndex = state.displayedItems.length;
+                const endIndex = startIndex + remainingItemsToDisplay;
+                const newDisplayedItems = state.items.slice(startIndex, endIndex);
                 setState((prevState) => ({
                     ...prevState,
-                    displayedItems: newDisplayedItems,
-                    hasMore: state.displayedItems.length + itemsPerDisplay < state.items.length,
+                    displayedItems: [...prevState.displayedItems, ...newDisplayedItems],
                 }));
             }
         }, 1000),
-        [state.displayedItems, state.items, itemsPerDisplay],
+        [state.displayedItems, state.items, itemsPerPage, adjustedHasMore],
     );
 
     const handlePageChange = useCallback(
@@ -115,21 +118,18 @@ const InfinitePagination = () => {
         [navigate, totalPages],
     );
 
-    const actualItemsForCurrentPage = Math.min(itemsPerPage, sortedData.length - (currentPage - 1) * itemsPerPage);
-    const allItemsForCurrentPageDisplayed = state.displayedItems.length >= actualItemsForCurrentPage;
-
     return (
         <section id={`top-${data.key}-page-${currentPage}`} className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6  text-center  text-xl font-bold capitalize text-primary underline xs:text-lg lg:text-4xl">
+            <h2 className="bg-secondary pb-4 pt-6 text-center text-xl font-bold capitalize text-primary underline xs:text-lg lg:text-4xl">
                 {title}
             </h2>
             <InfiniteScroll
                 pageStart={0}
-                loadMore={debounce(fetchMoreItems, 1000)}
-                hasMore={state.hasMore}
+                loadMore={fetchMoreItems}
+                hasMore={adjustedHasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {state.hasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
+                        {adjustedHasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
                     </div>
                 }
             >

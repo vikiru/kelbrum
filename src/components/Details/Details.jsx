@@ -68,7 +68,7 @@ const Details = ({ anime }) => {
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Season</h2>
                                 <p className="text-lg capitalize text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
-                                    {anime.premiered}
+                                    {anime.premiered || 'Unknown'}
                                 </p>
                             </div>
 
