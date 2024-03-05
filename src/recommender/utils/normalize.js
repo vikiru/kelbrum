@@ -1,45 +1,42 @@
 import * as tf from '@tensorflow/tfjs';
 
-import { calculateStatistics, createMapping } from './stats.js';
-import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
-
-import { returnUniqueArray } from './filter.js';
-import { sortData } from './utils.js';
 import { writeData } from '../dataAccess/writeFile.js';
+import { returnUniqueArray } from './filter.js';
+import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
+import { calculateStatistics, createMapping } from './stats.js';
+import { sortData } from './utils.js';
 
 const typeMapping = {
-    'TV': 1,
-    'ONA': 2,
-    'Movie': 3,
-    'Unknown': 4,
+    TV: 1,
+    ONA: 2,
+    Movie: 3,
+    Unknown: 4,
 };
 
 const ratingMapping = {
-    'G': 1,
-    'PG': 2,
+    G: 1,
+    PG: 2,
     'PG-13': 3,
-    'R': 4,
+    R: 4,
     'R+': 5,
-    'Unknown': 6,
+    Unknown: 6,
 };
 
 const demographicMapping = {
-    'Kids': 1,
-    'Shoujo': 2,
-    'Josei': 2.5,
-    'Shounen': 3,
-    'Seinen': 3.5,
-    'Unknown': 5,
+    Kids: 1,
+    Shoujo: 2,
+    Josei: 2.5,
+    Shounen: 3,
+    Seinen: 3.5,
+    Unknown: 5,
 };
-
-
 
 function normalizeMapping(data, property) {
     const mapping = {
-        'type': typeMapping,
-        'rating': ratingMapping,
-        'demographics': demographicMapping,
-    }
+        type: typeMapping,
+        rating: ratingMapping,
+        demographics: demographicMapping,
+    };
     const map = mapping[property];
     return data.map((entry) => {
         const value = entry[property];
@@ -47,7 +44,7 @@ function normalizeMapping(data, property) {
             return map['Unknown'];
         } else {
             if (Array.isArray(value) && value.length > 1) {
-                const mappedValues = value.map(val => map[val]);
+                const mappedValues = value.map((val) => map[val]);
                 return Math.min(...mappedValues);
             } else {
                 return map[value];
@@ -55,7 +52,6 @@ function normalizeMapping(data, property) {
         }
     });
 }
-
 
 /**
  * Encodes the combination of data based on the given property using a unique value mapping.
@@ -197,9 +193,7 @@ function normalizeCategorical(data) {
 }
 
 /**
-
  * Multi-hot encodes the data based on the specified property.
- *
  *
  * @param {Array} data - The input data array.
  * @param {string} property - The property to perform encoding on.
@@ -211,7 +205,6 @@ function multiHotEncode(data, property) {
         return uniqueValues.map((value) => (entry[property].includes(value) ? 1 : 0));
     });
 }
-
 
 /**
  * Asynchronously creates a feature tensor based on the given data.
@@ -229,7 +222,7 @@ async function createFeatureTensor(data) {
         { func: multiHotEncode, isCategorical: true, property: 'genres', is1D: false },
         { func: normalizeMapping, isCategorical: true, property: 'demographics', is1D: true },
         { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
-        { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false},
+        { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false },
         { func: minMaxScale, isCategorical: false, property: 'durationMinutes', is1D: true },
         { func: minMaxScale, isCategorical: false, property: 'score', is1D: true },
         //{ func: multiHotEncode, isCategorical: true, property: 'studios', is1D: false },
