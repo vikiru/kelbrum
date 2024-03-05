@@ -71,13 +71,14 @@ const InfinitePagination = () => {
     }, [data]);
 
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+    const itemsLeftToDisplay = sortedData.length - (currentPage - 1) * itemsPerPage;
     const isLastPage = currentPage === totalPages;
     const allItemsForCurrentPageDisplayed = state.displayedItems.length >= itemsPerPage;
-    const adjustedHasMore = !(isLastPage && allItemsForCurrentPageDisplayed);
+    const hasMore = !(isLastPage && (allItemsForCurrentPageDisplayed || itemsLeftToDisplay <= 0));
 
     useEffect(() => {
-        setState((prevState) => ({ ...prevState, hasMore: adjustedHasMore }));
-    }, [adjustedHasMore]);
+        setState((prevState) => ({ ...prevState, hasMore }));
+    }, [hasMore]);
 
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -93,7 +94,7 @@ const InfinitePagination = () => {
 
     const fetchMoreItems = useCallback(
         debounce(() => {
-            if (adjustedHasMore) {
+            if (hasMore) {
                 const remainingItemsToDisplay = itemsPerPage - state.displayedItems.length;
                 const startIndex = state.displayedItems.length;
                 const endIndex = startIndex + remainingItemsToDisplay;
@@ -104,7 +105,7 @@ const InfinitePagination = () => {
                 }));
             }
         }, 1000),
-        [state.displayedItems, state.items, itemsPerPage, adjustedHasMore],
+        [state.displayedItems, state.items, itemsPerPage, hasMore],
     );
 
     const handlePageChange = useCallback(
@@ -126,10 +127,10 @@ const InfinitePagination = () => {
             <InfiniteScroll
                 pageStart={0}
                 loadMore={fetchMoreItems}
-                hasMore={adjustedHasMore}
+                hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {adjustedHasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
+                        {hasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
                     </div>
                 }
             >
