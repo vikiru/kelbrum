@@ -126,13 +126,13 @@ function weightedDistance(tensorA, tensorB) {
     };
 
     const weights = {
-        type: 0.5,
-        source: 0.7,
-        rating: 0.5,
-        genres: 0.1,
+        type: 0.8,
+        source: 0.2,
+        rating: 0.8,
+        genres: 0.2,
         demographics: 0.1,
         themes: 0.1,
-        synopsis: 0.1,
+        synopsis: 0.2,
         duration: 0.5,
         score: 0.5
     };
