@@ -1,10 +1,10 @@
-import sw from 'remove-stopwords';
-import wordList from 'word-list';
-import natural from 'natural';
-import { lemmatizer } from 'lemmatizer';
 import fs from 'fs';
 import { initializeDataFile } from './utils.js';
+import { lemmatizer } from 'lemmatizer';
+import natural from 'natural';
 import { readJSONFile } from '../dataAccess/readFile.js';
+import sw from 'remove-stopwords';
+import wordList from 'word-list';
 
 const tfidf = new natural.TfIdf();
 const wordArray = fs.readFileSync(wordList, 'utf8').split('\n');
