@@ -7,6 +7,56 @@ import { returnUniqueArray } from './filter.js';
 import { sortData } from './utils.js';
 import { writeData } from '../dataAccess/writeFile.js';
 
+const typeMapping = {
+    'TV': 1,
+    'ONA': 2,
+    'Movie': 3,
+    'Unknown': 4,
+};
+
+const ratingMapping = {
+    'G': 1,
+    'PG': 2,
+    'PG-13': 3,
+    'R': 4,
+    'R+': 5,
+    'Unknown': 6,
+};
+
+const demographicMapping = {
+    'Kids': 1,
+    'Shoujo': 2,
+    'Josei': 2.5,
+    'Shounen': 3,
+    'Seinen': 3.5,
+    'Unknown': 5,
+};
+
+
+
+function normalizeMapping(data, property) {
+    const mapping = {
+        'type': typeMapping,
+        'rating': ratingMapping,
+        'demographics': demographicMapping,
+    }
+    const map = mapping[property];
+    return data.map((entry) => {
+        const value = entry[property];
+        if (Array.isArray(value) && value.length === 0) {
+            return map['Unknown'];
+        } else {
+            if (Array.isArray(value) && value.length > 1) {
+                const mappedValues = value.map(val => map[val]);
+                return Math.min(...mappedValues);
+            } else {
+                return map[value];
+            }
+        }
+    });
+}
+
+
 /**
  * Encodes the combination of data based on the given property using a unique value mapping.
  *
@@ -88,7 +138,7 @@ function ordinalEncode(data, property) {
  * @returns {Array} The scaled data array
  */
 function minMaxScale(data, property) {
-    const uniqueValues = returnUniqueArray(data, property);
+    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
     const minValue = Math.min(...uniqueValues);
     const maxValue = Math.max(...uniqueValues);
     const range = maxValue - minValue;
@@ -160,8 +210,8 @@ function multiHotEncode(data, property) {
     return data.map((entry) => {
         return uniqueValues.map((value) => (entry[property].includes(value) ? 1 : 0));
     });
-
 }
+
 
 /**
  * Asynchronously creates a feature tensor based on the given data.
@@ -173,14 +223,16 @@ async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const synopsisData = await normalizeSynopsis(data);
     const normalizationFunctions = [
-        { func: multiHotEncode, isCategorical: true, property: 'type', is1D: false },
+        { func: normalizeMapping, isCategorical: true, property: 'type', is1D: true },
         { func: multiHotEncode, isCategorical: true, property: 'source', is1D: false },
-        { func: multiHotEncode, isCategorical: true, property: 'rating', is1D: false },
+        { func: normalizeMapping, isCategorical: true, property: 'rating', is1D: true },
         { func: multiHotEncode, isCategorical: true, property: 'genres', is1D: false },
-        { func: multiHotEncode, isCategorical: true, property: 'demographics', is1D: false },
+        { func: normalizeMapping, isCategorical: true, property: 'demographics', is1D: true },
         { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
         { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false},
-        //{ func: minMaxScale, isCategorical: false, property: 'score', is1D: true },
+        { func: minMaxScale, isCategorical: false, property: 'durationMinutes', is1D: true },
+        { func: minMaxScale, isCategorical: false, property: 'score', is1D: true },
+        //{ func: multiHotEncode, isCategorical: true, property: 'studios', is1D: false },
         //{ func: minMaxScale, isCategorical: false, property: 'episodes', is1D: true },
     ];
 
@@ -194,7 +246,7 @@ async function createFeatureTensor(data) {
         }
 
         let tensor;
-        if (func === minMaxScale) {
+        if (is1D) {
             tensor = tf.tensor1d(normalizedData);
             tensor = tensor.expandDims(1);
         } else {
