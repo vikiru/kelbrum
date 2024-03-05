@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -18,7 +17,7 @@ const AnimeCard = ({ anime, index }) => {
         <section
             id="anime-card"
             key={anime.id}
-            className="rounded-lg card mx-auto flex flex-col w-[80%] cursor-default overflow-hidden bg-primary p-1 pb-4 xs:min-h-[60vh] 2xl:w-[70%] dark:bg-gray-800"
+            className="card mx-auto flex w-[80%] cursor-default flex-col overflow-hidden rounded-lg bg-primary p-1 pb-4 xs:min-h-[60vh] 2xl:w-[70%] dark:bg-gray-800"
         >
             <div className="flex min-h-[10vh] items-center justify-center xs:pb-0 lg:pt-4 2xl:pb-2">
                 <h2 className="text-center text-lg font-semibold text-neutral xs:text-sm lg:text-2xl dark:text-gray-100">
@@ -34,12 +33,13 @@ const AnimeCard = ({ anime, index }) => {
                             <img
                                 src={`${anime.imageURL}`}
                                 alt={`${anime.title} image`}
-                                className="lg:h-48 w-full rounded-lg object-cover xs:h-32 xl:h-50 3xl:h-70 4xl:h-72 5xl:h-80"
+                                className="xl:h-50 3xl:h-70 w-full rounded-lg object-cover xs:h-32 lg:h-48 4xl:h-72 5xl:h-80"
                                 loading="lazy"
                                 onError={handleImageError}
                             />
                         </picture>
                     )}
+                    {hasError && <div className="w-full rounded-lg bg-gray-200 lg:h-48 dark:bg-gray-700"></div>}
                 </div>
             </section>
 
