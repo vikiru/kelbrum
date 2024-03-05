@@ -152,15 +152,15 @@ function weightedDistance(tensorA, tensorB){
     
     const synopsisTensorA = tensorA.slice(synopsisStart, synopsisEnd);
     const synopsisTensorB = tensorB.slice(synopsisStart, synopsisEnd);
-
-    const synopsisWeight = 0.5;
-    const themesWeight = 0.3;
-    const genresWeight = 0.05;
-    const demographicsWeight = 0.15;
-    const typeWeight = 0.0167;
-    const sourceWeight = 0.0167;
-    const ratingWeight = 0.0167;
-
+    
+    const synopsisWeight = 0.3575; 
+    const themesWeight = 0.3125; 
+    const genresWeight = 0.1; 
+    const demographicsWeight = 0.0025; 
+    const typeWeight = 0.03; 
+    const sourceWeight = 0.0025; 
+    const ratingWeight = 0.01; 
+    
     const typeLength = 4;
     const sourceLength = 17;
     const ratingLength = 6;
@@ -180,13 +180,25 @@ function weightedDistance(tensorA, tensorB){
     const themeDistance = distance.gower(themesTensorA, themesTensorB) * themesWeight;
     const synopsisDistance = distance.gower(synopsisTensorA, synopsisTensorB) * synopsisWeight;
 
+   
     //console.log(`Type Distance: ${typeDistance}`);
+
     //console.log(`Source Distance: ${sourceDistance}`);
+
     //console.log(`Rating Distance: ${ratingDistance}`);
+
     //console.log(`Genres Distance: ${genresDistance}`);
+
     //console.log(`Demographics Distance: ${demographicsDistance}`);
+
    // console.log(`Theme Distance: ${themeDistance}`);
+
     //console.log(`Synopsis Distance: ${synopsisDistance}`);
+    
+   
+   
+   
+   
 
     const distanceSum = typeDistance + sourceDistance + ratingDistance + genresDistance + demographicsDistance + themeDistance + synopsisDistance;
     return distanceSum;
