@@ -1,8 +1,11 @@
 import * as tf from '@tensorflow/tfjs';
 
-import { returnUniqueArray } from './filter.js';
 import { calculateStatistics, createMapping } from './stats.js';
+import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
+
+import { returnUniqueArray } from './filter.js';
 import { sortData } from './utils.js';
+import { writeData } from '../dataAccess/writeFile.js';
 
 /**
  * Encodes the combination of data based on the given property using a unique value mapping.
@@ -45,7 +48,7 @@ function encodeCombination(data, property) {
  * @returns {Array} The encoded data array
  */
 function encodeCategorical(data, property) {
-    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
+    const uniqueValues = returnUniqueArray(data, property);
     return data.map((entry) => {
         const propertyValue = entry[property];
         const propertyString = propertyValue.toString();
@@ -68,7 +71,7 @@ function encodeCategorical(data, property) {
  * @returns {Array} The encoded array
  */
 function ordinalEncode(data, property) {
-    const uniqueValues = sortData(returnUniqueArray(data, property, ['Unknown']));
+    const uniqueValues = sortData(returnUniqueArray(data, property));
     return data.map((entry) => {
         if (entry[property] === 0 || entry[property] === 'Unknown') {
             return -1;
@@ -85,14 +88,14 @@ function ordinalEncode(data, property) {
  * @returns {Array} The scaled data array
  */
 function minMaxScale(data, property) {
-    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
+    const uniqueValues = returnUniqueArray(data, property);
     const minValue = Math.min(...uniqueValues);
     const maxValue = Math.max(...uniqueValues);
     const range = maxValue - minValue;
 
     return data.map((entry) => {
         if (entry[property] === 0 || entry[property] === 'Unknown') {
-            return (minValue - minValue) / range;
+            return 0;
         } else {
             return (entry[property] - minValue) / range;
         }
@@ -124,20 +127,6 @@ function robustScale(data, property, stats) {
 }
 
 /**
- * Multi-hot encodes the data based on the specified property.
- *
- * @param {Array} data - The input data array.
- * @param {string} property - The property to perform encoding on.
- * @returns {Array} - The multi-hot encoded array.
- */
-function multiHotEncode(data, property) {
-    const uniqueValues = returnUniqueArray(data, property);
-    return data.map((entry) => {
-        return uniqueValues.map((value) => (entry[property].includes(value) ? 1 : 0));
-    });
-}
-
-/**
  * Normalizes categorical data to a range between 0 and 1.
  *
  * @param {Array} data - The array of categorical data to be normalized
@@ -158,17 +147,20 @@ function normalizeCategorical(data) {
 }
 
 /**
- * Check if the array is 1D or 2D.
+
+ * Multi-hot encodes the data based on the specified property.
  *
- * @param {Array} arr - The input array to be checked
- * @returns {string} The dimension of the array, either '1D' or '2D'
+ *
+ * @param {Array} data - The input data array.
+ * @param {string} property - The property to perform encoding on.
+ * @returns {Array} - The multi-hot encoded array.
  */
-function checkArrayDimension(arr) {
-    if (arr.some((item) => Array.isArray(item))) {
-        return '2D';
-    } else {
-        return '1D';
-    }
+function multiHotEncode(data, property) {
+    const uniqueValues = returnUniqueArray(data, property);
+    return data.map((entry) => {
+        return uniqueValues.map((value) => (entry[property].includes(value) ? 1 : 0));
+    });
+
 }
 
 /**
@@ -179,45 +171,30 @@ function checkArrayDimension(arr) {
  */
 async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
+    const synopsisData = await normalizeSynopsis(data);
     const normalizationFunctions = [
-        { func: encodeCategorical, isCategorical: true, property: 'type' },
-        { func: encodeCategorical, isCategorical: true, property: 'source' },
-        //{ func: encodeCombination, isCategorical: true, property: 'status' },
-        { func: encodeCategorical, isCategorical: true, property: 'rating' },
-        // { func: encodeCombination, isCategorical: true, property: 'premiered'},
-        //{ func: encodeCombination, isCategorical: true, property: 'season' },
-        //{ func: encodeCombination, isCategorical: true, property: 'year' },
-        { func: encodeCategorical, isCategorical: true, property: 'genres' },
-        { func: encodeCategorical, isCategorical: true, property: 'demographics' },
-        { func: encodeCategorical, isCategorical: true, property: 'themes' },
-        //{ func: encodeCategorical, isCategorical: true, property: 'producers' },
-        { func: encodeCategorical, isCategorical: true, property: 'studios' },
-        //{ func: encodeCombination, isCategorical: true, property: 'licensors' },
-
-        //{ func: minMaxScale, isCategorical: false, property: 'rank' },
-        // { func: minMaxScale, isCategorical: false, property: 'popularity' },
-
-        { func: minMaxScale, isCategorical: false, property: 'score' },
-        //{ func: minMaxScale, isCategorical: false, property: 'scoredBy' },
-        // { func: minMaxScale, isCategorical: false, property: 'favourites' },
-        //{ func: minMaxScale, isCategorical: false, property: 'members' },
-
-        //{ func: minMaxScale, isCategorical: false, property: 'durationMinutes' },
-        { func: minMaxScale, isCategorical: false, property: 'episodes' },
+        { func: multiHotEncode, isCategorical: true, property: 'type', is1D: false },
+        { func: multiHotEncode, isCategorical: true, property: 'source', is1D: false },
+        { func: multiHotEncode, isCategorical: true, property: 'rating', is1D: false },
+        { func: multiHotEncode, isCategorical: true, property: 'genres', is1D: false },
+        { func: multiHotEncode, isCategorical: true, property: 'demographics', is1D: false },
+        { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
+        { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false},
+        //{ func: minMaxScale, isCategorical: false, property: 'score', is1D: true },
+        //{ func: minMaxScale, isCategorical: false, property: 'episodes', is1D: true },
     ];
 
-    const allTensors = normalizationFunctions.map(({ func, isCategorical, property }) => {
+    const allTensors = normalizationFunctions.map(({ func, isCategorical, is1D, property }) => {
         let normalizedData;
         if (isCategorical) {
             normalizedData = func(data, property);
-            if (func !== encodeCategorical) normalizedData = normalizeCategorical(normalizedData);
+            if (func === normalizeSynopsis) normalizedData = synopsisData;
         } else {
             normalizedData = func(data, property, stats);
         }
-        const dimension = checkArrayDimension(normalizedData);
 
         let tensor;
-        if (dimension === '1D') {
+        if (func === minMaxScale) {
             tensor = tf.tensor1d(normalizedData);
             tensor = tensor.expandDims(1);
         } else {
@@ -227,7 +204,7 @@ async function createFeatureTensor(data) {
     });
 
     validateTensors(allTensors);
-    const concatenatedTensor = tf.concat(allTensors, 1);
+    const concatenatedTensor = tf.concat2d(allTensors, 1);
     return concatenatedTensor;
 }
 
@@ -280,11 +257,9 @@ function validateTensors(tensors) {
 
 export {
     minMaxScale,
-    multiHotEncode,
+    encodeCombination,
     ordinalEncode,
     robustScale,
-    checkArrayDimension,
-    encodeCombination,
     encodeCategorical,
     normalizeCategorical,
     createFeatureTensor,
