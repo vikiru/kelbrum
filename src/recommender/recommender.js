@@ -8,10 +8,10 @@ import { distance } from 'ml-distance';
  * @returns {Array} The sorted anime data based on similarity.
  */
 async function retrieveAnimeData(recommendations, data) {
-    const indexes = recommendations.map((r) => r.index);
-    const animeData = data.filter((d) => indexes.includes(d.id));
+    const indexes = new Set(recommendations.map((r) => r.index));
+    const animeData = data.filter((d) => indexes.has(d.id));
     animeData.forEach((d) => {
-        d.similarity = (recommendations.find((r) => r.index === d.id).similarity * 100).toFixed(2);
+        d.similarity = recommendations.find((r) => r.index === d.id).similarity.toFixed(2);
     });
     return animeData.sort((a, b) => a.similarity - b.similarity);
 }
@@ -36,25 +36,12 @@ async function shuffleRandom(arr) {
  * @returns {Array} An array of recommended items sorted by similarity
  */
 async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
-    const MIN_THRESHOLD = 0.9;
-
-    const filteredSimilarities = similarities.filter((s) => 1 - s.similarity >= MIN_THRESHOLD);
-    filteredSimilarities.sort((a, b) => a.similarity - b.similarity);
-
-    const selectedIds = new Set();
-    const recommendations = [];
-
-    for (const item of filteredSimilarities) {
-        const similarity = 1 - item.similarity;
-        if (recommendations.length === MAX_ANIME) {
-            break;
-        }
-        if (!selectedIds.has(item.index) && similarity >= MIN_THRESHOLD) {
-            selectedIds.add(item.index);
-            recommendations.push(item);
-        }
-    }
-    return Array.from(recommendations).sort((a, b) => a.similarity - b.similarity);
+    const MAX_THRESHOLD = 0.5;
+    const filteredSimilarities = similarities
+        .sort((a, b) => a.similarity - b.similarity);
+    console.log(similarities);
+    const recommendations = filteredSimilarities.slice(0, MAX_ANIME);
+    return recommendations;
 }
 
 /**
@@ -68,8 +55,9 @@ async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
  * @returns {array} Sorted array of objects containing index and similarity
  */
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
+    const excludedSet = new Set(excludedIds);
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
-        if (cluster === clusterNumber && index !== id && !excludedIds.includes(index)) {
+        if (cluster === clusterNumber && index !== id && !excludedSet.has(index)) {
             indices.push(index);
         }
         return indices;
@@ -79,9 +67,9 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         return [];
     }
 
+    const tensor = featureArray[id];
     const similarityResults = await Promise.all(
         otherAnimeIndices.map(async (otherIndex) => {
-            const tensor = featureArray[id];
             const otherTensor = featureArray[otherIndex];
             try {
                 const similarity = await compareTensors(tensor, otherTensor);
@@ -96,6 +84,7 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
     return similarityResults.filter((result) => result !== null).sort((a, b) => a.similarity - b.similarity);
 }
 
+
 /**
  * Calculate the custom distance between two tensors.
  *
@@ -103,14 +92,14 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
  * @param {Array} tensorB - The second tensor
  * @returns {number} The custom distance between the two tensors
  */
-function customDistance(tensorA, tensorB) {
+async function customDistance(tensorA, tensorB) {
     let tensorDistance = 0;
     let weightSum = 0;
 
     const categoricalWeight = 0.7;
-    const numericalWeight = 1 - categoricalWeight;
+    const numericalWeight = 0.3;
 
-    const numCategoricalFeatures = 7;
+    const numCategoricalFeatures = 6;
 
     const categoricalA = tensorA.slice(0, numCategoricalFeatures);
     const categoricalB = tensorB.slice(0, numCategoricalFeatures);
@@ -120,21 +109,88 @@ function customDistance(tensorA, tensorB) {
     const categoricalDistance = distance.gower(categoricalA, categoricalB) * categoricalWeight;
     const numericalDistance = distance.gower(continuousA, continuousB) * numericalWeight;
 
-    tensorDistance = categoricalDistance + numericalDistance;
+    tensorDistance = categoricalDistance;
 
-    weightSum =
-        numCategoricalFeatures * categoricalWeight + (tensorA.length - numCategoricalFeatures) * numericalWeight;
-
-    if (weightSum === 0) {
-        console.error('Weight sum is zero, cannot divide by zero');
-        return NaN;
-    }
-
-    return tensorDistance / weightSum;
+    return tensorDistance;
 }
 
-function compareTensors(tensorA, tensorB) {
-    return customDistance(tensorA, tensorB);
+
+function weightedDistance(tensorA, tensorB){
+    const typeStart = 0;
+    const typeEnd = typeStart + 4;
+    const sourceStart = typeEnd;
+    const sourceEnd = sourceStart + 17;
+    const ratingStart = sourceEnd;
+    const ratingEnd = ratingStart + 6;
+    const genresStart = ratingEnd;
+    const genresEnd = genresStart + 19;
+    const demographicsStart = genresEnd;
+    const demographicsEnd = demographicsStart + 5;
+    const themeStart = demographicsEnd;
+    const themeEnd = themeStart + 51;
+    const synopsisStart = themeEnd;
+    const synopsisEnd = synopsisStart + 223;
+
+    const typeTensorA = tensorA.slice(typeStart, typeEnd);
+    const typeTensorB = tensorB.slice(typeStart, typeEnd);
+    
+    const sourceTensorA = tensorA.slice(sourceStart, sourceEnd);
+    const sourceTensorB = tensorB.slice(sourceStart, sourceEnd);
+    
+    const ratingTensorA = tensorA.slice(ratingStart, ratingEnd);
+    const ratingTensorB = tensorB.slice(ratingStart, ratingEnd);
+    
+    const genresTensorA = tensorA.slice(genresStart, genresEnd);
+    const genresTensorB = tensorB.slice(genresStart, genresEnd);
+    
+    const demographicsTensorA = tensorA.slice(demographicsStart, demographicsEnd);
+    const demographicsTensorB = tensorB.slice(demographicsStart, demographicsEnd);
+
+    const themesTensorA = tensorA.slice(themeStart, themeEnd);
+    const themesTensorB = tensorB.slice(themeStart, themeEnd);
+    
+    const synopsisTensorA = tensorA.slice(synopsisStart, synopsisEnd);
+    const synopsisTensorB = tensorB.slice(synopsisStart, synopsisEnd);
+
+    const genresWeight = 0.2;
+    const typeWeight = 0.025;
+    const sourceWeight = 0.025;
+    const ratingWeight = 0.05;
+    const synopsisWeight = 0.2;
+
+    const typeLength = 4;
+    const sourceLength = 17;
+    const ratingLength = 6;
+    const genresLength = 19;
+    const demographicsLength = 5;
+    const themesLength = 51;
+    const synopsisLength = 223;
+
+    const weightSum = (typeLength * typeWeight) + (sourceLength * sourceWeight) + (ratingLength * ratingWeight) + (genresWeight * genresLength) +
+    (genresWeight * demographicsLength) + (genresWeight * themesLength) + (synopsisWeight * synopsisLength);
+
+    const typeDistance = distance.dice(typeTensorA, typeTensorB) * typeWeight;
+    const sourceDistance = distance.dice(sourceTensorA, sourceTensorB) * sourceWeight;
+    const ratingDistance = distance.dice(ratingTensorA, ratingTensorB) * ratingWeight;
+    const genresDistance = distance.gower(genresTensorA, genresTensorB) * genresWeight;
+    const demographicsDistance = distance.gower(demographicsTensorA, demographicsTensorB) * genresWeight;
+    const themeDistance = distance.gower(themesTensorA, themesTensorB) * genresWeight;
+    const synopsisDistance = distance.gower(synopsisTensorA, synopsisTensorB) * synopsisWeight;
+
+    //console.log(`Type Distance: ${typeDistance}`);
+    //console.log(`Source Distance: ${sourceDistance}`);
+    //console.log(`Rating Distance: ${ratingDistance}`);
+    //console.log(`Genres Distance: ${genresDistance}`);
+    //console.log(`Demographics Distance: ${demographicsDistance}`);
+   // console.log(`Theme Distance: ${themeDistance}`);
+    //console.log(`Synopsis Distance: ${synopsisDistance}`);
+
+    const distanceSum = typeDistance + sourceDistance + ratingDistance + genresDistance + demographicsDistance + themeDistance + synopsisDistance;
+    return distanceSum;
 }
 
-export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };
+async function compareTensors(tensorA, tensorB) {
+    return weightedDistance(tensorA, tensorB);
+}
+
+export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations, weightedDistance };
