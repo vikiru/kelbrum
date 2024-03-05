@@ -36,7 +36,6 @@ async function shuffleRandom(arr) {
  * @returns {Array} An array of recommended items sorted by similarity
  */
 async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
-    const MAX_THRESHOLD = 0.5;
     const filteredSimilarities = similarities
         .sort((a, b) => a.similarity - b.similarity);
     console.log(similarities);
@@ -55,6 +54,8 @@ async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
  * @returns {array} Sorted array of objects containing index and similarity
  */
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
+    const MAX_THRESHOLD = 0.1;
+
     const excludedSet = new Set(excludedIds);
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
         if (cluster === clusterNumber && index !== id && !excludedSet.has(index)) {
@@ -81,7 +82,7 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         }),
     );
 
-    return similarityResults.filter((result) => result !== null).sort((a, b) => a.similarity - b.similarity);
+    return similarityResults.filter((result) => result !== null && result.similarity <= MAX_THRESHOLD).sort((a, b) => a.similarity - b.similarity);
 }
 
 
@@ -152,11 +153,13 @@ function weightedDistance(tensorA, tensorB){
     const synopsisTensorA = tensorA.slice(synopsisStart, synopsisEnd);
     const synopsisTensorB = tensorB.slice(synopsisStart, synopsisEnd);
 
-    const genresWeight = 0.2;
-    const typeWeight = 0.025;
-    const sourceWeight = 0.025;
-    const ratingWeight = 0.05;
-    const synopsisWeight = 0.2;
+    const synopsisWeight = 0.5;
+    const themesWeight = 0.3;
+    const genresWeight = 0.05;
+    const demographicsWeight = 0.15;
+    const typeWeight = 0.0167;
+    const sourceWeight = 0.0167;
+    const ratingWeight = 0.0167;
 
     const typeLength = 4;
     const sourceLength = 17;
@@ -172,9 +175,9 @@ function weightedDistance(tensorA, tensorB){
     const typeDistance = distance.dice(typeTensorA, typeTensorB) * typeWeight;
     const sourceDistance = distance.dice(sourceTensorA, sourceTensorB) * sourceWeight;
     const ratingDistance = distance.dice(ratingTensorA, ratingTensorB) * ratingWeight;
-    const genresDistance = distance.gower(genresTensorA, genresTensorB) * genresWeight;
-    const demographicsDistance = distance.gower(demographicsTensorA, demographicsTensorB) * genresWeight;
-    const themeDistance = distance.gower(themesTensorA, themesTensorB) * genresWeight;
+    const genresDistance = distance.dice(genresTensorA, genresTensorB) * genresWeight;
+    const demographicsDistance = distance.dice(demographicsTensorA, demographicsTensorB) * demographicsWeight;
+    const themeDistance = distance.gower(themesTensorA, themesTensorB) * themesWeight;
     const synopsisDistance = distance.gower(synopsisTensorA, synopsisTensorB) * synopsisWeight;
 
     //console.log(`Type Distance: ${typeDistance}`);
