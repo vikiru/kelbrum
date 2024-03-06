@@ -53,7 +53,7 @@ const config = {
                     breadcrumbs: true,
                 },
                 gtag: {
-                    trackingID: '123', // replace
+                    trackingID: 'G-HX9JEL4XJY',
                     anonymizeIP: true,
                 },
                 blog: false,
