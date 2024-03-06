@@ -13,9 +13,6 @@ function SeasonsPage() {
         const seasons = ['spring', 'summer', 'fall', 'winter'];
 
         return (a, b) => {
-            const [seasonA, yearA] = a.key.split(' ');
-            const [seasonB, yearB] = b.key.split(' ');
-
             const isUnknownA = seasonA === 'Unknown';
             const isUnknownB = seasonB === 'Unknown';
 
@@ -25,6 +22,8 @@ function SeasonsPage() {
 
             if (isUnknownB) return -1;
 
+            const [seasonA, yearA] = a.key.split(' ');
+            const [seasonB, yearB] = b.key.split(' ');
             const seasonValueA = seasons.indexOf(seasonA);
             const seasonValueB = seasons.indexOf(seasonB);
 
