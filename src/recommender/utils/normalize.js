@@ -136,7 +136,7 @@ function ordinalEncode(data, property) {
  */
 function minMaxScale(data, property) {
     const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
-    const minValue = Math.min(...uniqueValues);
+    const minValue = Math.min(...uniqueValues) + 1;
     const maxValue = Math.max(...uniqueValues);
     const range = maxValue - minValue;
 
