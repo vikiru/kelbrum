@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import { useData } from '../../context/DataProvider';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 import DataList from './../../components/DataList/DataList';
 
 function SeasonsPage() {
-    const { filteredSeasons } = useData();
+    const { filteredSeasons } = useFilteredData();
     const location = useLocation();
     const isSeasonDetailPage = location.pathname === '/anime/seasons';
 
@@ -38,17 +38,8 @@ function SeasonsPage() {
         };
     }, []);
 
-    const groupBySeason = useMemo(() => {
-        const uniqueSeasons = [...new Set(filteredSeasons.map((season) => season.key.split(' ')[0]))];
-
-        return uniqueSeasons.map((seasonName) => ({
-            key: seasonName,
-            values: filteredSeasons.filter((season) => season.key.includes(seasonName)),
-        }));
-    }, [filteredSeasons]);
-
     return (
-        <div className="min-h-screen bg-secondary pb-16">
+        <section id="seasons" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isSeasonDetailPage && (
                 <DataList
                     title="Seasons"
@@ -59,7 +50,7 @@ function SeasonsPage() {
                 />
             )}
             <Outlet />
-        </div>
+        </section>
     );
 }
 

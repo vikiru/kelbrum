@@ -1,10 +1,10 @@
 import { debounce } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import { useData } from '../../context/DataProvider';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 const InfinitePagination = () => {
     const { id } = useParams();
@@ -20,12 +20,14 @@ const InfinitePagination = () => {
         filteredStudios,
         filteredLicensors,
         filteredSeasons,
-    } = useData();
+    } = useFilteredData();
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [items, setItems] = useState([]);
-    const [displayedItems, setDisplayedItems] = useState([]);
-    const [hasMore, setHasMore] = useState(true);
+    const [state, setState] = useState({
+        items: [],
+        displayedItems: [],
+        hasMore: true,
+    });
     const itemsPerPage = 50;
     const itemsPerDisplay = 10;
 
@@ -64,68 +66,83 @@ const InfinitePagination = () => {
     }
 
     const title = `Top ${data.key} Anime`;
-    const sortedData = data.values.sort((a, b) => b.score - a.score);
+    const sortedData = useMemo(() => {
+        return data.values.sort((a, b) => b.score - a.score);
+    }, [data]);
+
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+    const itemsLeftToDisplay = sortedData.length - (currentPage - 1) * itemsPerPage;
+    const isLastPage = currentPage === totalPages;
+    const allItemsForCurrentPageDisplayed = state.displayedItems.length >= itemsPerPage;
+    const hasMore = !(isLastPage && (allItemsForCurrentPageDisplayed || itemsLeftToDisplay <= 0));
 
     useEffect(() => {
-        const allItemsLoaded = items.length >= sortedData.length;
-        setHasMore(!allItemsLoaded);
-    }, [items, sortedData.length]);
+        setState((prevState) => ({ ...prevState, hasMore }));
+    }, [hasMore]);
 
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const newItems = sortedData.slice(startIndex, endIndex);
-        setItems(newItems);
-        setDisplayedItems(newItems.slice(0, itemsPerDisplay));
-        setHasMore(newItems.length > itemsPerDisplay);
+        setState((prevState) => ({
+            ...prevState,
+            items: newItems,
+            displayedItems: newItems.slice(0, itemsPerDisplay),
+            hasMore: newItems.length > itemsPerDisplay,
+        }));
     }, [currentPage, sortedData]);
 
-    const fetchMoreItems = () => {
-        if (displayedItems.length < items.length) {
-            const newDisplayedItems = displayedItems.concat(
-                items.slice(displayedItems.length, displayedItems.length + itemsPerDisplay),
-            );
-            setDisplayedItems(newDisplayedItems);
-            setHasMore(displayedItems.length + itemsPerDisplay < items.length);
-        }
-    };
+    const fetchMoreItems = useCallback(
+        debounce(() => {
+            if (hasMore) {
+                const remainingItemsToDisplay = itemsPerPage - state.displayedItems.length;
+                const startIndex = state.displayedItems.length;
+                const endIndex = startIndex + remainingItemsToDisplay;
+                const newDisplayedItems = state.items.slice(startIndex, endIndex);
+                setState((prevState) => ({
+                    ...prevState,
+                    displayedItems: [...prevState.displayedItems, ...newDisplayedItems],
+                }));
+            }
+        }, 1000),
+        [state.displayedItems, state.items, itemsPerPage, hasMore],
+    );
 
-    const handlePageChange = (newPage) => {
-        if (newPage >= 1 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-            navigate(`?page=${newPage}`);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    const actualItemsForCurrentPage = Math.min(itemsPerPage, sortedData.length - (currentPage - 1) * itemsPerPage);
-    const allItemsForCurrentPageDisplayed = displayedItems.length >= actualItemsForCurrentPage;
+    const handlePageChange = useCallback(
+        (newPage) => {
+            if (newPage >= 1 && newPage <= totalPages) {
+                setCurrentPage(newPage);
+                navigate(`?page=${newPage}`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        },
+        [navigate, totalPages],
+    );
 
     return (
-        <div className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold capitalize text-primary underline">
+        <section id={`top-${data.key}-page-${currentPage}`} className="bg-secondary pb-6">
+            <h2 className="bg-secondary pb-4 pt-6 text-center text-xl font-bold capitalize text-primary underline xs:text-lg lg:text-4xl">
                 {title}
             </h2>
             <InfiniteScroll
                 pageStart={0}
-                loadMore={debounce(fetchMoreItems, 1000)}
+                loadMore={fetchMoreItems}
                 hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg bg-primary" />}
+                        {hasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2">
-                    {displayedItems.map((item, index) => {
+                <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
+                    {state.displayedItems.map((item, index) => {
                         const globalIndex = (currentPage - 1) * itemsPerPage + (index + 1);
                         return <AnimeCard key={item.title} anime={item} index={globalIndex} />;
                     })}
                 </div>
             </InfiniteScroll>
             {allItemsForCurrentPageDisplayed && (
-                <div className="flex justify-center bg-secondary pb-6">
+                <section id="pagination" className="flex justify-center bg-secondary pb-6">
                     <div className="join">
                         <button
                             className="btn join-item"
@@ -145,9 +162,9 @@ const InfinitePagination = () => {
                             »
                         </button>
                     </div>
-                </div>
+                </section>
             )}
-        </div>
+        </section>
     );
 };
 
