@@ -47,7 +47,7 @@ const AnimeCard = ({ anime, index }) => {
                             onError={handleImageError}
                         />
                     )}
-                    {hasError && <div className="w-full rounded-lg bg-gray-200 lg:h-48 dark:bg-gray-700"></div>}
+                    {hasError && <div className="w-full rounded-lg bg-gray-200 lg:h-48 dark:bg-gray-800"></div>}
                 </div>
             </section>
 

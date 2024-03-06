@@ -225,7 +225,7 @@ async function createFeatureTensor(data) {
         { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
         { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false },
         { func: minMaxScale, isCategorical: false, property: 'durationMinutes', is1D: true },
-        { func: minMaxScale, isCategorical: false, property: 'score', is1D: true },
+        { func: robustScale, isCategorical: false, property: 'score', is1D: true },
         { func: minMaxScale, isCategorical: false, property: 'year', is1D: true },
         //{ func: multiHotEncode, isCategorical: true, property: 'studios', is1D: false },
         //{ func: minMaxScale, isCategorical: false, property: 'episodes', is1D: true },
