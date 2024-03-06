@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-import MiniSearch from 'minisearch';
 import { debounce } from 'lodash';
+import MiniSearch from 'minisearch';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
@@ -77,9 +76,9 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
             const container = activeSuggestionElement.parentNode;
             const containerRect = container.getBoundingClientRect();
             const elementRect = activeSuggestionElement.getBoundingClientRect();
-    
+
             const isFullyVisible = elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
-    
+
             if (!isFullyVisible) {
                 const scrollPosition = elementRect.top - containerRect.top;
                 setTimeout(() => {
