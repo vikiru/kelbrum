@@ -117,12 +117,14 @@ function getDistance(property, tensorA, tensorB) {
             return distance.manhattan(tensorA, tensorB);
         case 'themes':
             return distance.dice(tensorA, tensorB);
-        case 'duration':
+        case 'durationMinutes':
             return distance.manhattan(tensorA, tensorB);
         case 'score':
             return distance.manhattan(tensorA, tensorB);
         case 'synopsis':
             return distance.dice(tensorA, tensorB);
+        case 'year':
+            return distance.manhattan(tensorA, tensorB);
     }
 }
 
@@ -141,8 +143,9 @@ function weightedDistance(tensorA, tensorB) {
         demographics: [38, 39],
         themes: [39, 90],
         synopsis: [90, 339],
-        duration: [339, 340],
+        durationMinutes: [339, 340],
         score: [340, 341],
+        year: [341, 342],
     };
 
     const weights = {
@@ -153,8 +156,9 @@ function weightedDistance(tensorA, tensorB) {
         demographics: 0.3,
         themes: 0.55,
         synopsis: 0.2,
-        duration: 0.5,
         score: 0.1,
+        durationMinutes: 0.5,
+        year: 0.1,
     };
     const weightSum = Object.values(weights).reduce((sum, currentValue) => sum + currentValue, 0);
 
@@ -165,7 +169,7 @@ function weightedDistance(tensorA, tensorB) {
         const secondTensor = sliceTensor(tensorB, start, end);
         const weight = weights[feature];
         const distance = getDistance(feature, firstTensor, secondTensor);
-        //console.log(`Feature: ${feature}, Raw Distance: ${distance}, Weighted Distance: ${distance * weight}`);
+
         distanceSum += distance * weight;
     }
 
