@@ -99,21 +99,21 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
     return (
         <div className={`h-screen flex-grow p-8 pb-16 ${showSuggestions ? 'overflow-y-hidden' : ''}`}>
             <div className="min-h-[40rem]">
-                <div className="flex">
+                <div className="flex justify-between">
                     <input
                         type="text"
                         value={inputValue}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        placeholder="Enter an anime name..."
+                        placeholder="Enter anime title"
                         className="input input-bordered w-full bg-white p-4 pl-6 pr-6 text-sm text-gray-900 sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg dark:bg-gray-800 dark:text-gray-100 flex-grow"
                     />
                     <select
                         value={selectedType}
                         onChange={(e) => setSelectedType(e.target.value)}
-                        className="select select-bordered w-full max-w-xs p-2 pl-4 pr-4 text-center dark:bg-gray-800 dark:text-gray-100"
+                        className="select select-bordered w-1/2 max-w-xs p-2 pl-4 pr-4 text-center dark:bg-gray-800 dark:text-gray-100"
                     >
-                        <option disabled selected>Select an anime type</option>
+                        <option disabled>Select an anime type</option>
                         <option value="">All Types</option>
                         <option value="TV">TV</option>
                         <option value="ONA">ONA</option>
