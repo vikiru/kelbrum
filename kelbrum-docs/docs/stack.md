@@ -8,6 +8,7 @@ Backend:
 
 -   [Node.js](https://nodejs.org/en)
 -   [Tensorflow.js](https://github.com/tensorflow/tfjs)
+-   [natural](https://github.com/NaturalNode/natural)
 -   [simple-statistics](https://github.com/simple-statistics/simple-statistics)
 -   [ml-distance](https://github.com/mljs/distance)
 -   [ml-kmeans](https://github.com/mljs/kmeans)

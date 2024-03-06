@@ -73,21 +73,10 @@ For the purposes of the recommendation system, not all properties are applicable
 -   `themes`
 -   `demographics`
 -   `type`
--   `episodes`
--   `premiered`
--   `season`
--   `year`
--   `status`
--   `producers`
--   `licensors`
 -   `studios`
 -   `source`
 -   `durationMinutes`
 -   `rating`
--   `rank`
--   `popularity`
--   `favourites`
--   `scoredBy`
--   `members`
+-   `synopsis`
 
-However, in the end not all properties were used in the current system. Additionally, there is potential for expanding upon these existing properties and utilizing additonal properties such as `synopsis`, `titles` and a new property `relations` which would contain information about anime and manga related to a given anime entry, this would include information such as prequels, sequels, etc.
+There is definetly room for improvement especially through the incorporation of more properties such as the `studios`, `favourites`, `members`, `rank`, `popularity`, and `episodes`.
