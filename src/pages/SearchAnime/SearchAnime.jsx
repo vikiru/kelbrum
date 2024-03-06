@@ -12,7 +12,7 @@ const SearchAnime = () => {
     }, []);
 
     return (
-        <section id="anime-search" className="bg-secondary dark:bg-gray-900">
+        <section id="anime-search" className="bg-secondary pb-16 dark:bg-gray-900">
             <SearchBar valueMap={titleIDMap} path="" fields={fields} storeFields={fields} />
         </section>
     );
