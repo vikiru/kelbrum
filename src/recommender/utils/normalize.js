@@ -1,10 +1,11 @@
 import * as tf from '@tensorflow/tfjs';
 
-import { writeData } from '../dataAccess/writeFile.js';
-import { returnUniqueArray } from './filter.js';
-import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
 import { calculateStatistics, createMapping } from './stats.js';
+import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
+
+import { returnUniqueArray } from './filter.js';
 import { sortData } from './utils.js';
+import { writeData } from '../dataAccess/writeFile.js';
 
 const typeMapping = {
     TV: 1,
@@ -141,7 +142,7 @@ function minMaxScale(data, property) {
 
     return data.map((entry) => {
         if (entry[property] === 0 || entry[property] === 'Unknown') {
-            return 0;
+            return maxValue + 1;
         } else {
             return (entry[property] - minValue) / range;
         }
