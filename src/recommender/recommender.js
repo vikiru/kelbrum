@@ -8,10 +8,10 @@ import { distance } from 'ml-distance';
  * @returns {Array} The sorted anime data based on similarity.
  */
 async function retrieveAnimeData(recommendations, data) {
-    const indexes = recommendations.map((r) => r.index);
-    const animeData = data.filter((d) => indexes.includes(d.id));
+    const indexes = new Set(recommendations.map((r) => r.index));
+    const animeData = data.filter((d) => indexes.has(d.id));
     animeData.forEach((d) => {
-        d.similarity = (recommendations.find((r) => r.index === d.id).similarity * 100).toFixed(2);
+        d.similarity = recommendations.find((r) => r.index === d.id).similarity.toFixed(2);
     });
     return animeData.sort((a, b) => a.similarity - b.similarity);
 }
@@ -36,25 +36,9 @@ async function shuffleRandom(arr) {
  * @returns {Array} An array of recommended items sorted by similarity
  */
 async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
-    const MIN_THRESHOLD = 0.9;
-
-    const filteredSimilarities = similarities.filter((s) => 1 - s.similarity >= MIN_THRESHOLD);
-    filteredSimilarities.sort((a, b) => a.similarity - b.similarity);
-
-    const selectedIds = new Set();
-    const recommendations = [];
-
-    for (const item of filteredSimilarities) {
-        const similarity = 1 - item.similarity;
-        if (recommendations.length === MAX_ANIME) {
-            break;
-        }
-        if (!selectedIds.has(item.index) && similarity >= MIN_THRESHOLD) {
-            selectedIds.add(item.index);
-            recommendations.push(item);
-        }
-    }
-    return Array.from(recommendations).sort((a, b) => a.similarity - b.similarity);
+    const filteredSimilarities = similarities.sort((a, b) => a.similarity - b.similarity);
+    const recommendations = filteredSimilarities.slice(0, MAX_ANIME);
+    return recommendations;
 }
 
 /**
@@ -68,8 +52,10 @@ async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
  * @returns {array} Sorted array of objects containing index and similarity
  */
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
+    const MAX_THRESHOLD = 0.4;
+    const excludedSet = new Set(excludedIds);
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
-        if (cluster === clusterNumber && index !== id && !excludedIds.includes(index)) {
+        if (cluster === clusterNumber && index !== id && !excludedSet.has(index)) {
             indices.push(index);
         }
         return indices;
@@ -79,9 +65,9 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         return [];
     }
 
+    const tensor = featureArray[id];
     const similarityResults = await Promise.all(
         otherAnimeIndices.map(async (otherIndex) => {
-            const tensor = featureArray[id];
             const otherTensor = featureArray[otherIndex];
             try {
                 const similarity = await compareTensors(tensor, otherTensor);
@@ -93,48 +79,108 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         }),
     );
 
-    return similarityResults.filter((result) => result !== null).sort((a, b) => a.similarity - b.similarity);
+    return similarityResults
+        .filter((result) => result !== null && result.similarity <= MAX_THRESHOLD)
+        .sort((a, b) => a.similarity - b.similarity);
 }
 
 /**
- * Calculate the custom distance between two tensors.
+ * Slices a given tensor from the start index to the end index.
  *
- * @param {Array} tensorA - The first tensor
- * @param {Array} tensorB - The second tensor
- * @returns {number} The custom distance between the two tensors
+ * @param {Tensor} tensor - The tensor to be sliced
+ * @param {number} start - The start index of the slice
+ * @param {number} end - The end index of the slice
+ * @returns {Tensor} The sliced tensor
  */
-function customDistance(tensorA, tensorB) {
-    let tensorDistance = 0;
-    let weightSum = 0;
+function sliceTensor(tensor, start, end) {
+    return tensor.slice(start, end);
+}
 
-    const categoricalWeight = 0.7;
-    const numericalWeight = 1 - categoricalWeight;
+/**
+ * Calculate the distance between two tensors based on the given property.
+ *
+ * @param {string} property - The property based on which the distance is calculated.
+ * @param {Tensor} tensorA - The first tensor.
+ * @param {Tensor} tensorB - The second tensor. {number} The distance between the two tensors.
+ */
+function getDistance(property, tensorA, tensorB) {
+    switch (property) {
+        case 'type':
+            return distance.manhattan(tensorA, tensorB);
+        case 'source':
+            return distance.dice(tensorA, tensorB);
+        case 'rating':
+            return distance.manhattan(tensorA, tensorB);
+        case 'genres':
+            return distance.dice(tensorA, tensorB);
+        case 'demographics':
+            return distance.manhattan(tensorA, tensorB);
+        case 'themes':
+            return distance.dice(tensorA, tensorB);
+        case 'duration':
+            return distance.manhattan(tensorA, tensorB);
+        case 'score':
+            return distance.manhattan(tensorA, tensorB);
+        case 'synopsis':
+            return distance.dice(tensorA, tensorB);
+    }
+}
 
-    const numCategoricalFeatures = 7;
+/**
+ * Calculate the weighted distance between two tensors based on the specified indices and weights.
+ *
+ * @param {Object} tensorA - The first tensor
+ * @param {Object} tensorB - The second tensor {number} the weighted distance between the two tensors
+ */
+function weightedDistance(tensorA, tensorB) {
+    const indices = {
+        type: [0, 1],
+        source: [1, 18],
+        rating: [18, 19],
+        genres: [19, 38],
+        demographics: [38, 39],
+        themes: [39, 90],
+        synopsis: [90, 339],
+        duration: [339, 340],
+        score: [340, 341],
+    };
 
-    const categoricalA = tensorA.slice(0, numCategoricalFeatures);
-    const categoricalB = tensorB.slice(0, numCategoricalFeatures);
-    const continuousA = tensorA.slice(numCategoricalFeatures);
-    const continuousB = tensorB.slice(numCategoricalFeatures);
+    const weights = {
+        type: 0.8,
+        source: 0.2,
+        rating: 0.8,
+        genres: 0.4,
+        demographics: 0.3,
+        themes: 0.55,
+        synopsis: 0.2,
+        duration: 0.5,
+        score: 0.1,
+    };
+    const weightSum = Object.values(weights).reduce((sum, currentValue) => sum + currentValue, 0);
 
-    const categoricalDistance = distance.gower(categoricalA, categoricalB) * categoricalWeight;
-    const numericalDistance = distance.gower(continuousA, continuousB) * numericalWeight;
+    let distanceSum = 0;
 
-    tensorDistance = categoricalDistance + numericalDistance;
-
-    weightSum =
-        numCategoricalFeatures * categoricalWeight + (tensorA.length - numCategoricalFeatures) * numericalWeight;
-
-    if (weightSum === 0) {
-        console.error('Weight sum is zero, cannot divide by zero');
-        return NaN;
+    for (const [feature, [start, end]] of Object.entries(indices)) {
+        const firstTensor = sliceTensor(tensorA, start, end);
+        const secondTensor = sliceTensor(tensorB, start, end);
+        const weight = weights[feature];
+        const distance = getDistance(feature, firstTensor, secondTensor);
+        //console.log(`Feature: ${feature}, Raw Distance: ${distance}, Weighted Distance: ${distance * weight}`);
+        distanceSum += distance * weight;
     }
 
-    return tensorDistance / weightSum;
+    return distanceSum / weightSum;
 }
 
-function compareTensors(tensorA, tensorB) {
-    return customDistance(tensorA, tensorB);
+/**
+ * Compares two tensors using a given distance function.
+ *
+ * @param {type} tensorA - The first tensor
+ * @param {type} tensorB - The second tensor
+ * @returns {type} The result of the comparison
+ */
+async function compareTensors(tensorA, tensorB) {
+    return weightedDistance(tensorA, tensorB);
 }
 
-export { shuffleRandom, customDistance, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations };
+export { shuffleRandom, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations, weightedDistance };

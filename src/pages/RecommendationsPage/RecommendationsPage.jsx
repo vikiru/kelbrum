@@ -5,6 +5,8 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
 import { useData } from '../../context/DataProvider';
+import { useFeatureArray } from '../../context/FeatureArrayProvider';
+import { useKMeans } from '../../context/KMeansProvider';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
@@ -12,7 +14,9 @@ import {
 } from '../../recommender/recommender';
 
 const RecommendationsPage = () => {
-    const { data, featureArray, kmeans } = useData();
+    const { data } = useData();
+    const { featureArray } = useFeatureArray();
+    const { kmeans } = useKMeans();
     const { id } = useParams();
     const anime = data[id];
     const location = useLocation();
@@ -24,8 +28,8 @@ const RecommendationsPage = () => {
             try {
                 const cluster = kmeans.clusters[anime.id];
                 const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id);
-                const reccs = await returnRandomRecommendations(results, 1000);
-                const topResultsData = await retrieveAnimeData(reccs, data);
+                const recommendations = await returnRandomRecommendations(results, 200);
+                const topResultsData = await retrieveAnimeData(recommendations, data);
                 setTopResults(topResultsData);
             } catch (error) {
                 setTopResults([]);
@@ -88,8 +92,10 @@ const RecommendationsPage = () => {
     const allItemsForCurrentPageDisplayed = displayedItems.length >= actualItemsForCurrentPage;
 
     return (
-        <div className="bg-secondary pb-6">
-            <h2 className="bg-secondary pb-4 pt-6 text-center text-4xl font-bold text-primary underline">{title}</h2>
+        <section id={`top-recommendations-page-${currentPage}`} className="bg-secondary pb-6 dark:bg-gray-900">
+            <h2 className="bg-secondary pb-4 pt-6 text-center  text-xl  font-bold text-primary underline xs:text-lg lg:text-4xl dark:bg-gray-900">
+                {title}
+            </h2>
             <InfiniteScroll
                 pageStart={0}
                 loadMore={debounce(fetchMoreItems, 1000)}
@@ -100,7 +106,7 @@ const RecommendationsPage = () => {
                     </div>
                 }
             >
-                <div className="3xl:grid-cols-3 m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2">
+                <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
                     {displayedItems.map((item, index) => {
                         const globalIndex = (currentPage - 1) * itemsPerPage + (index + 1);
                         return <AnimeCard key={item.title} anime={item} index={globalIndex} />;
@@ -108,7 +114,7 @@ const RecommendationsPage = () => {
                 </div>
             </InfiniteScroll>
             {allItemsForCurrentPageDisplayed && (
-                <div className="flex justify-center bg-secondary pb-6">
+                <div className="flex justify-center bg-secondary pb-6 dark:bg-gray-900">
                     <div className="join">
                         <button
                             className="btn join-item"
@@ -130,7 +136,7 @@ const RecommendationsPage = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </section>
     );
 };
 

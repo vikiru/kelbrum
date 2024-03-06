@@ -24,8 +24,8 @@ function Router() {
             <NavBar />
             <Suspense
                 fallback={
-                    <div className="flex h-screen items-center justify-center">
-                        <div className="spinner spinner-lg text-primary" />
+                    <div className="flex min-h-screen items-center justify-center">
+                        <div className="loading loading-lg bg-secondary dark:bg-gray-900" />
                     </div>
                 }
             >
