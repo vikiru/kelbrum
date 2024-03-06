@@ -5,7 +5,7 @@ import SearchBar from './../../components/SearchBar/SearchBar';
 
 const SearchAnime = () => {
     const { titleIDMap } = useTitleIDMap();
-    const fields = ['title', 'synonyms'];
+    const fields = ['title', 'synonyms', 'type'];
 
     useEffect(() => {
         window.scrollBy(0, 50);

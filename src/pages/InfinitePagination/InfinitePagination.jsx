@@ -144,7 +144,7 @@ const InfinitePagination = () => {
                     })}
                 </div>
             </InfiniteScroll>
-            {allItemsForCurrentPageDisplayed && (
+            {hasMore && (
                 <section id="pagination" className="flex justify-center bg-secondary pb-6">
                     <div className="join">
                         <button

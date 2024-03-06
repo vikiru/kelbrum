@@ -3,13 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 const Details = ({ anime }) => {
     const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
     const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
-    const [webPURL, setWebPURL] = useState(anime.imageURL);
-
-    useEffect(() => {
-        if (!hasError) {
-            setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
-        }
-    }, [anime.imageURL]);
+    const [imageURL, setImageURL] = useState(anime.imageURL);
 
     useEffect(() => {
         if (!hasError) {
@@ -25,6 +19,10 @@ const Details = ({ anime }) => {
         }
     }, [anime.imageURL, hasError]);
 
+    const handleImageError = () => {
+        setHasError(true);
+    };
+
     const trimmedStudios = useMemo(() => {
         return anime.studios.length === 0 ? ['Unknown'] : anime.studios.map((studio) => studio.trim());
     }, [anime.studios]);
@@ -37,10 +35,6 @@ const Details = ({ anime }) => {
         return anime.licensors.length === 0 ? ['Unknown'] : anime.licensors.map((licensor) => licensor.trim());
     }, [anime.licensors]);
 
-    const handleImageError = () => {
-        setHasError(true);
-    };
-
     return (
         <section id="anime-details">
             <h2 className="bg-secondary pt-4 text-center font-bold text-primary underline xs:text-lg lg:text-xl 2xl:text-3xl 4xl:text-5xl dark:bg-gray-900 dark:text-gray-100">
@@ -49,19 +43,16 @@ const Details = ({ anime }) => {
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
-                    <section id="anime-image" className="mx-4 mt-4 xs:block lg:hidden">
-                        {!hasError && anime.imageURL !== excludedURL && (
-                            <picture>
-                                <source srcSet={`${webPURL}`} type="image/webp" />
-                                <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
-                                <img
-                                    src={`${anime.imageURL}`}
-                                    alt={`${anime.title} image`}
-                                    className="h-auto w-full rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
-                                    onError={handleImageError}
-                                />
-                            </picture>
-                        )}
+                <section id="anime-image" className="mx-4 mt-4 xs:block lg:hidden">
+
+                {!hasError && anime.imageURL !== excludedURL && (
+                        <img
+                            src={`${imageURL}`}
+                            alt={`${anime.title} image`}
+                            className="h-auto max-h-[1500px] w-full rounded-lg object-fit shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                            onError={handleImageError}
+                        />
+                    )}
                     </section>
 
                     <section id="anime-general-info">
@@ -115,17 +106,13 @@ const Details = ({ anime }) => {
                 </div>
 
                 <section id="anime-image" className="mx-4 mt-14 xs:hidden lg:block">
-                    {!hasError && anime.imageURL !== excludedURL && (
-                        <picture>
-                            <source srcSet={`${webPURL}`} type="image/webp" />
-                            <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
-                            <img
-                                src={`${anime.imageURL}`}
-                                alt={`${anime.title} image`}
-                                className="h-auto max-h-[1500px] w-full rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
-                                onError={handleImageError}
-                            />
-                        </picture>
+                {!hasError && anime.imageURL !== excludedURL && (
+                        <img
+                            src={`${imageURL}`}
+                            alt={`${anime.title} image`}
+                            className="h-auto max-h-[1500px] w-[80%] rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                            onError={handleImageError}
+                        />
                     )}
                 </section>
             </div>
@@ -137,7 +124,7 @@ const Details = ({ anime }) => {
                             Synopsis
                         </h2>
 
-                        <p className="text-left text-xl 3xl:text-3xl dark:text-gray-100">{anime.synopsis}</p>
+                        <p className="text-left text-xl dark:text-gray-100">{anime.synopsis}</p>
                     </section>
 
                     <section id="anime-additional-info">

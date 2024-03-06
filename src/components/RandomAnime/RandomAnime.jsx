@@ -25,7 +25,6 @@ const RandomAnime = ({ anime, allAnime }) => {
         initialSlide: 0,
         speed: 500,
         autoplaySpeed: 2000,
-        cssEase: 'linear',
         responsive: [
             {
                 breakpoint: 600,

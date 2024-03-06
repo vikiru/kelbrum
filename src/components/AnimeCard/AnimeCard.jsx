@@ -4,13 +4,7 @@ import { Link } from 'react-router-dom';
 const AnimeCard = ({ anime, index }) => {
     const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
     const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
-    const [webPURL, setWebPURL] = useState(anime.imageURL);
-
-    useEffect(() => {
-        if (!hasError) {
-            setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
-        }
-    }, [anime.imageURL]);
+    const [imageURL, setImageURL] = useState(anime.imageURL);
 
     useEffect(() => {
         if (!hasError) {
@@ -45,17 +39,13 @@ const AnimeCard = ({ anime, index }) => {
             <section id="image" className="flex flex-col gap-2 pb-2">
                 <div className="flex min-h-[50vh] flex-grow justify-center rounded-lg p-2 xs:min-h-[20vh] 2xl:min-h-[20vh]">
                     {!hasError && (
-                        <picture>
-                            <source srcSet={`${webPURL}`} type="image/webp" />
-                            <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
-                            <img
-                                src={`${anime.imageURL}`}
-                                alt={`${anime.title} image`}
-                                className="xl:h-50 3xl:h-70 w-full rounded-lg object-cover xs:h-32 lg:h-48 4xl:h-72 5xl:h-80"
-                                loading="lazy"
-                                onError={handleImageError}
-                            />
-                        </picture>
+                        <img
+                            src={`${imageURL}`}
+                            alt={`${anime.title} image`}
+                            className="xl:h-50 3xl:h-70 w-full rounded-lg object-contain xs:h-32 lg:h-48 4xl:h-72 5xl:h-80"
+                            loading="lazy"
+                            onError={handleImageError}
+                        />
                     )}
                     {hasError && <div className="w-full rounded-lg bg-gray-200 lg:h-48 dark:bg-gray-700"></div>}
                 </div>
@@ -77,7 +67,7 @@ const AnimeCard = ({ anime, index }) => {
                     .filter((d) => d !== 'Unknown')
                     .map((d) => (
                         <span
-                            className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2  lg:text-lg"
+                            className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2 lg:text-lg"
                             key={d}
                         >
                             {d}
