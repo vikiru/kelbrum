@@ -22,14 +22,15 @@ const InfinitePagination = () => {
         filteredSeasons,
     } = useFilteredData();
 
+    const itemsPerPage = 50;
+    const itemsPerDisplay = 10;
+
     const [currentPage, setCurrentPage] = useState(1);
     const [state, setState] = useState({
         items: [],
         displayedItems: [],
         hasMore: true,
     });
-    const itemsPerPage = 50;
-    const itemsPerDisplay = 10;
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -70,11 +71,13 @@ const InfinitePagination = () => {
         return data.values.sort((a, b) => b.score - a.score);
     }, [data]);
 
+
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
     const itemsLeftToDisplay = sortedData.length - (currentPage - 1) * itemsPerPage;
     const isLastPage = currentPage === totalPages;
+    const isCurrentPageShort = sortedData.length <= itemsPerDisplay;
     const allItemsForCurrentPageDisplayed = state.displayedItems.length >= itemsPerPage;
-    const hasMore = !(isLastPage && (allItemsForCurrentPageDisplayed || itemsLeftToDisplay <= 0));
+    const hasMore = !(isLastPage && (allItemsForCurrentPageDisplayed || itemsLeftToDisplay <= 0)) && !isCurrentPageShort;
 
     useEffect(() => {
         setState((prevState) => ({ ...prevState, hasMore }));
