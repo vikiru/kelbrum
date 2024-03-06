@@ -1,13 +1,31 @@
 import React, { useEffect, useState } from 'react';
+import { Img } from 'react-optimized-image';
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
-    const [hasError, setHasError] = useState(false);
+    const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
+    const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
     const [webPURL, setWebPURL] = useState(anime.imageURL);
 
     useEffect(() => {
-        setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
+        if (!hasError) {
+            setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
+        }
     }, [anime.imageURL]);
+
+    useEffect(() => {
+        if (!hasError) {
+            const preloadLink = document.createElement('link');
+            preloadLink.href = anime.imageURL;
+            preloadLink.rel = 'preload';
+            preloadLink.as = 'image';
+            document.head.appendChild(preloadLink);
+
+            return () => {
+                document.head.removeChild(preloadLink);
+            };
+        }
+    }, [anime.imageURL, hasError]);
 
     const handleImageError = () => {
         setHasError(true);
@@ -29,6 +47,7 @@ const AnimeCard = ({ anime, index }) => {
                 <div className="flex min-h-[50vh] flex-grow justify-center rounded-lg p-2 xs:min-h-[20vh] 2xl:min-h-[20vh]">
                     {!hasError && (
                         <picture>
+                            <source srcSet={`${webPURL}`} type="image/webp" />
                             <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
                             <img
                                 src={`${anime.imageURL}`}

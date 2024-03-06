@@ -1,12 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 const Details = ({ anime }) => {
-    const [hasError, setHasError] = useState(false);
+    const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
+    const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
     const [webPURL, setWebPURL] = useState(anime.imageURL);
 
     useEffect(() => {
-        setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
-    });
+        if (!hasError) {
+            setWebPURL(anime.imageURL.replace('.jpg', '.webp'));
+        }
+    }, [anime.imageURL]);
+
+    useEffect(() => {
+        if (!hasError) {
+            const preloadLink = document.createElement('link');
+            preloadLink.href = anime.imageURL;
+            preloadLink.rel = 'preload';
+            preloadLink.as = 'image';
+            document.head.appendChild(preloadLink);
+
+            return () => {
+                document.head.removeChild(preloadLink);
+            };
+        }
+    }, [anime.imageURL, hasError]);
 
     const trimmedStudios = useMemo(() => {
         return anime.studios.length === 0 ? ['Unknown'] : anime.studios.map((studio) => studio.trim());
@@ -33,7 +50,7 @@ const Details = ({ anime }) => {
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
                     <section id="anime-image" className="mx-4 mt-4 xs:block lg:hidden">
-                        {!hasError && (
+                        {!hasError && anime.imageURL !== excludedURL && (
                             <picture>
                                 <source srcSet={`${webPURL}`} type="image/webp" />
                                 <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
@@ -41,6 +58,7 @@ const Details = ({ anime }) => {
                                     src={`${anime.imageURL}`}
                                     alt={`${anime.title} image`}
                                     className="h-auto w-full rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                                    onError={handleImageError}
                                 />
                             </picture>
                         )}
@@ -88,7 +106,6 @@ const Details = ({ anime }) => {
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
                                 <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Score</h2>
-
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.score === 0 ? 'Unknown' : `${anime.score} /  10`}
                                 </p>
@@ -98,7 +115,7 @@ const Details = ({ anime }) => {
                 </div>
 
                 <section id="anime-image" className="mx-4 mt-14 xs:hidden lg:block">
-                    {!hasError && (
+                    {!hasError && anime.imageURL !== excludedURL && (
                         <picture>
                             <source srcSet={`${webPURL}`} type="image/webp" />
                             <source srcSet={`${anime.imageURL}`} type="image/jpeg" />
@@ -106,6 +123,7 @@ const Details = ({ anime }) => {
                                 src={`${anime.imageURL}`}
                                 alt={`${anime.title} image`}
                                 className="h-auto max-h-[1500px] w-full rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                                onError={handleImageError}
                             />
                         </picture>
                     )}
