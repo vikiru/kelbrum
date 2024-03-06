@@ -95,7 +95,7 @@ const RandomAnime = ({ anime, allAnime }) => {
 
     return (
         <section id="random-anime" className="w-full overflow-x-hidden bg-secondary px-10 pb-8 dark:bg-gray-900">
-            <div className="slider-container xs:pb-3 2xl:pb-6">
+            <div className="slider-container xs:pb-3">
                 <Slider {...settings}>
                     {shuffledAnime.map((anime, index) => (
                         <div key={anime.title} className="m-4 mx-auto flex flex-col justify-between">

@@ -3,21 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 const Details = ({ anime }) => {
     const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
     const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
-    const [imageURL, setImageURL] = useState(anime.imageURL);
-
-    useEffect(() => {
-        if (!hasError) {
-            const preloadLink = document.createElement('link');
-            preloadLink.href = anime.imageURL;
-            preloadLink.rel = 'preload';
-            preloadLink.as = 'image';
-            document.head.appendChild(preloadLink);
-
-            return () => {
-                document.head.removeChild(preloadLink);
-            };
-        }
-    }, [anime.imageURL, hasError]);
 
     const handleImageError = () => {
         setHasError(true);
@@ -47,7 +32,7 @@ const Details = ({ anime }) => {
 
                 {!hasError && anime.imageURL !== excludedURL && (
                         <img
-                            src={`${imageURL}`}
+                            src={`${anime.imageURL}`}
                             alt={`${anime.title} image`}
                             className="h-auto max-h-[1500px] w-full rounded-lg object-fit shadow-sm transition-shadow duration-300 hover:shadow-xl"
                             onError={handleImageError}
@@ -108,7 +93,7 @@ const Details = ({ anime }) => {
                 <section id="anime-image" className="mx-4 mt-14 xs:hidden lg:block">
                 {!hasError && anime.imageURL !== excludedURL && (
                         <img
-                            src={`${imageURL}`}
+                            src={`${anime.imageURL}`}
                             alt={`${anime.title} image`}
                             className="h-auto max-h-[1500px] w-[80%] rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                             onError={handleImageError}
