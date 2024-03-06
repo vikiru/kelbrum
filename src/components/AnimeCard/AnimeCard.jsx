@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Img } from 'react-optimized-image';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
