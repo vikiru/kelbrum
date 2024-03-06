@@ -73,7 +73,6 @@ For the purposes of the recommendation system, not all properties are applicable
 -   `themes`
 -   `demographics`
 -   `type`
--   `studios`
 -   `source`
 -   `durationMinutes`
 -   `rating`
