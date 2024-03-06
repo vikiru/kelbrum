@@ -40,32 +40,32 @@
 
 ---
 
-**Kelbrum** is an anime recommendation system designed to suggest anime titles that are similar to those chosen by users. It employs K-means++ clustering in combination with a custom distance function, which uses Gower's distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to accurately compute the distance between two separate anime.
+**Kelbrum** is an anime recommendation system designed to suggest anime titles similar to those chosen by users. It employs **K-means++** clustering in combination with a custom distance function, which uses a combination of the **Manhattan** and **Dice** distance. The custom distance function assigns weighted values to each property of an anime such as its `title`, `genres`, `score` to  compute the distance between two separate anime.
 
 The frontend of the project was initially set up using [Vite.js](https://vitejs.dev/) for development purposes, but has since transitioned to utilize [Create React App](https://create-react-app.dev/), in conjunction with [React](https://react.dev/), [React Router](https://reactrouter.com/), [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/).
 
-The backend of this project, aka the 'heart' of the project was built utilizing [Tensorflow.js](https://www.tensorflow.org/js/) in combination with external libraries such as [ml-kmeans](https://github.com/mljs/kmeans), [ml-distance](https://github.com/mljs/distance), and [simple-statistics](https://github.com/simple-statistics/simple-statistics).
+The backend of this project, aka the 'heart' of the project was built utilizing [Tensorflow.js](https://www.tensorflow.org/js/) in combination with external libraries such as [ml-kmeans](https://github.com/mljs/kmeans), [ml-distance](https://github.com/mljs/distance), and [simple-statistics](https://github.com/simple-statistics/simple-statistics). Additionally, to perform TF-IDF analysis on anime synopses, [natural](https://github.com/NaturalNode/natural) was used alongside [remove-stopwords](https://github.com/WorldBrain/remove-stopwords), [word-list](https://github.com/sindresorhus/word-list), and [lemmatizer](https://github.com/FinNLP/lemmatizer).
 
 Upon combining these two parts, the project comes together in the form, that is, **Kelbrum**.
 
 > [!IMPORTANT]
 > The data used within this project was possible thanks to the following:
 >
-> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and proccessed into a custom JavaScript class known as [AnimeEntry](./recommender/models/AnimeEntry.js).
+> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and processed into a custom JavaScript class known as [AnimeEntry](./recommender/models/AnimeEntry.js).
 > 2. [JikanAPI](https://github.com/jikan-me/jikan-rest) - Missing information such as `pageURL`, `imageURL`, `trailerURL` and other existing properties which may have needed updates were updated by making several API requests to JikanAPI, which contains anime information obtained from [MyAnimeList](https://myanimelist.net/).
 >
 > All external images and text used within this app belong to their respective owners.
 
 ## 📖 Table of Contents
 
--   [📖 Table of Contents](#-table-of-contents)
--   [🌟 Features](#-features)
--   [🛠️ Tech Stack](#️-tech-stack)
--   [📝 Prerequisites](#-prerequisites)
--   [⚡ Setup Instructions](#-setup-instructions)
--   [📜 Available Scripts](#-available-scripts)
--   [✨ Acknowledgments](#-acknowledgments)
--   [©️ License](#️-license)
+- [📖 Table of Contents](#-table-of-contents)
+- [🌟 Features](#-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📝 Prerequisites](#-prerequisites)
+- [⚡ Setup Instructions](#-setup-instructions)
+- [📜 Available Scripts](#-available-scripts)
+- [✨ Acknowledgments](#-acknowledgments)
+- [©️ License](#️-license)
 
 ## 🌟 Features
 
@@ -74,9 +74,9 @@ Upon combining these two parts, the project comes together in the form, that is,
 -   The ability to view all anime grouped together based on properties such as `genres`, `studios`, `seasons`, etc
 -   The ability to view the top 100 anime within the existing set of anime, based on average score
 -   A dedicated anime details page that enables users to view detailed information about an anime and receive recommendations based on similarity
--   The ability to view 10 unique random anime recommendations and view up to 1000 recommendations per anime (not all will have that many)
--   The flexibility to modify the recommendation algorithm at any time, based on the provided K-means JSON file and feature tensors
+-   The ability to view 10 unique random anime recommendations and view up to 200 recommendations per anime (not all anime will have that many recommendations)
 -   The ability to grow and accommodate other content types such as `manga`, `manhwa`, and `manhua`
+-  The capability to prioritize anime properties based on assigned weights and adjust the recommendation algorithm at any time using the provided K-means JSON file and feature tensors
 
 ## 🛠️ Tech Stack
 
@@ -84,9 +84,11 @@ Backend:
 
 -   [Node.js](https://nodejs.org/en)
 -   [Tensorflow.js](https://github.com/tensorflow/tfjs)
+-   [natural](https://github.com/NaturalNode/natural)
 -   [simple-statistics](https://github.com/simple-statistics/simple-statistics)
 -   [ml-distance](https://github.com/mljs/distance)
 -   [ml-kmeans](https://github.com/mljs/kmeans)
+
 
 Frontend:
 
@@ -165,9 +167,14 @@ npm run prettier
 -   [csv-parse](https://github.com/adaltas/node-csv)
 -   [PapaParse](https://www.papaparse.com/)
 -   [lodash](https://github.com/lodash/lodash)
+-   [lemmatizer](https://github.com/FinNLP/lemmatizer)
 -   [MiniSearch](https://github.com/lucaong/minisearch)
 -   [React Infinite Scroller](https://github.com/danbovey/react-infinite-scroller)
+-   [react-slick](https://github.com/akiran/react-slick)
+-   [remove-stopwords](https://github.com/WorldBrain/remove-stopwords)
+-   [slick-carousel](https://github.com/kenwheeler/slick/)
 -   [tailwind-scrollbar](https://github.com/adoxography/tailwind-scrollbar)
+-   [word-list](https://github.com/sindresorhus/word-list)
 -   [SimpleIcons](https://simpleicons.org/)
 -   [Tensorflow.js](https://www.tensorflow.org/js)
 -   [Tensorflow.js Documentation](https://js.tensorflow.org/api/latest/)
