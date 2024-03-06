@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 
-import { useData } from '../../context/DataProvider';
+import { useTitleIDMap } from '../../context/TitleIDMapProvider';
 import SearchBar from './../../components/SearchBar/SearchBar';
 
 const SearchAnime = () => {
-    const { titleIDMap } = useData();
+    const { titleIDMap } = useTitleIDMap();
     const fields = ['title', 'synonyms'];
 
     useEffect(() => {
@@ -12,9 +12,9 @@ const SearchAnime = () => {
     }, []);
 
     return (
-        <div className="bg-secondary">
+        <section id="anime-search" className="bg-secondary dark:bg-gray-900">
             <SearchBar valueMap={titleIDMap} path="" fields={fields} storeFields={fields} />
-        </div>
+        </section>
     );
 };
 

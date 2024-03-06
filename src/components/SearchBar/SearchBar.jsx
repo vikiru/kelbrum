@@ -13,8 +13,10 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
     const navigate = useNavigate();
     const navigateToPage = (id) => navigate(`/anime/${path}${id}`);
 
-    const miniSearch = useMemo(() => {
-        const miniSearch = new MiniSearch({
+    const miniSearchRef = useRef();
+
+    if (!miniSearchRef.current) {
+        miniSearchRef.current = new MiniSearch({
             fields: fields,
             storeFields: storeFields,
             searchOptions: {
@@ -22,10 +24,12 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                 fuzzy: 0.2,
             },
         });
+        miniSearchRef.current.addAll(
+            valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })),
+        );
+    }
 
-        miniSearch.addAll(valueMap.map((item) => ({ id: item.value, title: item.title, synonyms: item.synonyms })));
-        return miniSearch;
-    }, [fields, storeFields, valueMap]);
+    const miniSearch = miniSearchRef.current;
 
     const debouncedSearch = useCallback(
         debounce((string) => {
@@ -41,10 +45,13 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
         [miniSearch],
     );
 
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
-        debouncedSearch(e.target.value);
-    };
+    const handleInputChange = useCallback(
+        (e) => {
+            setInputValue(e.target.value);
+            debouncedSearch(e.target.value);
+        },
+        [debouncedSearch],
+    );
 
     const handleOnSelect = (selectedItem) => {
         setSuggestions([]);
@@ -82,7 +89,7 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
     }, [activeSuggestionIndex]);
 
     return (
-        <div className={`min-h-screen flex-grow p-8 pb-16 ${showSuggestions ? 'overflow-y-hidden' : ''}`}>
+        <div className={`h-screen flex-grow p-8 pb-16 ${showSuggestions ? 'overflow-y-hidden' : ''}`}>
             <div className="min-h-[40rem]">
                 <div className="w-full">
                     <input
@@ -96,18 +103,23 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                 </div>
 
                 {suggestions.length > 0 && (
-                    <div className="mt-4 max-h-[72vh] overflow-y-scroll scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500 xs:space-y-1 lg:space-y-2">
+                    <div className="mt-4 max-h-[72vh] overflow-y-auto scrollbar-thin scrollbar-track-blue-100 scrollbar-thumb-gray-500 xs:space-y-1 lg:space-y-2 4xl:max-h-[80vh] dark:bg-gray-800">
                         {suggestions.map((suggestion, index) => (
                             <div
                                 key={index}
                                 ref={(el) => (suggestionRefs.current[index] = el)}
-                                className={`card cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100 dark:bg-blue-500' : 'bg-white dark:bg-gray-800'}`}
+                                className={`cursor-pointer transition-shadow duration-200 hover:shadow-lg ${index === activeSuggestionIndex ? 'bg-blue-100 dark:bg-blue-500' : 'bg-white dark:bg-gray-800'}`}
                                 onClick={() => handleOnSelect(suggestion)}
                             >
                                 <div className="card-body p-2 sm:p-3 md:p-4">
-                                    <p className="card-title text-xs text-gray-900 sm:text-sm md:text-base dark:text-gray-100">
+                                    <p className="card-title text-lg text-gray-900 sm:text-sm lg:text-xl dark:text-gray-100">
                                         {suggestion.title}
                                     </p>
+                                    {suggestion.synonyms && suggestion.synonyms.length > 0 && (
+                                        <p className="text-sm text-gray-200">
+                                            {suggestion.synonyms.slice(0, 3).join(', ')}
+                                        </p>
+                                    )}{' '}
                                 </div>
                             </div>
                         ))}

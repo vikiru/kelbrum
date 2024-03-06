@@ -94,7 +94,6 @@ function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
  * @returns {any} The most suitable property based on comparison
  */
 function compareInputToFetched(inputProperty, fetchedProperty) {
-    let property = inputProperty;
     const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
     const fetchedDefaults = ['Unknown', null];
 
@@ -102,18 +101,20 @@ function compareInputToFetched(inputProperty, fetchedProperty) {
     const inputIsNumber = isNumber(inputProperty);
     const fetchedIsNumber = isNumber(fetchedProperty);
 
-    if (inputIsNumber && fetchedIsNumber) {
-        if (inputProperty !== fetchedProperty) {
-            property = fetchedProperty;
-        }
-    } else if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
-        property = fetchedProperty;
+    const bothAreStrings = typeof inputProperty === 'string' && typeof fetchedProperty === 'string';
+    if (bothAreStrings && inputProperty !== fetchedProperty) {
+        return fetchedProperty;
     }
 
-    if (property === undefined || property === null) {
-        property = inputProperty;
+    if (inputIsNumber && fetchedIsNumber && inputProperty !== fetchedProperty) {
+        return fetchedProperty;
     }
-    return property;
+
+    if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
+        return fetchedProperty;
+    }
+
+    return inputProperty;
 }
 
 /**
@@ -139,7 +140,10 @@ function identifyMissingProperties(entry) {
     return Object.keys(entry).filter(
         (key) =>
             !excludedKeys.includes(key) &&
-            (entry[key] === 'Unknown' || entry[key] === 0 || (Array.isArray(entry[key]) && entry[key].length === 0)),
+            (entry[key] === 'Unknown' ||
+                entry[key] === 0 ||
+                (Array.isArray(entry[key]) && entry[key].length === 0) ||
+                entry[key] === 'No description available for this anime.'),
     );
 }
 
@@ -287,6 +291,7 @@ async function handleMissingData(data) {
                     if (animeResult) {
                         updateEntry(entry, animeResult);
                         console.info(`Entry for '${entry.title}' updated successfully.`);
+                        console.log(entry.title, entry.synopsis);
                     } else {
                         console.warn(
                             `Entry for '${entry.title}' could not be matched. Adding to issues list for exclusion.`,

@@ -31,6 +31,7 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
             });
             const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
             const assignments = result.clusters;
+            console.log(k, wcss);
             results.push({ k, wcss });
         } catch (error) {
             console.error(`Error computing KMeans for k=${k}:`, error);
@@ -70,6 +71,8 @@ async function returnKmeansModel(featureArray, k, distanceFunction) {
             initialization: 'kmeans++',
             distanceFunction: distanceFunction,
         });
+        const wcss = kmeansModel.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
+        console.log(k, wcss);
         await writeData(modelFileName, kmeansModel);
         return kmeansModel;
     }

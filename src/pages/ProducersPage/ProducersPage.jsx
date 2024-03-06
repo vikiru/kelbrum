@@ -1,18 +1,18 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import { useData } from '../../context/DataProvider';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 import DataList from './../../components/DataList/DataList';
 
 function ProducersPage() {
-    const { filteredProducers } = useData();
+    const { filteredProducers } = useFilteredData();
     const location = useLocation();
     const isProducerDetailPage = location.pathname === '/anime/producers';
     return (
-        <div className="min-h-screen bg-secondary pb-16">
+        <section id="producers" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isProducerDetailPage && <DataList title="Producers" data={filteredProducers} path="producers" />}
             <Outlet />
-        </div>
+        </section>
     );
 }
 

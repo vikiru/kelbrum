@@ -1,18 +1,18 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import { useData } from '../../context/DataProvider';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 import DataList from './../../components/DataList/DataList';
 
 function StudiosPage() {
-    const { filteredStudios } = useData();
+    const { filteredStudios } = useFilteredData();
     const location = useLocation();
     const isStudioDetailPage = location.pathname === '/anime/studios';
     return (
-        <div className="min-h-screen bg-secondary pb-16">
+        <section id="studios" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
             {isStudioDetailPage && <DataList title="Studios" data={filteredStudios} path="studios" />}
             <Outlet />
-        </div>
+        </section>
     );
 }
 

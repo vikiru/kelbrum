@@ -22,15 +22,21 @@ const DataList = ({ title, data, path, customSort, capitalizeTitle = false }) =>
     }, [data, sortFunction]);
 
     return (
-        <div className="bg-secondary">
+        <div className="bg-secondary dark:bg-gray-900">
             <h2
-                className={`bg-secondary bg-opacity-50 pb-2 pt-4 text-center text-xl font-bold text-primary underline lg:text-4xl`}
+                className={`bg-secondary bg-opacity-50 pb-2 pt-4 text-center  text-xl  font-bold text-primary underline xs:text-lg lg:text-4xl dark:bg-gray-900`}
             >
                 {title}
             </h2>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {sortedData.map((item, index) => (
-                    <DataCard key={index} path={path} index={data.indexOf(item)} value={item} capitalizeTitle={true} />
+                    <DataCard
+                        key={index}
+                        path={path}
+                        index={data.indexOf(item)}
+                        value={item}
+                        capitalizeTitle={capitalizeTitle}
+                    />
                 ))}
             </div>
         </div>
