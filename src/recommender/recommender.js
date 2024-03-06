@@ -170,7 +170,12 @@ function weightedDistance(tensorA, tensorB) {
         const weight = weights[feature];
         const distance = getDistance(feature, firstTensor, secondTensor);
 
-        distanceSum += distance * weight;
+        if (isNaN(distance)) {
+            distanceSum += 0;
+        }
+        else {
+            distanceSum += distance * weight;
+        }
     }
 
     return distanceSum / weightSum;
