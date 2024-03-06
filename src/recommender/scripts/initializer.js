@@ -62,7 +62,6 @@ async function main() {
     try {
         const data = await initializeDataFile();
         const featureTensor = await createFeatureTensor(data);
-        console.log(featureTensor);
         const featureArray = featureTensor.arraySync();
         const titleIDMap = data.flatMap((d) => {
             const uniqueTitles = Array.from(new Set(d.titles));
