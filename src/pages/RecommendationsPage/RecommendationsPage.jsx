@@ -1,17 +1,17 @@
-import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import { useData } from '../../context/DataProvider';
-import { useFeatureArray } from '../../context/FeatureArrayProvider';
-import { useKMeans } from '../../context/KMeansProvider';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
+import AnimeCard from '../../components/AnimeCard/AnimeCard';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash';
+import { useData } from '../../context/DataProvider';
+import { useFeatureArray } from '../../context/FeatureArrayProvider';
+import { useKMeans } from '../../context/KMeansProvider';
 
 const RecommendationsPage = () => {
     const { data } = useData();
@@ -28,8 +28,8 @@ const RecommendationsPage = () => {
             try {
                 const cluster = kmeans.clusters[anime.id];
                 const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id);
-                const reccs = await returnRandomRecommendations(results, 1000);
-                const topResultsData = await retrieveAnimeData(reccs, data);
+                const recommendations = await returnRandomRecommendations(results, 200);
+                const topResultsData = await retrieveAnimeData(recommendations, data);
                 setTopResults(topResultsData);
             } catch (error) {
                 setTopResults([]);

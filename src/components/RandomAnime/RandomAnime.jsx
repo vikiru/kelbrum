@@ -1,12 +1,12 @@
-import React, { useMemo, useRef } from 'react';
-import { useInView } from 'react-intersection-observer';
-import { Link } from 'react-router-dom';
-import Slider from 'react-slick';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 
-import { shuffleRandom } from '../../recommender/recommender';
+import React, { useMemo, useRef } from 'react';
+
 import AnimeCard from '../AnimeCard/AnimeCard';
+import { Link } from 'react-router-dom';
+import Slider from 'react-slick';
+import { shuffleRandom } from '../../recommender/recommender';
 
 const RandomAnime = ({ anime, allAnime }) => {
     const shuffledAnime = useMemo(() => {

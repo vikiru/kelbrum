@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-
-import Details from '../../components/Details/Details';
-import { useData } from '../../context/DataProvider';
-import { useFeatureArray } from '../../context/FeatureArrayProvider';
-import { useKMeans } from '../../context/KMeansProvider';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
+
+import Details from '../../components/Details/Details';
 import RandomAnime from './../../components/RandomAnime/RandomAnime';
+import { useData } from '../../context/DataProvider';
+import { useFeatureArray } from '../../context/FeatureArrayProvider';
+import { useKMeans } from '../../context/KMeansProvider';
 
 const AnimeDetails = () => {
     const { data } = useData();
@@ -27,8 +27,8 @@ const AnimeDetails = () => {
                 const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id, [
                     anime.id,
                 ]);
-                const reccs = await returnRandomRecommendations(results);
-                const topResultsData = await retrieveAnimeData(reccs, data);
+                const recommendations = await returnRandomRecommendations(results);
+                const topResultsData = await retrieveAnimeData(recommendations, data);
                 setTopResults(topResultsData);
             } catch (error) {
                 setTopResults([]);
