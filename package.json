@@ -47,7 +47,7 @@
     "react-slick": "^0.30.2",
     "remove-stopwords": "^1.0.3",
     "slick-carousel": "^1.8.1",
-    "web-vitals": "^2.1.4",
+    "web-vitals": "^3.5.2",
     "word-list": "^3.1.0"
   },
   "scripts": {
