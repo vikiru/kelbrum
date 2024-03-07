@@ -1,8 +1,5 @@
-import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
 import { useFilteredData } from '../../context/FilteredDataProvider';
 
@@ -23,21 +20,10 @@ const InfinitePagination = () => {
     } = useFilteredData();
 
     const itemsPerPage = 50;
-    const itemsPerDisplay = 10;
-
     const [currentPage, setCurrentPage] = useState(1);
-    const [state, setState] = useState({
-        items: [],
-        displayedItems: [],
-        hasMore: true,
-    });
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const pageParam = searchParams.get('page');
-        const page = pageParam ? parseInt(pageParam, 10) : 1;
-        setCurrentPage(page);
-    }, [location.search]);
+    const [items, setItems] = useState([]);
+    const [displayedItems, setDisplayedItems] = useState([]);
+    const [hasMore, setHasMore] = useState(true);
 
     let data;
     switch (parentPath) {
@@ -66,85 +52,43 @@ const InfinitePagination = () => {
             data = null;
     }
 
-    const title = `Top ${data.key} Anime`;
-    const sortedData = useMemo(() => {
-        return data.values.sort((a, b) => b.score - a.score);
-    }, [data]);
-
-
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const itemsLeftToDisplay = sortedData.length - (currentPage - 1) * itemsPerPage;
-    const isLastPage = currentPage === totalPages;
-    const isCurrentPageShort = sortedData.length <= itemsPerDisplay;
-    const allItemsForCurrentPageDisplayed = state.displayedItems.length >= itemsPerPage;
-    const hasMore = !(isLastPage && (allItemsForCurrentPageDisplayed || itemsLeftToDisplay <= 0)) && !isCurrentPageShort;
+    const title = data ? `Top ${data.key} Anime` : 'Anime';
+    const totalPages = Math.ceil(data.values.length / itemsPerPage);
 
     useEffect(() => {
-        setState((prevState) => ({ ...prevState, hasMore }));
-    }, [hasMore]);
+        if (data && data.values) {
+            const sortedData = [...data.values].sort((a, b) => a.score - b.score);
+            setItems(sortedData);
+        }
+    }, [data]);
 
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
-        const newItems = sortedData.slice(startIndex, endIndex);
-        setState((prevState) => ({
-            ...prevState,
-            items: newItems,
-            displayedItems: newItems.slice(0, itemsPerDisplay),
-            hasMore: newItems.length > itemsPerDisplay,
-        }));
-    }, [currentPage, sortedData]);
+        const newItems = items.slice(startIndex, endIndex);
+        setDisplayedItems(newItems);
+        setHasMore(currentPage < totalPages);
+    }, [currentPage, items, totalPages]);
 
-    const fetchMoreItems = useCallback(
-        debounce(() => {
-            if (hasMore) {
-                const remainingItemsToDisplay = itemsPerPage - state.displayedItems.length;
-                const startIndex = state.displayedItems.length;
-                const endIndex = startIndex + remainingItemsToDisplay;
-                const newDisplayedItems = state.items.slice(startIndex, endIndex);
-                setState((prevState) => ({
-                    ...prevState,
-                    displayedItems: [...prevState.displayedItems, ...newDisplayedItems],
-                }));
-            }
-        }, 1000),
-        [state.displayedItems, state.items, itemsPerPage, hasMore],
-    );
-
-    const handlePageChange = useCallback(
-        (newPage) => {
-            if (newPage >= 1 && newPage <= totalPages) {
-                setCurrentPage(newPage);
-                navigate(`?page=${newPage}`);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        },
-        [navigate, totalPages],
-    );
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            navigate(`?page=${newPage}`);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     return (
-        <section id={`top-${data.key}-page-${currentPage}`} className="bg-secondary pb-6">
+        <section id={`top-${data ? data.key : 'anime'}-page-${currentPage}`} className="bg-secondary pb-6">
             <h2 className="bg-secondary pb-4 pt-6 text-center text-xl font-bold capitalize text-primary underline xs:text-lg lg:text-4xl">
                 {title}
             </h2>
-            <InfiniteScroll
-                pageStart={0}
-                loadMore={fetchMoreItems}
-                hasMore={hasMore}
-                loader={
-                    <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg bg-primary dark:bg-gray-100" />}
-                    </div>
-                }
-            >
-                <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
-                    {state.displayedItems.map((item, index) => {
-                        const globalIndex = (currentPage - 1) * itemsPerPage + (index + 1);
-                        return <AnimeCard key={item.title} anime={item} index={globalIndex} />;
-                    })}
-                </div>
-            </InfiniteScroll>
-            {hasMore && (
+            <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
+                {displayedItems.map((item, index) => (
+                    <AnimeCard key={item.title} anime={item} index={index + 1} />
+                ))}
+            </div>
+            {hasMore && totalPages > 1 && (
                 <section id="pagination" className="flex justify-center bg-secondary pb-6">
                     <div className="join">
                         <button
@@ -171,4 +115,4 @@ const InfinitePagination = () => {
     );
 };
 
-export default React.memo(InfinitePagination);
+export default InfinitePagination;
