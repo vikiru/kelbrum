@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
 import { useFilteredData } from '../../context/FilteredDataProvider';
 
-const InfinitePagination = () => {
+const Pagination = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
@@ -115,4 +116,4 @@ const InfinitePagination = () => {
     );
 };
 
-export default InfinitePagination;
+export default Pagination;

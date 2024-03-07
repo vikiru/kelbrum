@@ -15,8 +15,8 @@ const AnimeCard = ({ anime, index }) => {
             key={anime.id}
             className="card mx-auto flex w-[80%] cursor-default flex-col overflow-hidden rounded-lg bg-primary p-1 pb-4 xs:min-h-[60vh] 2xl:w-[70%] dark:bg-gray-800"
         >
-            <div className="flex flex-col items-center justify-center w-full">
-                <h2 className="text-center text-lg font-semibold text-neutral xs:text-sm lg:text-2xl dark:text-gray-100 mb-4">
+            <div className="flex w-full flex-col items-center justify-center">
+                <h2 className="mb-4 text-center text-lg font-semibold text-neutral xs:text-sm lg:text-2xl dark:text-gray-100">
                     {anime.title}
                 </h2>
 
@@ -35,7 +35,7 @@ const AnimeCard = ({ anime, index }) => {
                     </div>
                 </section>
 
-                <section id="genres" className="flex flex-wrap items-center justify-center mb-4">
+                <section id="genres" className="mb-4 flex flex-wrap items-center justify-center">
                     {anime.genres
                         .filter((g) => g !== 'Unknown')
                         .map((g) => (

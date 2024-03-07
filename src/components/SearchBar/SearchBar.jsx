@@ -36,12 +36,12 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
         debounce((string) => {
             let results = miniSearch.search(string, { limit: 10 });
             if (selectedType !== '') {
-                results = results.filter(result => result.type === selectedType);
+                results = results.filter((result) => result.type === selectedType);
             }
             setSuggestions(
                 results
                     .slice(0, 10)
-                    .map(result => ({ id: result.id, title: result.title, synonyms: result.synonyms })),
+                    .map((result) => ({ id: result.id, title: result.title, synonyms: result.synonyms })),
             );
             setActiveSuggestionIndex(0);
             setShowSuggestions(true);
@@ -106,7 +106,7 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Enter anime title"
-                        className="input input-bordered w-full bg-white p-4 pl-6 pr-6 text-sm text-gray-900 sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg dark:bg-gray-800 dark:text-gray-100 flex-grow"
+                        className="input input-bordered w-full flex-grow bg-white p-4 pl-6 pr-6 text-sm text-gray-900 sm:p-5 sm:pl-7 sm:pr-7 md:p-6 md:pl-8 md:pr-8 md:text-lg dark:bg-gray-800 dark:text-gray-100"
                     />
                     <select
                         value={selectedType}

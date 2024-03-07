@@ -16,8 +16,7 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-@media(min-width:768px)
-{
+@media (min-width: 768px) {
     .slick-dots li button:before {
         font-size: 24px;
         color: #fff;

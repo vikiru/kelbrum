@@ -28,16 +28,15 @@ const Details = ({ anime }) => {
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
-                <section id="anime-image" className="mx-4 mt-4 xs:block lg:hidden">
-
-                {!hasError && anime.imageURL !== excludedURL && (
-                        <img
-                            src={`${anime.imageURL}`}
-                            alt={`${anime.title} image`}
-                            className="h-auto max-h-[1500px] w-full rounded-lg object-fit shadow-sm transition-shadow duration-300 hover:shadow-xl"
-                            onError={handleImageError}
-                        />
-                    )}
+                    <section id="anime-image" className="mx-4 mt-4 xs:block lg:hidden">
+                        {!hasError && anime.imageURL !== excludedURL && (
+                            <img
+                                src={`${anime.imageURL}`}
+                                alt={`${anime.title} image`}
+                                className="object-fit h-auto max-h-[1500px] w-full rounded-lg shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                                onError={handleImageError}
+                            />
+                        )}
                     </section>
 
                     <section id="anime-general-info">
@@ -91,7 +90,7 @@ const Details = ({ anime }) => {
                 </div>
 
                 <section id="anime-image" className="mx-4 mt-14 xs:hidden lg:block">
-                {!hasError && anime.imageURL !== excludedURL && (
+                    {!hasError && anime.imageURL !== excludedURL && (
                         <img
                             src={`${anime.imageURL}`}
                             alt={`${anime.title} image`}
