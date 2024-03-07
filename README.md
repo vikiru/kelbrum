@@ -7,8 +7,8 @@
 <a href="https://vikiru.github.io/kelbrum/">
 	<img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation"/>
 </a>
-<a href="">
-    <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="kelbrum API hosted via Render"/>
+<a href="https://kelbrum-v1.web.app">
+    <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="Kelbrum live site hosted via Firebase"/>
 </a>
 <br/>
  <a href="https://wakatime.com/@vikiru/projects/ioitawlsqa">

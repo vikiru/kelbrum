@@ -15,8 +15,8 @@ const RandomAnime = ({ anime, allAnime }) => {
     }, [allAnime]);
 
     const settings = {
-        dots: true,
-        dotsClass: 'slick-dots slick-thumb',
+        dots: false,
+        dotsClass: 'slick-dots slick-thumb mt-4',
         infinite: true,
         autoplay: false,
         swipeToSlide: true,
@@ -25,7 +25,6 @@ const RandomAnime = ({ anime, allAnime }) => {
         initialSlide: 0,
         speed: 500,
         autoplaySpeed: 2000,
-        cssEase: 'linear',
         responsive: [
             {
                 breakpoint: 600,
@@ -33,6 +32,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     infinite: true,
+                    dots: false,
                 },
             },
             {
@@ -41,6 +41,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     infinite: true,
+                    dots: false,
                 },
             },
             {
@@ -49,6 +50,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     infinite: true,
+                    dots: false,
                 },
             },
             {
@@ -57,6 +59,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     infinite: true,
+                    dots: false,
                 },
             },
             {
@@ -65,6 +68,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     infinite: true,
+                    dots: false,
                 },
             },
             {
@@ -73,6 +77,7 @@ const RandomAnime = ({ anime, allAnime }) => {
                     slidesToShow: 2,
                     slidesToScroll: 1,
                     infinite: true,
+                    dots: false,
                 },
             },
             {
@@ -96,17 +101,15 @@ const RandomAnime = ({ anime, allAnime }) => {
 
     return (
         <section id="random-anime" className="w-full overflow-x-hidden bg-secondary px-10 pb-8 dark:bg-gray-900">
-            <div className="slider-container xs:pb-3 2xl:pb-6">
+            <div className="slider-container py-6">
                 <Slider {...settings}>
                     {shuffledAnime.map((anime, index) => (
-                        <div key={anime.title} className="m-4 mx-auto flex flex-col justify-between">
-                            <AnimeCard anime={anime} index={index + 1} />
-                        </div>
+                        <AnimeCard key={anime.title} anime={anime} index={index + 1} />
                     ))}
                 </Slider>
             </div>
             {anime !== undefined && (
-                <div className="mx-auto mt-2 flex items-center justify-center">
+                <div className="mx-auto mt-2 flex items-center justify-center pt-2">
                     <Link
                         to={`/anime/recommendations/${anime.id}`}
                         className="hover:bg-accent-darker btn btn-accent rounded-lg bg-accent px-2 py-1 uppercase text-white lg:px-4 lg:text-xl"

@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
+import { et } from 'remove-stopwords/lib/export_file.js';
 
 import { writeData } from '../dataAccess/writeFile.js';
 import { returnUniqueArray } from './filter.js';
@@ -135,13 +136,13 @@ function ordinalEncode(data, property) {
  */
 function minMaxScale(data, property) {
     const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
-    const minValue = Math.min(...uniqueValues);
+    const minValue = Math.min(...uniqueValues) + 1;
     const maxValue = Math.max(...uniqueValues);
     const range = maxValue - minValue;
 
     return data.map((entry) => {
         if (entry[property] === 0 || entry[property] === 'Unknown') {
-            return 0;
+            return maxValue + 1;
         } else {
             return (entry[property] - minValue) / range;
         }
@@ -173,7 +174,7 @@ function robustScale(data, property, stats) {
 }
 
 /**
- * Normalizes categorical data to a range between 0 and 1.
+ * Normalizes categorical data to a range between 0 and 1. This function is used in combination with encodeCombination.
  *
  * @param {Array} data - The array of categorical data to be normalized
  * @returns {Array} - The normalized data array
@@ -207,6 +208,24 @@ function multiHotEncode(data, property) {
 }
 
 /**
+ * Maps through the data array and returns existing values from the specified property, replacing default values with 0.
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property name to extract values from each entry in the data array
+ * @returns {Array} - The array of existing values, with default values replaced by 0
+ */
+function returnExistingValues(data, property) {
+    return data.map((entry) => {
+        const value = entry[property];
+        if (value === 'Unknown' || value === 0 || (Array.isArray(value) && value.length === 0)) {
+            return 0;
+        } else {
+            return value;
+        }
+    });
+}
+
+/**
  * Asynchronously creates a feature tensor based on the given data.
  *
  * @param {array} data - The input data to create the feature tensor
@@ -223,8 +242,9 @@ async function createFeatureTensor(data) {
         { func: normalizeMapping, isCategorical: true, property: 'demographics', is1D: true },
         { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
         { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false },
-        { func: minMaxScale, isCategorical: false, property: 'durationMinutes', is1D: true },
-        { func: minMaxScale, isCategorical: false, property: 'score', is1D: true },
+        { func: returnExistingValues, isCategorical: false, property: 'durationMinutes', is1D: true },
+        { func: robustScale, isCategorical: false, property: 'score', is1D: true },
+        { func: minMaxScale, isCategorical: false, property: 'year', is1D: true },
         //{ func: multiHotEncode, isCategorical: true, property: 'studios', is1D: false },
         //{ func: minMaxScale, isCategorical: false, property: 'episodes', is1D: true },
     ];
