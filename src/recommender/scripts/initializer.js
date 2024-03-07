@@ -62,14 +62,13 @@ async function main() {
     try {
         const data = await initializeDataFile();
         const featureTensor = await createFeatureTensor(data);
-        console.log(featureTensor);
         const featureArray = featureTensor.arraySync();
         const titleIDMap = data.flatMap((d) => {
             const uniqueTitles = Array.from(new Set(d.titles));
-            return { title: d.title, synonyms: uniqueTitles, value: d.id , type: d.type};
+            return { title: d.title, synonyms: uniqueTitles, value: d.id, type: d.type };
         });
-        const animeOne = data.find(d => d.malID === 54112);
-        const animeTwo = data.find(d => d.malID === 270); // 52741 uu, 226 ef, 8074 dead, 270 helsing
+        const animeOne = data.find((d) => d.malID === 54112);
+        const animeTwo = data.find((d) => d.malID === 270); // 52741 uu, 226 ef, 8074 dead, 270 helsing
         //testDistances(animeOne.id, animeTwo.id, featureArray);
         //await returnOptimalK(featureArray, 50, weightedDistance, 'test.json');
         const kmeans = await returnKmeansModel(featureArray, 10, weightedDistance);
@@ -80,5 +79,6 @@ async function main() {
         console.error('Error occured:', err);
     }
 }
+
 
 main();

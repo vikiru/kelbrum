@@ -79,11 +79,16 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         }),
     );
 
-    return similarityResults
-        .filter((result) => result !== null)
-        .sort((a, b) => a.similarity - b.similarity);
+    return similarityResults.filter((result) => result !== null).sort((a, b) => a.similarity - b.similarity);
 }
 
+/**
+ * Creates new tensors based on the input tensors, filtering out elements where either tensorA or tensorB is equal to 1.
+ *
+ * @param {Array} tensorA - the first input tensor
+ * @param {Array} tensorB - the second input tensor
+ * @returns {Object} an object containing the new tensors newTensorA and newTensorB
+ */
 function createNewTensors(tensorA, tensorB) {
     const newTensorA = [];
     const newTensorB = [];
@@ -91,14 +96,13 @@ function createNewTensors(tensorA, tensorB) {
     for (let i = 0; i < tensorA.length; i++) {
         const tensorAValue = tensorA[i];
         const tensorBValue = tensorB[i];
-        if (tensorAValue === 1 || tensorBValue === 1){
+        if (tensorAValue === 1 || tensorBValue === 1) {
             newTensorA.push(tensorAValue);
             newTensorB.push(tensorBValue);
         }
     }
     return { newTensorA, newTensorB };
 }
-
 
 /**
  * Slices a given tensor from the start index to the end index.
@@ -132,7 +136,7 @@ function getDistance(property, tensorA, tensorB) {
         case 'demographics':
             return distance.manhattan(tensorA, tensorB);
         case 'themes':
-            return  distance.dice(tensorA, tensorB);
+            return distance.dice(tensorA, tensorB);
         case 'durationMinutes':
             return distance.manhattan(tensorA, tensorB);
         case 'score':
@@ -169,11 +173,11 @@ function weightedDistance(tensorA, tensorB) {
         source: 0.2,
         rating: 0.5,
         genres: 0.4,
-        demographics: 0.3,
-        themes: 0.55,
-        synopsis: 0.2,
+        demographics: 0.5,
+        themes: 0.8,
+        synopsis: 0.5,
         score: 0.1,
-        durationMinutes: 0.5,
+        durationMinutes: 1,
         year: 0.1,
     };
 
@@ -188,7 +192,7 @@ function weightedDistance(tensorA, tensorB) {
         score: false,
         durationMinutes: false,
         year: false,
-    }
+    };
     const weightSum = Object.values(weights).reduce((sum, currentValue) => sum + currentValue, 0);
 
     let distanceSum = 0;
@@ -199,20 +203,17 @@ function weightedDistance(tensorA, tensorB) {
         const weight = weights[feature];
         let distance = 0;
 
-        if (shouldCreateNew[feature]){
+        if (shouldCreateNew[feature]) {
             const { newTensorA, newTensorB } = createNewTensors(firstTensor, secondTensor);
             distance = newTensorA.length > 0 ? getDistance(feature, newTensorA, newTensorB) : 0;
-        }
-        else {
+        } else {
             distance = getDistance(feature, firstTensor, secondTensor);
         }
 
-        //console.log(feature, distance);
         if (isNaN(distance)) {
             distanceSum += 0;
-        }
-        else {
-            distanceSum += distance * weight; 
+        } else {
+            distanceSum += distance * weight;
         }
     }
 

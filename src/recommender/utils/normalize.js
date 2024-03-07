@@ -3,6 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import { calculateStatistics, createMapping } from './stats.js';
 import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
 
+import { et } from 'remove-stopwords/lib/export_file.js';
 import { returnUniqueArray } from './filter.js';
 import { sortData } from './utils.js';
 import { writeData } from '../dataAccess/writeFile.js';
@@ -174,7 +175,7 @@ function robustScale(data, property, stats) {
 }
 
 /**
- * Normalizes categorical data to a range between 0 and 1.
+ * Normalizes categorical data to a range between 0 and 1. This function is used in combination with encodeCombination.
  *
  * @param {Array} data - The array of categorical data to be normalized
  * @returns {Array} - The normalized data array
@@ -207,6 +208,19 @@ function multiHotEncode(data, property) {
     });
 }
 
+function returnExistingValues(data, property){
+    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
+    return data.map((entry) => {
+        const value = entry[property];
+        if (value === 'Unknown' || value === 0 || Array.isArray(value) && value.length === 0){
+            return 0;
+        }
+        else {
+            return value;
+        }
+    })
+}
+
 /**
  * Asynchronously creates a feature tensor based on the given data.
  *
@@ -224,7 +238,7 @@ async function createFeatureTensor(data) {
         { func: normalizeMapping, isCategorical: true, property: 'demographics', is1D: true },
         { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
         { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false },
-        { func: minMaxScale, isCategorical: false, property: 'durationMinutes', is1D: true },
+        { func: returnExistingValues, isCategorical: false, property: 'durationMinutes', is1D: true },
         { func: robustScale, isCategorical: false, property: 'score', is1D: true },
         { func: minMaxScale, isCategorical: false, property: 'year', is1D: true },
         //{ func: multiHotEncode, isCategorical: true, property: 'studios', is1D: false },
