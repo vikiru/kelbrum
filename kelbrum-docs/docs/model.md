@@ -77,5 +77,6 @@ For the purposes of the recommendation system, not all properties are applicable
 -   `durationMinutes`
 -   `rating`
 -   `synopsis`
+-   `year`
 
-There is definetly room for improvement especially through the incorporation of more properties such as the `studios`, `favourites`, `members`, `rank`, `popularity`, and `episodes`.
+There is definetly room for improvement especially through the incorporation of more properties such as the `studios`, `favourites`, `members`, `rank`, `popularity`, and `episodes`. To further improve the recommendations, `genres`, `themes` should use a form of ordinal encoding similar to `type`, `demographics`, and `rating` assigning unique numerical values to each possible value and trying to group similar properties like `action` and `adventure` closer together than for example, `action` and `comedy`. It would also be nice to have additional unexplored properties such as `countryOfOrigin` which can be used to group similar anime based on where the source originated from.

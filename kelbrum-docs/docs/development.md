@@ -27,4 +27,3 @@ Since the objective of my project was to recommend anime that was similar to use
 ### Designing the UI
 
 Once all the previous steps were completed, the final step was to design a simple and easy to use UI that was as visually appealing as possible, to achieve this goal I utilized [React](https://react.dev/) and [React Router](https://reactrouter.com/) in combination with [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) alongside various npm packages such as [MiniSearch](https://github.com/lucaong/minisearch), [lodash](https://github.com/lodash/lodash), [tailwind-scrollbar](https://github.com/adoxography/tailwind-scrollbar), [React Infinite Scroller](https://github.com/danbovey/react-infinite-scroller), [react-slick](https://github.com/akiran/react-slick), and [slick-carousel](https://github.com/kenwheeler/slick/).
-.
