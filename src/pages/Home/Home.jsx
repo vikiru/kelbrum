@@ -12,7 +12,7 @@ function Home() {
             <section id="hero" className="hero flex items-center justify-center bg-primary py-6 dark:bg-gray-900">
                 <div className="hero-content text-center">
                     <div className="mx-auto">
-                        <h1 className="text-xl font-bold xs:text-lg lg:text-4xl 2xl:text-5xl 3xl:text-6xl 4xl:text-7xl 5xl:text-8xl dark:text-gray-100">
+                        <h1 className="text-2xl font-bold xs:text-xl lg:text-5xl 2xl:text-6xl 3xl:text-7xl 4xl:text-8xl dark:text-gray-100">
                             Discover Your Next Favourite Anime
                         </h1>
                         <p className="xs:text-md pb-6 pt-4 text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl dark:text-gray-100">
@@ -21,12 +21,11 @@ function Home() {
                             presented with a selection of similar anime, tailored just for you. Not happy with the
                             suggestions? Refresh and you'll be presented with even more!
                         </p>
-                        <div className="mx-auto flex items-center justify-center space-x-4 rounded-full border-b-4 border-secondary bg-accent pt-2 hover:cursor-pointer xs:w-full lg:w-[50%] dark:border-primary">
-                            <Link
-                                to="/anime/search"
-                                className="xs:text-md rounded-lg py-3 text-lg text-white lg:px-6 xl:text-2xl"
-                            >
-                                Start Your Journey
+                        <div className="mx-auto flex items-center justify-center rounded-full border-b-4 border-secondary bg-accent py-2 pt-2 hover:cursor-pointer xs:w-full lg:w-[50%] dark:border-primary">
+                            <Link to="/anime/search" className="flex-grow">
+                                <span className="rounded-lg py-3 text-lg text-white lg:px-6 xl:text-2xl">
+                                    Start Your Journey
+                                </span>
                             </Link>
                         </div>
                     </div>
