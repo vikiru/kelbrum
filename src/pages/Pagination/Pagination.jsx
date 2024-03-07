@@ -53,12 +53,12 @@ const Pagination = () => {
             data = null;
     }
 
-    const title = data ? `Top ${data.key} Anime` : 'Anime';
+    const title = `Top ${data.key} Anime`;
     const totalPages = Math.ceil(data.values.length / itemsPerPage);
 
     useEffect(() => {
         if (data && data.values) {
-            const sortedData = [...data.values].sort((a, b) => a.score - b.score);
+            const sortedData = [...data.values].sort((a, b) => b.score - a.score);
             setItems(sortedData);
         }
     }, [data]);
