@@ -58,14 +58,14 @@ Upon combining these two parts, the project comes together in the form, that is,
 
 ## 📖 Table of Contents
 
-- [📖 Table of Contents](#-table-of-contents)
-- [🌟 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [📝 Prerequisites](#-prerequisites)
-- [⚡ Setup Instructions](#-setup-instructions)
-- [📜 Available Scripts](#-available-scripts)
-- [✨ Acknowledgments](#-acknowledgments)
-- [©️ License](#️-license)
+-   [📖 Table of Contents](#-table-of-contents)
+-   [🌟 Features](#-features)
+-   [🛠️ Tech Stack](#️-tech-stack)
+-   [📝 Prerequisites](#-prerequisites)
+-   [⚡ Setup Instructions](#-setup-instructions)
+-   [📜 Available Scripts](#-available-scripts)
+-   [✨ Acknowledgments](#-acknowledgments)
+-   [©️ License](#️-license)
 
 ## 🌟 Features
 
