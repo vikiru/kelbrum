@@ -208,8 +208,14 @@ function multiHotEncode(data, property) {
     });
 }
 
+/**
+ * Maps through the data array and returns existing values from the specified property, replacing default values with 0.
+ *
+ * @param {Array} data - The input data array
+ * @param {string} property - The property name to extract values from each entry in the data array
+ * @return {Array} - The array of existing values, with default values replaced by 0
+ */
 function returnExistingValues(data, property){
-    const uniqueValues = returnUniqueArray(data, property, ['Unknown']);
     return data.map((entry) => {
         const value = entry[property];
         if (value === 'Unknown' || value === 0 || Array.isArray(value) && value.length === 0){

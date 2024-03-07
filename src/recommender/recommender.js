@@ -52,7 +52,7 @@ async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
  * @returns {array} Sorted array of objects containing index and similarity
  */
 async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
-    const MAX_THRESHOLD = Infinity;
+    //const MAX_THRESHOLD = 0.4;
     const excludedSet = new Set(excludedIds);
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
         if (cluster === clusterNumber && index !== id && !excludedSet.has(index)) {
@@ -174,8 +174,8 @@ function weightedDistance(tensorA, tensorB) {
         rating: 0.5,
         genres: 0.4,
         demographics: 0.5,
-        themes: 0.8,
-        synopsis: 0.5,
+        themes: 0.55,
+        synopsis: 0.2,
         score: 0.1,
         durationMinutes: 1,
         year: 0.1,
