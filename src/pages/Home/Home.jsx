@@ -1,7 +1,6 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-
 import RandomAnime from '../../components/RandomAnime/RandomAnime';
+import React from 'react';
 import { useData } from '../../context/DataProvider';
 
 function Home() {
@@ -21,9 +20,9 @@ function Home() {
                             presented with a selection of similar anime, tailored just for you. Not happy with the
                             suggestions? Refresh and you'll be presented with even more!
                         </p>
-                        <div className="mx-auto flex items-center justify-center rounded-full border-b-4 border-secondary bg-accent pt-2 hover:cursor-pointer xs:w-full lg:w-[50%] dark:border-primary">
+                        <div className="mx-auto flex py-2 items-center justify-center rounded-full border-b-4 border-secondary bg-accent pt-2 hover:cursor-pointer xs:w-full lg:w-[50%] dark:border-primary">
                             <Link to="/anime/search" className="flex-grow">
-                                <span className="rounded-lg py-3 text-lg text-white lg:px-6">Start Your Journey</span>
+                                <span className="rounded-lg py-3 text-lg text-white lg:px-6 xl:text-2xl">Start Your Journey</span>
                             </Link>
                         </div>
                     </div>
