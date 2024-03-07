@@ -16,12 +16,24 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-.slick-dots li button:before {
-    font-size: 24px;
-    color: #fff;
+@media (min-width: 768px) {
+    .slick-dots li button:before {
+        font-size: 24px;
+        color: #fff;
+    }
+
+    .slick-dots li.slick-active button:before {
+        font-size: 24px;
+        color: #fff;
+    }
 }
 
-.slick-dots li.slick-active button:before {
-    font-size: 24px;
-    color: #fff;
+@media (min-width: 300px max-width: 768px) {
+    .slick-dots li button:before {
+        font-size: 12px;
+    }
+
+    .slick-dots li.slick-active button:before {
+        font-size: 12px;
+    }
 }

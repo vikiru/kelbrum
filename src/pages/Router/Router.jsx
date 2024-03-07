@@ -7,7 +7,7 @@ import Footer from './../../components/Footer/Footer';
 import NavBar from './../../components/NavBar/NavBar';
 
 const RecommendationsPage = React.lazy(() => import('../RecommendationsPage/RecommendationsPage'));
-const InfinitePagination = React.lazy(() => import('../InfinitePagination/InfinitePagination'));
+const Pagination = React.lazy(() => import('../Pagination/Pagination'));
 const AnimeDetails = React.lazy(() => import('../AnimeDetails/AnimeDetails'));
 const TopAnimePage = React.lazy(() => import('../TopAnimePage/TopAnimePage'));
 const SearchAnime = React.lazy(() => import('../SearchAnime/SearchAnime'));
@@ -35,19 +35,19 @@ function Router() {
                     <Route path="anime/top" element={<TopAnimePage />} />
                     <Route path="anime/search" element={<SearchAnime />} />
                     <Route path="anime/genres" element={<GenresPage />} />
-                    <Route path="anime/genres/:id" element={<InfinitePagination />} />
+                    <Route path="anime/genres/:id" element={<Pagination />} />
                     <Route path="anime/demographics" element={<GenresPage />} />
-                    <Route path="anime/demographics/:id" element={<InfinitePagination />} />
+                    <Route path="anime/demographics/:id" element={<Pagination />} />
                     <Route path="anime/themes" element={<GenresPage />} />
-                    <Route path="anime/themes/:id" element={<InfinitePagination />} />
+                    <Route path="anime/themes/:id" element={<Pagination />} />
                     <Route path="anime/licensors" element={<LicensorsPage />} />
-                    <Route path="anime/licensors/:id" element={<InfinitePagination />} />
+                    <Route path="anime/licensors/:id" element={<Pagination />} />
                     <Route path="anime/producers" element={<ProducersPage />} />
-                    <Route path="anime/producers/:id" element={<InfinitePagination />} />
+                    <Route path="anime/producers/:id" element={<Pagination />} />
                     <Route path="anime/studios" element={<StudiosPage />} />
-                    <Route path="anime/studios/:id" element={<InfinitePagination />} />
+                    <Route path="anime/studios/:id" element={<Pagination />} />
                     <Route path="anime/seasons" element={<SeasonsPage />} />
-                    <Route path="anime/seasons/:id" element={<InfinitePagination />} />
+                    <Route path="anime/seasons/:id" element={<Pagination />} />
                     <Route path="anime/recommendations/:id" element={<RecommendationsPage />} />
                 </Routes>
             </Suspense>

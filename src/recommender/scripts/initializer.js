@@ -62,11 +62,10 @@ async function main() {
     try {
         const data = await initializeDataFile();
         const featureTensor = await createFeatureTensor(data);
-        console.log(featureTensor);
         const featureArray = featureTensor.arraySync();
         const titleIDMap = data.flatMap((d) => {
             const uniqueTitles = Array.from(new Set(d.titles));
-            return { title: d.title, synonyms: uniqueTitles, value: d.id };
+            return { title: d.title, synonyms: uniqueTitles, value: d.id, type: d.type };
         });
         const kmeans = await returnKmeansModel(featureArray, 10, weightedDistance);
         await writeData('featureArray.json', featureArray);
