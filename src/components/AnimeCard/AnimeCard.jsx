@@ -15,7 +15,7 @@ const AnimeCard = ({ anime, index }) => {
             <div className="flex flex-col flex-grow">
                 <section id="title" className="flex flex-col items-center justify-center">
                     <h2 className="text-center text-lg font-semibold text-neutral dark:text-gray-100 4xl:text-4xl">
-                        {anime.title}
+                    {anime.title.length > 32 ? anime.title.substring(0, 32) + '...' : anime.title}
                     </h2>
                 </section>
 
@@ -24,7 +24,7 @@ const AnimeCard = ({ anime, index }) => {
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="w-full rounded-lg object-contain h-auto"
+                            className="w-full rounded-lg object-contain h-auto 2xl:h-[500px] 4xl:h-[800px]"
                             loading="lazy"
                             onError={handleImageError}
                         />
@@ -32,7 +32,7 @@ const AnimeCard = ({ anime, index }) => {
                     {hasError && <div className="w-full h-64 rounded-lg bg-gray-200 dark:bg-gray-700"></div>}
                 </section>
 
-                <section id="genres" className="flex flex-wrap items-center justify-center mt-6">
+                <section id="genres" className="flex flex-wrap items-center justify-center mt-6 min-h-[120px]">
                     {anime.genres
                         .filter((g) => g !== 'Unknown')
                         .map((g) => (
