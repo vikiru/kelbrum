@@ -1,10 +1,10 @@
 import { distance, similarity } from 'ml-distance';
-import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
 
+import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
+import { writeData } from '../dataAccess/writeFile.js';
+import { weightedDistance } from '../recommender.js';
 import { createFeatureTensor } from '../utils/normalize.js';
 import { initializeDataFile } from '../utils/utils.js';
-import { weightedDistance } from '../recommender.js';
-import { writeData } from '../dataAccess/writeFile.js';
 
 /**
  * Calculate various distance metrics between two feature tensors. This function is primarily used to test the
@@ -75,6 +75,5 @@ async function main() {
         console.error('Error occured:', err);
     }
 }
-
 
 main();

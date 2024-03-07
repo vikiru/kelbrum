@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -11,33 +10,33 @@ const AnimeCard = ({ anime, index }) => {
     };
 
     return (
-        <div className="card flex flex-col cursor-default overflow-hidden rounded-lg bg-primary p-4 shadow-lg dark:bg-gray-800 xs:w-full 2xl:w-[70%] mx-auto">
-            <div className="flex flex-col flex-grow">
+        <div className="card mx-auto flex cursor-default flex-col overflow-hidden rounded-lg bg-primary p-4 shadow-lg xs:w-full 2xl:w-[70%] dark:bg-gray-800">
+            <div className="flex flex-grow flex-col">
                 <section id="title" className="flex flex-col items-center justify-center">
-                    <h2 className="text-center text-lg font-semibold text-neutral dark:text-gray-100 4xl:text-4xl">
-                    {anime.title.length > 32 ? anime.title.substring(0, 32) + '...' : anime.title}
+                    <h2 className="text-center text-lg font-semibold text-neutral 4xl:text-4xl dark:text-gray-100">
+                        {anime.title.length > 32 ? anime.title.substring(0, 32) + '...' : anime.title}
                     </h2>
                 </section>
 
-                <section id="image" className="flex justify-center mt-4">
+                <section id="image" className="mt-4 flex justify-center">
                     {!hasError && (
                         <img
                             src={anime.imageURL}
                             alt={`${anime.title} image`}
-                            className="w-full rounded-lg object-contain h-auto 2xl:h-[500px] 4xl:h-[800px]"
+                            className="h-auto w-full rounded-lg object-contain 2xl:h-[500px] 4xl:h-[800px]"
                             loading="lazy"
                             onError={handleImageError}
                         />
                     )}
-                    {hasError && <div className="w-full h-64 rounded-lg bg-gray-200 dark:bg-gray-700"></div>}
+                    {hasError && <div className="h-64 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>}
                 </section>
 
-                <section id="genres" className="flex flex-wrap items-center justify-center mt-6 min-h-[120px]">
+                <section id="genres" className="mt-6 flex flex-wrap items-center justify-center">
                     {anime.genres
                         .filter((g) => g !== 'Unknown')
                         .map((g) => (
                             <span
-                                className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2 lg:text-lg 3xl:text-xl 3xl:p-3 4xl:text-4xl 4xl:p-4"
+                                className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-lg sm:p-4 lg:text-xl 3xl:p-3 3xl:text-xl 4xl:p-4 4xl:text-4xl"
                                 key={g}
                             >
                                 {g}
@@ -48,7 +47,7 @@ const AnimeCard = ({ anime, index }) => {
                         .filter((d) => d !== 'Unknown')
                         .map((d) => (
                             <span
-                                className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-xs sm:p-2 lg:text-lg 3xl:text-xl 3xl:p-3 4xl:text-4xl 4xl:p-4"
+                                className="badge badge-neutral mb-1 mr-1 bg-neutral p-1 text-lg sm:p-4 lg:text-xl 3xl:p-3 3xl:text-xl 4xl:p-4 4xl:text-4xl"
                                 key={d}
                             >
                                 {d}
@@ -57,7 +56,7 @@ const AnimeCard = ({ anime, index }) => {
                 </section>
             </div>
 
-            <section id="read-more" className="flex justify-center mt-4">
+            <section id="read-more" className="mt-4 flex justify-center">
                 <Link
                     to={`/anime/${anime.id}`}
                     className="btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"

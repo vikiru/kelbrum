@@ -1,12 +1,11 @@
 import * as tf from '@tensorflow/tfjs';
-
-import { calculateStatistics, createMapping } from './stats.js';
-import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
-
 import { et } from 'remove-stopwords/lib/export_file.js';
-import { returnUniqueArray } from './filter.js';
-import { sortData } from './utils.js';
+
 import { writeData } from '../dataAccess/writeFile.js';
+import { returnUniqueArray } from './filter.js';
+import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
+import { calculateStatistics, createMapping } from './stats.js';
+import { sortData } from './utils.js';
 
 const typeMapping = {
     TV: 1,
@@ -213,18 +212,17 @@ function multiHotEncode(data, property) {
  *
  * @param {Array} data - The input data array
  * @param {string} property - The property name to extract values from each entry in the data array
- * @return {Array} - The array of existing values, with default values replaced by 0
+ * @returns {Array} - The array of existing values, with default values replaced by 0
  */
-function returnExistingValues(data, property){
+function returnExistingValues(data, property) {
     return data.map((entry) => {
         const value = entry[property];
-        if (value === 'Unknown' || value === 0 || Array.isArray(value) && value.length === 0){
+        if (value === 'Unknown' || value === 0 || (Array.isArray(value) && value.length === 0)) {
             return 0;
-        }
-        else {
+        } else {
             return value;
         }
-    })
+    });
 }
 
 /**

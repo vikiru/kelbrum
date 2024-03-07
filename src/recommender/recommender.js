@@ -85,9 +85,9 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
 /**
  * Creates new tensors based on the input tensors, filtering out elements where either tensorA or tensorB is equal to 1.
  *
- * @param {Array} tensorA - the first input tensor
- * @param {Array} tensorB - the second input tensor
- * @returns {Object} an object containing the new tensors newTensorA and newTensorB
+ * @param {Array} tensorA - The first input tensor
+ * @param {Array} tensorB - The second input tensor
+ * @returns {Object} An object containing the new tensors newTensorA and newTensorB
  */
 function createNewTensors(tensorA, tensorB) {
     const newTensorA = [];
