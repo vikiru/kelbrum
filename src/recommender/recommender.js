@@ -14,7 +14,7 @@ async function retrieveAnimeData(recommendations, data) {
     animeData.forEach((d) => {
         d.similarity = recommendations.find((r) => r.index === d.id).similarity.toFixed(2);
     });
-    return animeData.filter(a => a.similarity <= MAX_THRESHOLD).sort((a, b) => a.similarity - b.similarity);
+    return animeData.filter((a) => a.similarity <= MAX_THRESHOLD).sort((a, b) => a.similarity - b.similarity);
 }
 
 /**

@@ -1,12 +1,11 @@
+import { distance, similarity } from 'ml-distance';
+import { kmeans } from 'ml-kmeans';
+import { dirname } from 'path';
+import path from 'path';
 import * as ss from 'simple-statistics';
+import { fileURLToPath } from 'url';
 
 import { checkFileExists, readJSONFile } from './readFile.js';
-import { distance, similarity } from 'ml-distance';
-
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { kmeans } from 'ml-kmeans';
-import path from 'path';
 import { writeData } from './writeFile.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,7 +32,7 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
             const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
             const assignments = result.clusters;
             console.log(k, wcss);
-            results.push({ k, wcss});
+            results.push({ k, wcss });
         } catch (error) {
             console.error(`Error computing KMeans for k=${k}:`, error);
             await writeData(fileName, results);
