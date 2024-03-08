@@ -1,17 +1,17 @@
+import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
+import AnimeCard from '../../components/AnimeCard/AnimeCard';
+import { useData } from '../../context/DataProvider';
+import { useFeatureArray } from '../../context/FeatureArrayProvider';
+import { useKMeans } from '../../context/KMeansProvider';
 import {
     retrieveAnimeData,
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-import AnimeCard from '../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
-import { debounce } from 'lodash';
-import { useData } from '../../context/DataProvider';
-import { useFeatureArray } from '../../context/FeatureArrayProvider';
-import { useKMeans } from '../../context/KMeansProvider';
 
 const RecommendationsPage = () => {
     const { data } = useData();
@@ -102,7 +102,7 @@ const RecommendationsPage = () => {
                 hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg dark:text-primary text-secondary" />}
+                        {hasMore && <div className="loading loading-lg text-secondary dark:text-primary" />}
                     </div>
                 }
             >

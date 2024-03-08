@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
-
-import AnimeCard from './../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
 import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+
 import { useTopAnime } from '../../context/TopAnimeProvider';
+import AnimeCard from './../../components/AnimeCard/AnimeCard';
 
 const TopAnimePage = () => {
     const { topAnime } = useTopAnime();
@@ -40,7 +40,7 @@ const TopAnimePage = () => {
                 hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg dark:text-primary text-secondary" />}
+                        {hasMore && <div className="loading loading-lg text-secondary dark:text-primary" />}
                     </div>
                 }
             >
