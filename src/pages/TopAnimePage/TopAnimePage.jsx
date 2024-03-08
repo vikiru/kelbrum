@@ -1,9 +1,9 @@
-import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 
-import { useTopAnime } from '../../context/TopAnimeProvider';
 import AnimeCard from './../../components/AnimeCard/AnimeCard';
+import InfiniteScroll from 'react-infinite-scroller';
+import { debounce } from 'lodash';
+import { useTopAnime } from '../../context/TopAnimeProvider';
 
 const TopAnimePage = () => {
     const { topAnime } = useTopAnime();
@@ -14,7 +14,7 @@ const TopAnimePage = () => {
     const fetchAnimeItems = useMemo(() => {
         return () => {
             const nextIndex = items.length;
-            const newItems = topAnime.slice(nextIndex, nextIndex + 10);
+            const newItems = topAnime.slice(nextIndex, nextIndex + 25);
 
             if (newItems.length === 0) {
                 setHasMore(false);
