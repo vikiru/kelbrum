@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
@@ -28,7 +29,7 @@ const AnimeCard = ({ anime, index }) => {
                             onError={handleImageError}
                         />
                     )}
-                    {hasError && <div className="h-64 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>}
+                    {hasError && <div className="h-64 w-full rounded-lg bg-gray-200 dark:bg-gray-800"></div>}
                 </section>
 
                 <section id="genres" className="mt-6 flex flex-wrap items-center justify-center">
