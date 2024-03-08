@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 
 function NavBar() {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -8,13 +8,13 @@ function NavBar() {
     };
 
     return (
-        <section id="navbar" className="navbar bg-base-100 text-gray-100 dark:bg-gray-800 dark:text-gray-100">
+        <section id="navbar" className="navbar bg-neutral text-secondary dark:bg-gray-800 dark:text-gray-100">
             <div className="navbar-start">
                 <div className="dropdown rounded-full dark:bg-gray-800">
                     <div tabIndex={0} role="button" className="btn btn-ghost rounded-full" onClick={toggleDropdown}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-10 w-10 fill-current text-gray-100 4xl:h-20 4xl:w-20 dark:text-gray-100"
+                            className="h-10 w-10 fill-current text-secondary 4xl:h-20 4xl:w-20 dark:text-gray-100"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                         >
@@ -76,7 +76,7 @@ function NavBar() {
             <div className="xs:navbar-center">
                 <Link
                     to="/"
-                    className="btn btn-ghost font-logo text-xl text-gray-100 lg:text-4xl dark:text-gray-100"
+                    className="btn btn-ghost font-logo text-xl text-secondary lg:text-4xl dark:text-gray-100"
                     role="button"
                     alt="Visit Kelbrum Homepage"
                 >
@@ -91,7 +91,7 @@ function NavBar() {
                     <button className="btn btn-circle btn-ghost">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-10 w-10 fill-current text-gray-100 4xl:h-20 4xl:w-20 dark:text-gray-100"
+                            className="h-10 w-10 fill-current text-secondary 4xl:h-20 4xl:w-20 dark:text-gray-100"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                         >

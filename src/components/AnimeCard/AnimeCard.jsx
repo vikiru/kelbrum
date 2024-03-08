@@ -14,7 +14,7 @@ const AnimeCard = ({ anime, index }) => {
         <div className="card mx-auto flex cursor-default flex-col overflow-hidden rounded-lg bg-primary p-4 shadow-lg xs:w-full 2xl:w-[70%] dark:bg-gray-800">
             <div className="flex flex-grow flex-col">
                 <section id="title" className="flex flex-col items-center justify-center">
-                    <h2 className="text-center text-lg font-semibold text-neutral 4xl:text-4xl dark:text-gray-100">
+                    <h2 className="text-center text-lg font-semibold text-secondary 4xl:text-4xl dark:text-gray-100">
                         {anime.title.length > 32 ? anime.title.substring(0, 32) + '...' : anime.title}
                     </h2>
                 </section>
@@ -29,7 +29,7 @@ const AnimeCard = ({ anime, index }) => {
                             onError={handleImageError}
                         />
                     )}
-                    {hasError && <div className="h-64 w-full rounded-lg bg-gray-200 dark:bg-gray-800"></div>}
+                    {hasError && <div className="h-64 w-full rounded-lg bg-primary dark:bg-gray-800"></div>}
                 </section>
 
                 <section id="genres" className="mt-6 flex flex-wrap items-center justify-center">
