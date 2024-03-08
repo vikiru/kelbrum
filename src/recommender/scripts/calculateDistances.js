@@ -1,11 +1,11 @@
 import { distance, similarity } from 'ml-distance';
-import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
 
+import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
+import { weightedDistance } from '../recommender.js';
 import { createFeatureTensor } from '../utils/normalize.js';
 import { initializeDataFile } from '../utils/utils.js';
-import { weightedDistance } from '../recommender.js';
 
-async function main(){
+async function main() {
     const data = await initializeDataFile();
     const featureTensor = await createFeatureTensor(data);
     const featureArray = featureTensor.arraySync();
@@ -19,9 +19,9 @@ async function main(){
             distanceFunction: similarity.cosine,
             fileName: 'statistics/cosine.json',
         },
-        dice : {
+        dice: {
             distanceFunction: distance.dice,
-            fileName:'statistics/dice.json',
+            fileName: 'statistics/dice.json',
         },
         euclidean: {
             distanceFunction: distance.euclidean,
@@ -54,10 +54,10 @@ async function main(){
         weightedDistance: {
             distanceFunction: weightedDistance,
             fileName: 'statistics/weightedDistance.json',
-        }
-    }
+        },
+    };
 
-    for (const key in distances){
+    for (const key in distances) {
         const distance = distances[key];
         const distanceFunction = distance.distanceFunction;
         const fileName = distance.fileName;

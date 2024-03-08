@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
-
-import AnimeCard from './../../components/AnimeCard/AnimeCard';
-import InfiniteScroll from 'react-infinite-scroller';
 import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+
 import { useTopAnime } from '../../context/TopAnimeProvider';
+import AnimeCard from './../../components/AnimeCard/AnimeCard';
 
 const TopAnimePage = () => {
     const { topAnime } = useTopAnime();
