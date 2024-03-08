@@ -102,7 +102,7 @@ const RecommendationsPage = () => {
                 hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg bg-primary" />}
+                        {hasMore && <div className="loading loading-lg text-secondary dark:text-primary" />}
                     </div>
                 }
             >

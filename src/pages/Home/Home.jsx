@@ -12,10 +12,10 @@ function Home() {
             <section id="hero" className="hero flex items-center justify-center bg-primary py-6 dark:bg-gray-900">
                 <div className="hero-content text-center">
                     <div className="mx-auto">
-                        <h1 className="text-2xl font-bold xs:text-xl lg:text-5xl 2xl:text-6xl 3xl:text-7xl 4xl:text-8xl dark:text-gray-100">
+                        <h1 className="text-2xl font-bold text-secondary xs:text-xl lg:text-5xl 2xl:text-6xl 3xl:text-7xl 4xl:text-8xl dark:text-gray-100">
                             Discover Your Next Favourite Anime
                         </h1>
-                        <p className="xs:text-md pb-6 pt-4 text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl dark:text-gray-100">
+                        <p className="xs:text-md pb-6 pt-4 text-lg text-secondary lg:text-xl xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl dark:text-gray-100">
                             Tired of searching for a new anime or trying to find a new movie to watch but can't find one
                             that suits your taste? Look no further! Search for one of your favorites, and you'll be
                             presented with a selection of similar anime, tailored just for you. Not happy with the
