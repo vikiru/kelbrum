@@ -8,12 +8,13 @@ import { distance } from 'ml-distance';
  * @returns {Array} The sorted anime data based on similarity.
  */
 async function retrieveAnimeData(recommendations, data) {
+    const MAX_THRESHOLD = 0.4;
     const indexes = new Set(recommendations.map((r) => r.index));
     const animeData = data.filter((d) => indexes.has(d.id));
     animeData.forEach((d) => {
         d.similarity = recommendations.find((r) => r.index === d.id).similarity.toFixed(2);
     });
-    return animeData.sort((a, b) => a.similarity - b.similarity);
+    return animeData.filter(a => a.similarity <= MAX_THRESHOLD).sort((a, b) => a.similarity - b.similarity);
 }
 
 /**
