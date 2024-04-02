@@ -1,4 +1,4 @@
-/*! For license information please see main.f1bddc2a.js.LICENSE.txt */
+/*! For license information please see main.ba63f8b4.js.LICENSE.txt */
 (self.webpackChunkkelbrum_docs = self.webpackChunkkelbrum_docs || []).push([
     [792],
     {
@@ -708,7 +708,7 @@
             var r = n(6540),
                 a = n(4784);
             const o = JSON.parse(
-                    '{"docusaurus-plugin-google-gtag":{"default":{"trackingID":["G-HX9JEL4XJY"],"anonymizeIP":true,"id":"default"}},"docusaurus-lunr-search":{"default":{"fileNames":{"searchDoc":"search-doc-1709869820275.json","lunrIndex":"lunr-index-1709869820275.json"}}},"docusaurus-plugin-content-docs":{"default":{"path":"/kelbrum/","versions":[{"name":"current","label":"Next","isLast":true,"path":"/kelbrum/","mainDocId":"index","docs":[{"id":"acknowledgments","path":"/kelbrum/acknowledgments","sidebar":"docs"},{"id":"development","path":"/kelbrum/development","sidebar":"docs"},{"id":"features","path":"/kelbrum/features","sidebar":"docs"},{"id":"index","path":"/kelbrum/","sidebar":"docs"},{"id":"kmeans","path":"/kelbrum/kmeans","sidebar":"docs"},{"id":"model","path":"/kelbrum/model","sidebar":"docs"},{"id":"motivation","path":"/kelbrum/motivation","sidebar":"docs"},{"id":"normalize","path":"/kelbrum/normalize","sidebar":"docs"},{"id":"prerequisites","path":"/kelbrum/prerequisites","sidebar":"docs"},{"id":"scripts","path":"/kelbrum/scripts","sidebar":"docs"},{"id":"setup","path":"/kelbrum/setup","sidebar":"docs"},{"id":"stack","path":"/kelbrum/stack","sidebar":"docs"}],"draftIds":[],"sidebars":{"docs":{"link":{"path":"/kelbrum/","label":"index"}}}}],"breadcrumbs":true}}}',
+                    '{"docusaurus-lunr-search":{"default":{"fileNames":{"searchDoc":"search-doc-1712089811043.json","lunrIndex":"lunr-index-1712089811043.json"}}},"docusaurus-plugin-google-gtag":{"default":{"trackingID":["G-HX9JEL4XJY"],"anonymizeIP":true,"id":"default"}},"docusaurus-plugin-content-docs":{"default":{"path":"/kelbrum/","versions":[{"name":"current","label":"Next","isLast":true,"path":"/kelbrum/","mainDocId":"index","docs":[{"id":"acknowledgments","path":"/kelbrum/acknowledgments","sidebar":"docs"},{"id":"development","path":"/kelbrum/development","sidebar":"docs"},{"id":"features","path":"/kelbrum/features","sidebar":"docs"},{"id":"index","path":"/kelbrum/","sidebar":"docs"},{"id":"kmeans","path":"/kelbrum/kmeans","sidebar":"docs"},{"id":"model","path":"/kelbrum/model","sidebar":"docs"},{"id":"motivation","path":"/kelbrum/motivation","sidebar":"docs"},{"id":"normalize","path":"/kelbrum/normalize","sidebar":"docs"},{"id":"prerequisites","path":"/kelbrum/prerequisites","sidebar":"docs"},{"id":"scripts","path":"/kelbrum/scripts","sidebar":"docs"},{"id":"setup","path":"/kelbrum/setup","sidebar":"docs"},{"id":"stack","path":"/kelbrum/stack","sidebar":"docs"}],"draftIds":[],"sidebars":{"docs":{"link":{"path":"/kelbrum/","label":"index"}}}}],"breadcrumbs":true}}}',
                 ),
                 i = JSON.parse(
                     '{"defaultLocale":"en","locales":["en"],"path":"i18n","currentLocale":"en","localeConfigs":{"en":{"label":"English","direction":"ltr","htmlLang":"en","calendar":"gregory","path":"en"}}}',
@@ -16923,6 +16923,7 @@
                 ],
                 themeConfig: {
                     metadata: [
+                        { name: 'author', content: 'Visakan Kirubakaran' },
                         {
                             name: 'keywords',
                             content:
@@ -16935,12 +16936,12 @@
                         },
                     ],
                     navbar: {
-                        logo: { alt: 'Kelbrum Logo', src: 'logo.png' },
+                        hideOnScroll: !0,
+                        title: 'Kelbrum',
                         items: [
                             { position: 'left', label: 'Features', href: '/features' },
                             { position: 'left', label: 'Motivation', href: '/motivation' },
                         ],
-                        hideOnScroll: !1,
                     },
                     docs: { sidebar: { hideable: !0, autoCollapseCategories: !0 }, versionPersistence: 'localStorage' },
                     footer: {

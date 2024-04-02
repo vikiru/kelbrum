@@ -60,7 +60,7 @@
                             children: (0, i.jsx)('img', { src: 'logo.png' }),
                         }),
                         '\n',
-                        (0, i.jsxs)('div', {
+                        (0, i.jsxs)('p', {
                             align: 'center',
                             id: 'badges',
                             children: [
@@ -78,7 +78,6 @@
                                         alt: 'Kelbrum live site hosted via Firebase',
                                     }),
                                 }),
-                                (0, i.jsx)('br', {}),
                                 (0, i.jsx)('a', {
                                     href: 'https://wakatime.com/@vikiru/projects/umhctwxtly',
                                     children: (0, i.jsx)('img', {
@@ -86,7 +85,6 @@
                                         alt: 'Wakatime Coding Stats for Kelbrum',
                                     }),
                                 }),
-                                (0, i.jsx)('br', {}),
                                 (0, i.jsx)('a', {
                                     href: 'https://github.com/vikiru/kelbrum/blob/main/LICENSE',
                                     children: (0, i.jsx)('img', {
@@ -103,6 +101,13 @@
                                 }),
                                 (0, i.jsx)('br', {}),
                                 (0, i.jsx)('a', {
+                                    href: 'https://github.com/vikiru/kelbrum/releases',
+                                    children: (0, i.jsx)('img', {
+                                        src: 'https://img.shields.io/github/v/release/vikiru/kelbrum',
+                                        alt: 'Release',
+                                    }),
+                                }),
+                                (0, i.jsx)('a', {
                                     href: 'https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed',
                                     children: (0, i.jsx)('img', {
                                         src: 'https://img.shields.io/github/issues-closed/vikiru/kelbrum',
@@ -116,14 +121,6 @@
                                         alt: 'Closed PRs',
                                     }),
                                 }),
-                                (0, i.jsx)('a', {
-                                    href: 'https://github.com/vikiru/kelbrum/releases',
-                                    children: (0, i.jsx)('img', {
-                                        src: 'https://img.shields.io/github/v/release/vikiru/kelbrum',
-                                        alt: 'Release',
-                                    }),
-                                }),
-                                (0, i.jsx)('br', {}),
                                 (0, i.jsx)('a', {
                                     href: 'https://github.com/vikiru/kelbrum/actions/workflows/lint.yml',
                                     children: (0, i.jsx)('img', {
