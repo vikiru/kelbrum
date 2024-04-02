@@ -99,7 +99,7 @@
                                         (0, t.jsx)(n.code, { children: 'TV' }),
                                         ' and ',
                                         (0, t.jsx)(n.code, { children: 'Movie' }),
-                                        '.  To accomplish this, I chose to assign distinct values to each unique value within each of these properties, leveraging my understanding of how related values are associated with each other',
+                                        '. To accomplish this, I chose to assign distinct values to each unique value within each of these properties, leveraging my understanding of how related values are associated with each other',
                                     ],
                                 }),
                                 '\n',
