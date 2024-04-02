@@ -74,6 +74,10 @@ const config = {
         ({
             metadata: [
                 {
+                    name:'author',
+                    content: 'Visakan Kirubakaran',
+                },
+                {
                     name: 'keywords',
                     content:
                         'Kelbrum, anime, recommendation, engine, system, machine learning, tensorflow, similarity, kmeans, react, react router, tailwindcss, daisyui',
@@ -85,10 +89,8 @@ const config = {
                 },
             ],
             navbar: {
-                logo: {
-                    alt: 'Kelbrum Logo',
-                    src: 'logo.png',
-                },
+                hideOnScroll: true,
+                title: 'Kelbrum',
                 items: [
                     {
                         position: 'left',
