@@ -74,7 +74,7 @@ const config = {
         ({
             metadata: [
                 {
-                    name:'author',
+                    name: 'author',
                     content: 'Visakan Kirubakaran',
                 },
                 {
