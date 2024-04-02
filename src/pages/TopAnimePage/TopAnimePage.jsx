@@ -14,7 +14,7 @@ const TopAnimePage = () => {
     const fetchAnimeItems = useMemo(() => {
         return () => {
             const nextIndex = items.length;
-            const newItems = topAnime.slice(nextIndex, nextIndex + 10);
+            const newItems = topAnime.slice(nextIndex, nextIndex + 25);
 
             if (newItems.length === 0) {
                 setHasMore(false);
