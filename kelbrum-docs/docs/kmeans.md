@@ -42,7 +42,7 @@ While other metrics were available, my primary focus was on the Within Cluster S
 
 From my experiments, I learned that given my data set, the following functions worked out the best:
 
-- **Manhattan Distance**
+-   **Manhattan Distance**
 -   **Dice Similarity**
 -   **Jaccard Index**
 -   **Gower's Distance**
