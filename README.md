@@ -23,14 +23,14 @@
   <img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style - Prettier"/>
  </a>
 <br/>
+  <a href="https://github.com/vikiru/kelbrum/releases">
+  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
+ </a>
  <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
   <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues"/>
  </a>
  <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
   <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs"/>
- </a>
-  <a href="https://github.com/vikiru/kelbrum/releases">
-  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
  </a>
 <br/>
  <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">

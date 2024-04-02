@@ -44,7 +44,7 @@ const RecommendationsPage = () => {
     const [displayedItems, setDisplayedItems] = useState([]);
     const [hasMore, setHasMore] = useState(true);
     const itemsPerPage = 50;
-    const itemsPerDisplay = 10;
+    const itemsPerDisplay = 25;
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
