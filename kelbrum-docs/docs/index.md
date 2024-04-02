@@ -6,7 +6,7 @@ title: 📖 Introduction
     <img src="logo.png"/>
 </div>
 
-<div align='center' id="badges">
+<p align='center' id="badges">
 
 <a href="https://vikiru.github.io/kelbrum/">
 	<img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation"/>
@@ -14,12 +14,12 @@ title: 📖 Introduction
 <a href="https://kelbrum-v1.web.app">
     <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="Kelbrum live site hosted via Firebase"/>
 </a>
-<br/>
+
  <a href="https://wakatime.com/@vikiru/projects/umhctwxtly">
   <img src="https://wakatime.com/badge/user/5e62f99d-3a1e-4fd2-8f37-77919d626a67/project/018e1a22-364b-4b87-a797-b55b694a169d.svg"
   alt="Wakatime Coding Stats for Kelbrum"/>
  </a>
- <br/>
+ 
  <a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
   <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge"/>
  </a>
@@ -27,20 +27,20 @@ title: 📖 Introduction
   <img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style - Prettier"/>
  </a>
 <br/>
+  <a href="https://github.com/vikiru/kelbrum/releases">
+  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
+ </a>
  <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
   <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues"/>
  </a>
  <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
   <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs"/>
  </a>
-  <a href="https://github.com/vikiru/kelbrum/releases">
-  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
- </a>
-<br/>
+
  <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">
   <img src="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml/badge.svg" alt="GitHub Lint Action Workflow Status"/>
  </a>
-</div>
+</p>
 
 ---
 
