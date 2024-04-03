@@ -22,7 +22,7 @@ const Details = ({ anime }) => {
 
     return (
         <section id="anime-details">
-            <h2 className="bg-secondary pt-4 text-center font-bold text-primary underline xs:text-lg lg:text-xl 2xl:text-3xl 4xl:text-5xl dark:bg-gray-900 dark:text-gray-100">
+            <h2 className="pt-4 text-center font-bold text-secondary underline xs:text-lg lg:text-xl 2xl:text-3xl 4xl:text-5xl dark:bg-gray-900 dark:text-gray-100">
                 {anime.title}
             </h2>
 
@@ -108,7 +108,7 @@ const Details = ({ anime }) => {
                             Synopsis
                         </h2>
 
-                        <p className="text-left text-xl dark:text-gray-100">{anime.synopsis}</p>
+                        <p className="text-left text-xl text-secondary dark:text-gray-100">{anime.synopsis}</p>
                     </section>
 
                     <section id="anime-additional-info">

@@ -14,7 +14,7 @@ const TopAnimePage = () => {
     const fetchAnimeItems = useMemo(() => {
         return () => {
             const nextIndex = items.length;
-            const newItems = topAnime.slice(nextIndex, nextIndex + 10);
+            const newItems = topAnime.slice(nextIndex, nextIndex + 25);
 
             if (newItems.length === 0) {
                 setHasMore(false);
@@ -40,7 +40,7 @@ const TopAnimePage = () => {
                 hasMore={hasMore}
                 loader={
                     <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg bg-primary" />}
+                        {hasMore && <div className="loading loading-lg text-secondary dark:text-primary" />}
                     </div>
                 }
             >
