@@ -41,11 +41,8 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
     }
 
     const optimalK = results.reduce((prev, curr) => (curr.wcss < prev.wcss ? curr : prev)).k;
-    const optimalS = results.reduce((prev, curr) =>
-        Math.abs(curr.silhouetteScore - 1) < Math.abs(prev.silhouetteScore - 1) ? curr : prev,
-    ).silhouetteScore;
     await writeData(fileName, results);
-    return { optimalK, optimalS };
+    return { optimalK };
 }
 
 /**

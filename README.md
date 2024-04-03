@@ -11,8 +11,8 @@
     <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="Kelbrum live site hosted via Firebase"/>
 </a>
 <br/>
- <a href="https://wakatime.com/@vikiru/projects/ioitawlsqa">
-  <img src="https://wakatime.com/badge/user/5e62f99d-3a1e-4fd2-8f37-77919d626a67/project/018d6816-57f1-4009-a823-d00889610f66.svg"
+ <a href="https://wakatime.com/@vikiru/projects/umhctwxtly">
+  <img src="https://wakatime.com/badge/user/5e62f99d-3a1e-4fd2-8f37-77919d626a67/project/018e1a22-364b-4b87-a797-b55b694a169d.svg"
   alt="Wakatime Coding Stats for Kelbrum"/>
  </a>
  <br/>
@@ -23,14 +23,14 @@
   <img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style - Prettier"/>
  </a>
 <br/>
+  <a href="https://github.com/vikiru/kelbrum/releases">
+  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
+ </a>
  <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
   <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues"/>
  </a>
  <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
   <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs"/>
- </a>
-  <a href="https://github.com/vikiru/kelbrum/releases">
-  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
  </a>
 <br/>
  <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">
@@ -51,7 +51,7 @@ Upon combining these two parts, the project comes together in the form, that is,
 > [!IMPORTANT]
 > The data used within this project was possible thanks to the following:
 >
-> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and processed into a custom JavaScript class known as [AnimeEntry](./recommender/models/AnimeEntry.js).
+> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and processed into a custom JavaScript class known as [AnimeEntry](./src/recommender/models/AnimeEntry.js).
 > 2. [JikanAPI](https://github.com/jikan-me/jikan-rest) - Missing information such as `pageURL`, `imageURL`, `trailerURL` and other existing properties which may have needed updates were updated by making several API requests to JikanAPI, which contains anime information obtained from [MyAnimeList](https://myanimelist.net/).
 >
 > All external images and text used within this app belong to their respective owners.

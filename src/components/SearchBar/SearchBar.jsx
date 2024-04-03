@@ -111,7 +111,7 @@ const SearchBar = ({ valueMap, path = '', fields, storeFields }) => {
                     <select
                         value={selectedType}
                         onChange={(e) => setSelectedType(e.target.value)}
-                        className="select select-bordered w-1/2 max-w-xs p-2 pl-4 pr-4 text-center dark:bg-gray-800 dark:text-gray-100"
+                        className="select select-bordered w-1/2 max-w-xs bg-white p-2 pl-4 pr-4 text-center text-gray-900 dark:bg-gray-800 dark:text-gray-100"
                     >
                         <option disabled>Select an anime type</option>
                         <option value="">All Types</option>
