@@ -86,7 +86,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
-    "@tailwindcss/typography": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.12",
     "@tensorflow/tfjs": "^4.17.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "^20.11.17",
