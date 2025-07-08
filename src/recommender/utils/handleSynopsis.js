@@ -1,21 +1,26 @@
-import fs from 'fs';
-import { lemmatizer } from 'lemmatizer';
+import fs from 'node:fs';
 import natural from 'natural';
 import sw from 'remove-stopwords';
 import wordList from 'word-list';
 
 import { readJSONFile } from '../dataAccess/readFile.js';
-import { initializeDataFile } from './utils.js';
 
 const tfidf = new natural.TfIdf();
-const wordArray = fs.readFileSync(wordList, 'utf8').split('\n');
+const _wordArray = fs.readFileSync(wordList, 'utf8').split('\n');
 const AggressiveTokenizer = natural.AggressiveTokenizer;
 const tokenizer = new AggressiveTokenizer();
 
 function cleanSynopsis(synopsis, keywords) {
-    const splitSynopsis = synopsis.includes('\n') ? synopsis.split('\n') : synopsis.split(' ');
+    const splitSynopsis = synopsis.includes('\n')
+        ? synopsis.split('\n')
+        : synopsis.split(' ');
     const filteredSynopsis = splitSynopsis
-        .filter((text) => text !== '' && !text.includes('Source:') && !text.includes('Written by MAL Rewrite'))
+        .filter(
+            (text) =>
+                text !== '' &&
+                !text.includes('Source:') &&
+                !text.includes('Written by MAL Rewrite'),
+        )
         .join(' ');
     let tokens = tokenizer.tokenize(filteredSynopsis);
     tokens = tokens.map((token) => token.toLowerCase());
@@ -26,7 +31,9 @@ function cleanSynopsis(synopsis, keywords) {
     synopsistfIDF.addDocument(tokens.join(' '));
     const terms = synopsistfIDF.listTerms(0);
 
-    let topTerms = terms.sort((a, b) => b.tfidf - a.tfidf).map((term) => term.term);
+    const topTerms = terms
+        .sort((a, b) => b.tfidf - a.tfidf)
+        .map((term) => term.term);
     return topTerms.join(' ');
 }
 
@@ -47,7 +54,9 @@ function returnTopTerms() {
             topTerms.set(term.term, currentScore + term.tfidf);
         });
     }
-    const sortedTerms = Array.from(topTerms.entries()).sort((a, b) => b[1] - a[1]);
+    const sortedTerms = Array.from(topTerms.entries()).sort(
+        (a, b) => b[1] - a[1],
+    );
     return sortedTerms;
 }
 

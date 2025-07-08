@@ -1,11 +1,12 @@
-import { Buffer } from 'buffer';
-import fs from 'fs';
+import fs from 'node:fs';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import Papa from 'papaparse';
-import { dirname } from 'path';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-import { processAnimeData, processUserInteractionData } from '../utils/processData.js';
+import {
+    processAnimeData,
+    processUserInteractionData,
+} from '../utils/processData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -63,7 +64,6 @@ async function readAndProcessFile(fileName, type) {
 
     try {
         const fileTypeHandlers = {
-            '.json': () => readJSONFile(filePath),
             '.csv': async () => {
                 const data = await readCSVFile(filePath);
                 if (type === 'AnimeEntry') {
@@ -72,6 +72,7 @@ async function readAndProcessFile(fileName, type) {
                     return processUserInteractionData(data);
                 }
             },
+            '.json': () => readJSONFile(filePath),
         };
 
         const handler = fileTypeHandlers[fileExtension];

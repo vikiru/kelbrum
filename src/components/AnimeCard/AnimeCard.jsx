@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, index }) => {
-    const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
+    const excludedURL =
+        'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
     const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
 
     const handleImageError = () => {
@@ -12,26 +13,36 @@ const AnimeCard = ({ anime, index }) => {
     return (
         <div className="card mx-auto flex cursor-default flex-col overflow-hidden rounded-lg bg-primary p-4 shadow-lg xs:w-full 2xl:w-[70%] dark:bg-gray-800">
             <div className="flex flex-grow flex-col">
-                <section id="title" className="flex flex-col items-center justify-center">
+                <section
+                    className="flex flex-col items-center justify-center"
+                    id="title"
+                >
                     <h2 className="text-center text-lg font-semibold text-secondary 4xl:text-4xl dark:text-gray-100">
-                        {anime.title.length > 32 ? anime.title.substring(0, 32) + '...' : anime.title}
+                        {anime.title.length > 32
+                            ? `${anime.title.substring(0, 32)}...`
+                            : anime.title}
                     </h2>
                 </section>
 
-                <section id="image" className="mt-4 flex justify-center">
+                <section className="mt-4 flex justify-center" id="image">
                     {!hasError && (
                         <img
-                            src={anime.imageURL}
                             alt={`${anime.title} image`}
                             className="h-auto w-full rounded-lg object-contain 2xl:h-[500px] 4xl:h-[800px]"
                             loading="lazy"
                             onError={handleImageError}
+                            src={anime.imageURL}
                         />
                     )}
-                    {hasError && <div className="h-64 w-full rounded-lg bg-primary dark:bg-gray-800"></div>}
+                    {hasError && (
+                        <div className="h-64 w-full rounded-lg bg-primary dark:bg-gray-800"></div>
+                    )}
                 </section>
 
-                <section id="genres" className="mt-6 flex flex-wrap items-center justify-center">
+                <section
+                    className="mt-6 flex flex-wrap items-center justify-center"
+                    id="genres"
+                >
                     {anime.genres
                         .filter((g) => g !== 'Unknown')
                         .map((g) => (
@@ -56,11 +67,11 @@ const AnimeCard = ({ anime, index }) => {
                 </section>
             </div>
 
-            <section id="read-more" className="mt-4 flex justify-center">
+            <section className="mt-4 flex justify-center" id="read-more">
                 <Link
-                    to={`/anime/${anime.id}`}
-                    className="btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"
                     aria-label={`Read more about ${anime.title}`}
+                    className="btn btn-accent rounded-lg bg-accent px-4 py-2 uppercase text-white"
+                    to={`/anime/${anime.id}`}
                 >
                     Read more
                 </Link>

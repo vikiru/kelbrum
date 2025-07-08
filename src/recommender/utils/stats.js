@@ -14,11 +14,11 @@ function createMapping(uniqueValues) {
     const mapping = {};
     let nextInt = 0;
     if (unknownCheck > 0) {
-        mapping['Unknown'] = nextInt;
+        mapping.Unknown = nextInt;
         nextInt++;
     }
     filteredValues.forEach((val) => {
-        if (!Object.prototype.hasOwnProperty.call(mapping, val)) {
+        if (!Object.hasOwn(mapping, val)) {
             mapping[val] = nextInt++;
         }
     });
@@ -36,14 +36,14 @@ function createMapping(uniqueValues) {
 function fillArray(data, mapping, key) {
     const array = [];
     data.forEach((entry) => {
-        let value = entry[key];
+        const value = entry[key];
         if (Array.isArray(value)) {
             const valueSum = value.reduce((acc, v) => acc + mapping[v], 0);
-            array.push({ value: valueSum, originalValues: value });
+            array.push({ originalValues: value, value: valueSum });
         } else if (typeof value === 'string') {
-            array.push({ value: mapping[value], originalValues: [value] });
+            array.push({ originalValues: [value], value: mapping[value] });
         } else if (typeof value === 'number') {
-            array.push({ value: Math.round(value), originalValues: [value] });
+            array.push({ originalValues: [value], value: Math.round(value) });
         }
     });
     return array;
@@ -65,14 +65,23 @@ function returnMedianMode(values, isCategorical) {
 
         median = {
             median: medianValue,
-            value: values.find((v) => v.value === medianValue)?.originalValues || 'Not found',
+            value:
+                values.find((v) => v.value === medianValue)?.originalValues ||
+                'Not found',
         };
 
         mode = {
             mode: modeValue,
             value: Array.isArray(modeValue)
-                ? modeValue.map((value) => values.find((v) => v.value === value)?.originalValues || 'Not found')
-                : [values.find((v) => v.value === modeValue)?.originalValues || 'Not found'],
+                ? modeValue.map(
+                      (value) =>
+                          values.find((v) => v.value === value)
+                              ?.originalValues || 'Not found',
+                  )
+                : [
+                      values.find((v) => v.value === modeValue)
+                          ?.originalValues || 'Not found',
+                  ],
         };
     } else {
         median = ss.median(values.map((v) => v.value));
@@ -102,12 +111,12 @@ function constructFrequencyMap(data, mapping, key) {
     }, {});
 
     Object.entries(valueCounts).forEach(([value, occurences]) => {
-        if (value === mapping['Unknown'] || value === mapping[0]) {
+        if (value === mapping.Unknown || value === mapping[0]) {
             invalidCount += occurences;
         }
         frequencyMap.push({
-            value,
             occurences,
+            value,
         });
     });
 
@@ -137,11 +146,15 @@ async function calculateStatistics(data) {
             'synopsis',
             'durationText',
         ];
-        const keys = Object.keys(firstElement).filter((key) => !excludedKeys.includes(key));
+        const keys = Object.keys(firstElement).filter(
+            (key) => !excludedKeys.includes(key),
+        );
         const valuesMap = [];
 
         const propertyMap = keys.map((key) => {
-            const isCategorical = Array.isArray(firstElement[key]) || typeof firstElement[key] === 'string';
+            const isCategorical =
+                Array.isArray(firstElement[key]) ||
+                typeof firstElement[key] === 'string';
             const uniqueValues = returnUniqueArray(data, key);
             const mapping = createMapping(uniqueValues);
             const frequencyMap = constructFrequencyMap(data, mapping, key);
@@ -167,26 +180,28 @@ async function calculateStatistics(data) {
             valuesMap[key] = processedValues;
 
             return {
-                property: key,
+                invalidCount,
+                iqr,
+                kurtosis,
+                max,
                 mean,
                 median,
-                mode,
-                variance,
-                standardDeviation,
                 min,
-                max,
+                mode,
+                property: key,
                 q1,
                 q3,
-                iqr,
                 skewness,
-                kurtosis,
-                invalidCount,
+                standardDeviation,
+                variance,
             };
         });
 
         propertyMap.forEach((prop) => {
             const values = valuesMap[prop.property];
-            const filteredProps = propertyMap.filter((otherProp) => otherProp.property !== prop.property);
+            const filteredProps = propertyMap.filter(
+                (otherProp) => otherProp.property !== prop.property,
+            );
             prop.covariance = [];
             prop.correlation = [];
 
@@ -211,4 +226,10 @@ async function calculateStatistics(data) {
     }
 }
 
-export { createMapping, fillArray, returnMedianMode, constructFrequencyMap, calculateStatistics };
+export {
+    createMapping,
+    fillArray,
+    returnMedianMode,
+    constructFrequencyMap,
+    calculateStatistics,
+};

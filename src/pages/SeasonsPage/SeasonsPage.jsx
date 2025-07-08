@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-
-import { useFilteredData } from '../../context/FilteredDataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function SeasonsPage() {
     const { filteredSeasons } = useFilteredData();
@@ -38,14 +37,17 @@ function SeasonsPage() {
     }, []);
 
     return (
-        <section id="seasons" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
+        <section
+            className="min-h-screen bg-secondary pb-16 dark:bg-gray-900"
+            id="seasons"
+        >
             {isSeasonDetailPage && (
                 <DataList
-                    title="Seasons"
+                    capitalizeTitle={true}
+                    customSort={compareSeasons}
                     data={filteredSeasons}
                     path="seasons"
-                    customSort={compareSeasons}
-                    capitalizeTitle={true}
+                    title="Seasons"
                 />
             )}
             <Outlet />

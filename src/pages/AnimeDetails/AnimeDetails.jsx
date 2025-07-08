@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import Details from '../../components/Details/Details';
+import RandomAnime from './../../components/RandomAnime/RandomAnime';
 import { useData } from '../../context/DataProvider';
 import { useFeatureArray } from '../../context/FeatureArrayProvider';
 import { useKMeans } from '../../context/KMeansProvider';
@@ -10,7 +11,6 @@ import {
     returnClusterSimilarities,
     returnRandomRecommendations,
 } from '../../recommender/recommender';
-import RandomAnime from './../../components/RandomAnime/RandomAnime';
 
 const AnimeDetails = () => {
     const { data } = useData();
@@ -24,13 +24,21 @@ const AnimeDetails = () => {
         const fetchData = async () => {
             try {
                 const cluster = kmeans.clusters[anime.id];
-                const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id, [
+                const results = await returnClusterSimilarities(
+                    cluster,
+                    kmeans.clusters,
+                    featureArray,
                     anime.id,
-                ]);
-                const recommendations = await returnRandomRecommendations(results);
-                const topResultsData = await retrieveAnimeData(recommendations, data);
+                    [anime.id],
+                );
+                const recommendations =
+                    await returnRandomRecommendations(results);
+                const topResultsData = await retrieveAnimeData(
+                    recommendations,
+                    data,
+                );
                 setTopResults(topResultsData);
-            } catch (error) {
+            } catch (_error) {
                 setTopResults([]);
             }
         };
@@ -38,7 +46,7 @@ const AnimeDetails = () => {
         if (anime) {
             fetchData();
         }
-    }, [anime]);
+    }, [anime, data, featureArray, kmeans.clusters]);
 
     return (
         <div className="overflow-x-hidden dark:bg-gray-900">
@@ -47,7 +55,7 @@ const AnimeDetails = () => {
                 <h2 className="bg-secondary py-4 text-center text-xl font-bold text-primary underline lg:text-4xl dark:bg-gray-900">
                     Unique Random Suggestions
                 </h2>
-                <RandomAnime anime={anime} allAnime={topResults} />
+                <RandomAnime allAnime={topResults} anime={anime} />
             </section>
         </div>
     );

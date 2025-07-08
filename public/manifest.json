@@ -1,40 +1,40 @@
 {
-    "short_name": "Kelbrum",
-    "name": "Kelbrum",
+    "background_color": "#ffffff",
+    "display": "standalone",
     "icons": [
         {
+            "sizes": "64x64 32x32 24x24 16x16",
             "src": "favicon-light.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
             "type": "image/x-icon"
         },
         {
+            "sizes": "64x64 32x32 24x24 16x16",
             "src": "favicon-dark.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
             "type": "image/x-icon"
         },
         {
+            "sizes": "192x192",
             "src": "android-chrome-192x192-light.png",
-            "type": "image/png",
-            "sizes": "192x192"
+            "type": "image/png"
         },
         {
+            "sizes": "192x192",
             "src": "android-chrome-192x192-dark.png",
-            "type": "image/png",
-            "sizes": "192x192"
+            "type": "image/png"
         },
         {
+            "sizes": "512x512",
             "src": "android-chrome-512x512-light.png",
-            "type": "image/png",
-            "sizes": "512x512"
+            "type": "image/png"
         },
         {
+            "sizes": "512x512",
             "src": "android-chrome-512x512-dark.png",
-            "type": "image/png",
-            "sizes": "512x512"
+            "type": "image/png"
         }
     ],
+    "name": "Kelbrum",
+    "short_name": "Kelbrum",
     "start_url": ".",
-    "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff"
+    "theme_color": "#000000"
 }

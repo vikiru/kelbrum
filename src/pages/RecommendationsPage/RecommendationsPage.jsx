@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import AnimeCard from '../../components/AnimeCard/AnimeCard';
 import { useData } from '../../context/DataProvider';
@@ -27,11 +27,22 @@ const RecommendationsPage = () => {
         const fetchData = async () => {
             try {
                 const cluster = kmeans.clusters[anime.id];
-                const results = await returnClusterSimilarities(cluster, kmeans.clusters, featureArray, anime.id);
-                const recommendations = await returnRandomRecommendations(results, 200);
-                const topResultsData = await retrieveAnimeData(recommendations, data);
+                const results = await returnClusterSimilarities(
+                    cluster,
+                    kmeans.clusters,
+                    featureArray,
+                    anime.id,
+                );
+                const recommendations = await returnRandomRecommendations(
+                    results,
+                    200,
+                );
+                const topResultsData = await retrieveAnimeData(
+                    recommendations,
+                    data,
+                );
                 setTopResults(topResultsData);
-            } catch (error) {
+            } catch (_error) {
                 setTopResults([]);
             }
         };
@@ -73,7 +84,10 @@ const RecommendationsPage = () => {
     const fetchMoreItems = () => {
         if (displayedItems.length < items.length) {
             const newDisplayedItems = displayedItems.concat(
-                items.slice(displayedItems.length, displayedItems.length + itemsPerDisplay),
+                items.slice(
+                    displayedItems.length,
+                    displayedItems.length + itemsPerDisplay,
+                ),
             );
             setDisplayedItems(newDisplayedItems);
             setHasMore(displayedItems.length + itemsPerDisplay < items.length);
@@ -84,32 +98,51 @@ const RecommendationsPage = () => {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
             navigate(`?page=${newPage}`);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ behavior: 'smooth', top: 0 });
         }
     };
 
-    const actualItemsForCurrentPage = Math.min(itemsPerPage, topResults.length - (currentPage - 1) * itemsPerPage);
-    const allItemsForCurrentPageDisplayed = displayedItems.length >= actualItemsForCurrentPage;
+    const actualItemsForCurrentPage = Math.min(
+        itemsPerPage,
+        topResults.length - (currentPage - 1) * itemsPerPage,
+    );
+    const allItemsForCurrentPageDisplayed =
+        displayedItems.length >= actualItemsForCurrentPage;
 
     return (
-        <section id={`top-recommendations-page-${currentPage}`} className="bg-secondary pb-6 dark:bg-gray-900">
+        <section
+            className="bg-secondary pb-6 dark:bg-gray-900"
+            id={`top-recommendations-page-${currentPage}`}
+        >
             <h2 className="bg-secondary pb-4 pt-6 text-center  text-xl  font-bold text-primary underline xs:text-lg lg:text-4xl dark:bg-gray-900">
                 {title}
             </h2>
             <InfiniteScroll
-                pageStart={0}
-                loadMore={debounce(fetchMoreItems, 1000)}
                 hasMore={hasMore}
                 loader={
-                    <div key={0} className="flex h-10 items-center justify-center">
-                        {hasMore && <div className="loading loading-lg text-secondary dark:text-primary" />}
+                    <div
+                        className="flex h-10 items-center justify-center"
+                        key={0}
+                    >
+                        {hasMore && (
+                            <div className="loading loading-lg text-secondary dark:text-primary" />
+                        )}
                     </div>
                 }
+                loadMore={debounce(fetchMoreItems, 1000)}
+                pageStart={0}
             >
                 <div className="m-8 grid gap-4 p-2 xs:grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3">
                     {displayedItems.map((item, index) => {
-                        const globalIndex = (currentPage - 1) * itemsPerPage + (index + 1);
-                        return <AnimeCard key={item.title} anime={item} index={globalIndex} />;
+                        const globalIndex =
+                            (currentPage - 1) * itemsPerPage + (index + 1);
+                        return (
+                            <AnimeCard
+                                anime={item}
+                                index={globalIndex}
+                                key={item.title}
+                            />
+                        );
                     })}
                 </div>
             </InfiniteScroll>
@@ -118,18 +151,27 @@ const RecommendationsPage = () => {
                     <div className="join">
                         <button
                             className="btn join-item"
-                            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
                             disabled={currentPage === 1}
+                            onClick={() =>
+                                handlePageChange(Math.max(currentPage - 1, 1))
+                            }
                         >
                             «
                         </button>
-                        <button className="btn join-item" onClick={() => handlePageChange(currentPage)}>
+                        <button
+                            className="btn join-item"
+                            onClick={() => handlePageChange(currentPage)}
+                        >
                             Page {currentPage} of {totalPages}
                         </button>
                         <button
                             className="btn join-item"
-                            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
                             disabled={currentPage === totalPages}
+                            onClick={() =>
+                                handlePageChange(
+                                    Math.min(currentPage + 1, totalPages),
+                                )
+                            }
                         >
                             »
                         </button>

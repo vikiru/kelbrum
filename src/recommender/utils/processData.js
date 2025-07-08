@@ -1,6 +1,12 @@
 import { AnimeEntry } from '../models/AnimeEntry.js';
 import { UserInteraction } from '../models/UserInteraction.js';
-import { cleanArray, cleanDuration, cleanPremiered, cleanRating, findSeasonalYear } from './clean.js';
+import {
+    cleanArray,
+    cleanDuration,
+    cleanPremiered,
+    cleanRating,
+    findSeasonalYear,
+} from './clean.js';
 
 /**
  * Parses the input value to the specified type, or returns the default value if parsing fails.
@@ -16,7 +22,9 @@ function parseOrDefault(value, defaultValue = 0, type = 'int') {
     } else if (type === 'float') {
         return parseFloat(value) || defaultValue;
     } else {
-        throw new Error('Invalid type specified for parseOrDefault. Use "int" or "float".');
+        throw new Error(
+            'Invalid type specified for parseOrDefault. Use "int" or "float".',
+        );
     }
 }
 
@@ -70,7 +78,11 @@ async function processAnimeData(data) {
 
         const cleanedPremiered = cleanString(premiered);
         const { season, year } = findSeasonalYear(cleanedPremiered, aired);
-        const cleanedPremieredWithSeason = cleanPremiered(cleanedPremiered, season, year);
+        const cleanedPremieredWithSeason = cleanPremiered(
+            cleanedPremiered,
+            season,
+            year,
+        );
 
         const cleanedType = cleanString(type);
         const cleanedSource = cleanString(source);

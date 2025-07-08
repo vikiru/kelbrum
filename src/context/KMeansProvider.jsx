@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import kmeans from '../recommender/data/kmeans.json';
 
@@ -12,7 +12,11 @@ export const KMeansProvider = ({ children }) => {
         [],
     );
 
-    return <KMeansContext.Provider value={state}>{children}</KMeansContext.Provider>;
+    return (
+        <KMeansContext.Provider value={state}>
+            {children}
+        </KMeansContext.Provider>
+    );
 };
 
 export const useKMeans = () => useContext(KMeansContext);

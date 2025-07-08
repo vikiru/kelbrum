@@ -10,7 +10,9 @@ async function fetchWithRetry(url, retries = 1) {
     try {
         const response = await fetch(url);
         if (response.status === RATE_LIMIT_STATUS && retries > 0) {
-            console.log('Rate limit reached. Attempting to retry request after delay.');
+            console.log(
+                'Rate limit reached. Attempting to retry request after delay.',
+            );
             await delay();
             return await fetchWithRetry(url, retries - 1);
         }
@@ -60,7 +62,7 @@ function delay() {
  * @returns {Array} The original input array
  */
 function compareArrays(inputArray, fetchedArray) {
-    let array = inputArray;
+    const array = inputArray;
     if (fetchedArray === undefined) return;
     if (inputArray.length === 0 && fetchedArray.length > 0) {
         inputArray = fetchedArray.map((a) => a.title || a.name).join(',');
@@ -94,14 +96,22 @@ function comparePremiered(inputPremiered, fetchedSeason, fetchedYear) {
  * @returns {any} The most suitable property based on comparison
  */
 function compareInputToFetched(inputProperty, fetchedProperty) {
-    const inputDefaults = ['Unknown', 0, 'No description available for this anime.', 'Not available'];
+    const inputDefaults = [
+        'Unknown',
+        0,
+        'No description available for this anime.',
+        'Not available',
+    ];
     const fetchedDefaults = ['Unknown', null];
 
-    const isNumber = (value) => !isNaN(parseFloat(value)) && isFinite(value);
+    const isNumber = (value) =>
+        !Number.isNaN(parseFloat(value)) && Number.isFinite(value);
     const inputIsNumber = isNumber(inputProperty);
     const fetchedIsNumber = isNumber(fetchedProperty);
 
-    const bothAreStrings = typeof inputProperty === 'string' && typeof fetchedProperty === 'string';
+    const bothAreStrings =
+        typeof inputProperty === 'string' &&
+        typeof fetchedProperty === 'string';
     if (bothAreStrings && inputProperty !== fetchedProperty) {
         return fetchedProperty;
     }
@@ -110,7 +120,10 @@ function compareInputToFetched(inputProperty, fetchedProperty) {
         return fetchedProperty;
     }
 
-    if (inputDefaults.includes(inputProperty) && !fetchedDefaults.includes(fetchedProperty)) {
+    if (
+        inputDefaults.includes(inputProperty) &&
+        !fetchedDefaults.includes(fetchedProperty)
+    ) {
         return fetchedProperty;
     }
 
@@ -124,7 +137,9 @@ function compareInputToFetched(inputProperty, fetchedProperty) {
  * @returns {string} The cleaned title.
  */
 function cleanTitle(title) {
-    const normalizedTitle = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const normalizedTitle = title
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
     return normalizedTitle.replace(/[^a-zA-Z0-9\s]/g, '');
 }
 
@@ -169,7 +184,8 @@ function constructUrl(title) {
 async function constructUrls(data) {
     const urls = [];
     for (const entry of data) {
-        const title = entry.englishName !== 'Unknown' ? entry.englishName : entry.title;
+        const title =
+            entry.englishName !== 'Unknown' ? entry.englishName : entry.title;
         const url = await constructUrl(title);
         urls.push(url);
     }
@@ -186,50 +202,57 @@ async function constructUrls(data) {
  */
 function findMatchingAnime(entry, fetchedData) {
     const searchTitle = cleanTitle(entry.title);
-    const possibleTitles = [entry.englishName, entry.otherName, entry.title, searchTitle].filter(
-        (t) => t !== 'Unknown',
-    );
+    const possibleTitles = [
+        entry.englishName,
+        entry.otherName,
+        entry.title,
+        searchTitle,
+    ].filter((t) => t !== 'Unknown');
     const uniquePossibleTitles = Array.from(new Set(possibleTitles));
     return fetchedData.data.find((a) => {
         const titlesToCheck = [a.title, a.title_english, a.title_japanese];
         return (
-            titlesToCheck.some((title) => uniquePossibleTitles.includes(title)) ||
-            a.title_synonyms.some((synonym) => uniquePossibleTitles.includes(synonym)) ||
+            titlesToCheck.some((title) =>
+                uniquePossibleTitles.includes(title),
+            ) ||
+            a.title_synonyms.some((synonym) =>
+                uniquePossibleTitles.includes(synonym),
+            ) ||
             a.titles.some((t) => uniquePossibleTitles.includes(t.title))
         );
     });
 }
 
 const propertyMapping = {
-    malID: 'mal_id',
-    pageURL: 'url',
-    trailerURL: 'trailer',
-    title: 'title',
-    titles: 'titles',
-    englishName: 'title_english',
-    otherName: 'title_japanese',
-    type: 'type',
-    source: 'source',
-    episodes: 'episodes',
-    status: 'status',
     aired: 'aired',
+    demographics: 'demographics',
     durationText: 'duration',
+    englishName: 'title_english',
+    episodes: 'episodes',
+    favourites: 'favorites',
+    genres: 'genres',
+    licensors: 'licensors',
+    malID: 'mal_id',
+    members: 'members',
+    otherName: 'title_japanese',
+    pageURL: 'url',
+    popularity: 'popularity',
+    producers: 'producers',
+    rank: 'rank',
     rating: 'rating',
     score: 'score',
     scoredBy: 'scored_by',
-    rank: 'rank',
-    popularity: 'popularity',
-    members: 'members',
-    favourites: 'favorites',
-    synopsis: 'synopsis',
     season: 'season',
-    year: 'year',
-    producers: 'producers',
-    licensors: 'licensors',
+    source: 'source',
+    status: 'status',
     studios: 'studios',
-    genres: 'genres',
+    synopsis: 'synopsis',
     themes: 'themes',
-    demographics: 'demographics',
+    title: 'title',
+    titles: 'titles',
+    trailerURL: 'trailer',
+    type: 'type',
+    year: 'year',
 };
 
 function updateEntry(entry, animeResult) {
@@ -237,18 +260,32 @@ function updateEntry(entry, animeResult) {
     for (const key of propertiesToUpdate) {
         const type = Array.isArray(entry[key]) ? 'array' : 'singleValue';
         if (type === 'singleValue') {
-            entry[key] = compareInputToFetched(entry[key], animeResult[propertyMapping[key]]);
+            entry[key] = compareInputToFetched(
+                entry[key],
+                animeResult[propertyMapping[key]],
+            );
         } else if (type === 'array') {
-            entry[key] = compareArrays(entry[key], animeResult[propertyMapping[key]]);
+            entry[key] = compareArrays(
+                entry[key],
+                animeResult[propertyMapping[key]],
+            );
         }
     }
     const titles = Array.from(
-        new Set([entry.title, entry.englishName, entry.otherName].filter((title) => title !== 'Unknown')),
+        new Set(
+            [entry.title, entry.englishName, entry.otherName].filter(
+                (title) => title !== 'Unknown',
+            ),
+        ),
     );
-    entry.titles = animeResult.titles.length > 0 ? Array.from(new Set(animeResult.titles.map((t) => t.title))) : titles;
+    entry.titles =
+        animeResult.titles.length > 0
+            ? Array.from(new Set(animeResult.titles.map((t) => t.title)))
+            : titles;
     entry.themes = animeResult.themes.map((theme) => theme.name);
     entry.demographics = animeResult.demographics.map((demo) => demo.name);
-    entry.trailerURL = animeResult.trailer.url !== null ? animeResult.trailer.url : 'Unknown';
+    entry.trailerURL =
+        animeResult.trailer.url !== null ? animeResult.trailer.url : 'Unknown';
 }
 
 async function handleMissingData(data) {
@@ -260,16 +297,22 @@ async function handleMissingData(data) {
     console.log(`Starting to process ${total} entries.`);
 
     const urls = await constructUrls(data);
-    const entriesToUpdate = data.filter((entry) => identifyMissingProperties(entry).length >= 2);
+    const entriesToUpdate = data.filter(
+        (entry) => identifyMissingProperties(entry).length >= 2,
+    );
     const totalBatches = Math.ceil(entriesToUpdate.length / 2);
 
-    console.log(`Processing ${entriesToUpdate.length} entries with missing data into ${totalBatches} batches.`);
+    console.log(
+        `Processing ${entriesToUpdate.length} entries with missing data into ${totalBatches} batches.`,
+    );
 
     for (let i = 0; i < entriesToUpdate.length; i += 2) {
         const batchNumber = i / 2 + 1;
         const remainingBatches = totalBatches - i / 2;
 
-        console.log(`Processing batch ${batchNumber} of ${totalBatches}. ${remainingBatches} batches remaining.`);
+        console.log(
+            `Processing batch ${batchNumber} of ${totalBatches}. ${remainingBatches} batches remaining.`,
+        );
 
         const batch = entriesToUpdate.slice(i, i + 2);
         const batchUrls = batch.map((entry) => urls[data.indexOf(entry)]);
@@ -277,20 +320,26 @@ async function handleMissingData(data) {
         console.log(`URLs for batch ${batchNumber}:`, batchUrls);
 
         try {
-            const results = await Promise.all(batchUrls.map((url) => fetchData(url)));
+            const results = await Promise.all(
+                batchUrls.map((url) => fetchData(url)),
+            );
 
             for (let j = 0; j < batch.length; j++) {
                 const entry = batch[j];
                 const result = results[j];
 
                 if (result.data.length === 0) {
-                    console.warn(`Entry for '${entry.title}' not found. Adding to missing list for exclusion.`);
+                    console.warn(
+                        `Entry for '${entry.title}' not found. Adding to missing list for exclusion.`,
+                    );
                     missing.push(entry);
                 } else {
                     const animeResult = findMatchingAnime(entry, result);
                     if (animeResult) {
                         updateEntry(entry, animeResult);
-                        console.info(`Entry for '${entry.title}' updated successfully.`);
+                        console.info(
+                            `Entry for '${entry.title}' updated successfully.`,
+                        );
                         console.log(entry.title, entry.synopsis);
                     } else {
                         console.warn(
@@ -309,9 +358,13 @@ async function handleMissingData(data) {
 
     const elapsedTime = process.hrtime(startTime);
     const elapsedSeconds = elapsedTime[0] + elapsedTime[1] / 1e9;
-    console.log(`Total time for processing all entries: ${elapsedSeconds.toFixed(2)} seconds`);
+    console.log(
+        `Total time for processing all entries: ${elapsedSeconds.toFixed(2)} seconds`,
+    );
 
-    const remainingEntries = data.filter((d) => !missing.includes(d) && !issues.includes(d));
+    const remainingEntries = data.filter(
+        (d) => !missing.includes(d) && !issues.includes(d),
+    );
     console.log(`Processed ${remainingEntries.length} entries successfully.`);
 
     return remainingEntries;

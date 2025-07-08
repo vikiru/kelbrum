@@ -10,7 +10,9 @@ import { filterAnimeData } from './filter.js';
  * @returns {number} The maximum value of the specified property.
  */
 function findMax(data, property) {
-    const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
+    const propArr = data
+        .map((d) => Number(d[property]))
+        .filter((arrItem) => !Number.isNaN(arrItem));
     return Math.max(...propArr);
 }
 
@@ -22,7 +24,9 @@ function findMax(data, property) {
  * @returns {number} The minimum value of the specified property.
  */
 function findMin(data, property) {
-    const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
+    const propArr = data
+        .map((d) => Number(d[property]))
+        .filter((arrItem) => !Number.isNaN(arrItem));
     return Math.min(...propArr);
 }
 
@@ -54,7 +58,9 @@ async function initializeDataFile() {
     const fileExists = await checkFileExists(fileName);
 
     if (!fileExists) {
-        console.log(`The file '${fileName}' does not exist. Constructing data files...`);
+        console.log(
+            `The file '${fileName}' does not exist. Constructing data files...`,
+        );
         const data = await constructDataFile();
         return data;
     } else {

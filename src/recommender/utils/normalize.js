@@ -1,16 +1,14 @@
 import * as tf from '@tensorflow/tfjs';
-import { et } from 'remove-stopwords/lib/export_file.js';
 
-import { writeData } from '../dataAccess/writeFile.js';
 import { returnUniqueArray } from './filter.js';
-import { constructTFIDF, normalizeSynopsis } from './handleSynopsis.js';
+import { normalizeSynopsis } from './handleSynopsis.js';
 import { calculateStatistics, createMapping } from './stats.js';
 import { sortData } from './utils.js';
 
 const typeMapping = {
-    TV: 1,
-    ONA: 2,
     Movie: 3,
+    ONA: 2,
+    TV: 1,
     Unknown: 4,
 };
 
@@ -24,25 +22,25 @@ const ratingMapping = {
 };
 
 const demographicMapping = {
-    Kids: 1,
-    Shoujo: 2,
     Josei: 2.5,
-    Shounen: 3,
+    Kids: 1,
     Seinen: 3.5,
+    Shoujo: 2,
+    Shounen: 3,
     Unknown: 5,
 };
 
 function normalizeMapping(data, property) {
     const mapping = {
-        type: typeMapping,
-        rating: ratingMapping,
         demographics: demographicMapping,
+        rating: ratingMapping,
+        type: typeMapping,
     };
     const map = mapping[property];
     return data.map((entry) => {
         const value = entry[property];
         if (Array.isArray(value) && value.length === 0) {
-            return map['Unknown'];
+            return map.Unknown;
         } else {
             if (Array.isArray(value) && value.length > 1) {
                 const mappedValues = value.map((val) => map[val]);
@@ -203,7 +201,9 @@ function normalizeCategorical(data) {
 function multiHotEncode(data, property) {
     const uniqueValues = returnUniqueArray(data, property);
     return data.map((entry) => {
-        return uniqueValues.map((value) => (entry[property].includes(value) ? 1 : 0));
+        return uniqueValues.map((value) =>
+            entry[property].includes(value) ? 1 : 0,
+        );
     });
 }
 
@@ -217,7 +217,11 @@ function multiHotEncode(data, property) {
 function returnExistingValues(data, property) {
     return data.map((entry) => {
         const value = entry[property];
-        if (value === 'Unknown' || value === 0 || (Array.isArray(value) && value.length === 0)) {
+        if (
+            value === 'Unknown' ||
+            value === 0 ||
+            (Array.isArray(value) && value.length === 0)
+        ) {
             return 0;
         } else {
             return value;
@@ -235,38 +239,90 @@ async function createFeatureTensor(data) {
     const stats = await calculateStatistics(data);
     const synopsisData = await normalizeSynopsis(data);
     const normalizationFunctions = [
-        { func: normalizeMapping, isCategorical: true, property: 'type', is1D: true },
-        { func: multiHotEncode, isCategorical: true, property: 'source', is1D: false },
-        { func: normalizeMapping, isCategorical: true, property: 'rating', is1D: true },
-        { func: multiHotEncode, isCategorical: true, property: 'genres', is1D: false },
-        { func: normalizeMapping, isCategorical: true, property: 'demographics', is1D: true },
-        { func: multiHotEncode, isCategorical: true, property: 'themes', is1D: false },
-        { func: normalizeSynopsis, isCategorical: true, property: 'synopsis', is1D: false },
-        { func: returnExistingValues, isCategorical: false, property: 'durationMinutes', is1D: true },
-        { func: robustScale, isCategorical: false, property: 'score', is1D: true },
-        { func: minMaxScale, isCategorical: false, property: 'year', is1D: true },
+        {
+            func: normalizeMapping,
+            is1D: true,
+            isCategorical: true,
+            property: 'type',
+        },
+        {
+            func: multiHotEncode,
+            is1D: false,
+            isCategorical: true,
+            property: 'source',
+        },
+        {
+            func: normalizeMapping,
+            is1D: true,
+            isCategorical: true,
+            property: 'rating',
+        },
+        {
+            func: multiHotEncode,
+            is1D: false,
+            isCategorical: true,
+            property: 'genres',
+        },
+        {
+            func: normalizeMapping,
+            is1D: true,
+            isCategorical: true,
+            property: 'demographics',
+        },
+        {
+            func: multiHotEncode,
+            is1D: false,
+            isCategorical: true,
+            property: 'themes',
+        },
+        {
+            func: normalizeSynopsis,
+            is1D: false,
+            isCategorical: true,
+            property: 'synopsis',
+        },
+        {
+            func: returnExistingValues,
+            is1D: true,
+            isCategorical: false,
+            property: 'durationMinutes',
+        },
+        {
+            func: robustScale,
+            is1D: true,
+            isCategorical: false,
+            property: 'score',
+        },
+        {
+            func: minMaxScale,
+            is1D: true,
+            isCategorical: false,
+            property: 'year',
+        },
         //{ func: multiHotEncode, isCategorical: true, property: 'studios', is1D: false },
         //{ func: minMaxScale, isCategorical: false, property: 'episodes', is1D: true },
     ];
 
-    const allTensors = normalizationFunctions.map(({ func, isCategorical, is1D, property }) => {
-        let normalizedData;
-        if (isCategorical) {
-            normalizedData = func(data, property);
-            if (func === normalizeSynopsis) normalizedData = synopsisData;
-        } else {
-            normalizedData = func(data, property, stats);
-        }
+    const allTensors = normalizationFunctions.map(
+        ({ func, isCategorical, is1D, property }) => {
+            let normalizedData;
+            if (isCategorical) {
+                normalizedData = func(data, property);
+                if (func === normalizeSynopsis) normalizedData = synopsisData;
+            } else {
+                normalizedData = func(data, property, stats);
+            }
 
-        let tensor;
-        if (is1D) {
-            tensor = tf.tensor1d(normalizedData);
-            tensor = tensor.expandDims(1);
-        } else {
-            tensor = tf.tensor2d(normalizedData);
-        }
-        return tensor;
-    });
+            let tensor;
+            if (is1D) {
+                tensor = tf.tensor1d(normalizedData);
+                tensor = tensor.expandDims(1);
+            } else {
+                tensor = tf.tensor2d(normalizedData);
+            }
+            return tensor;
+        },
+    );
 
     validateTensors(allTensors);
     const concatenatedTensor = tf.concat2d(allTensors, 1);
@@ -282,20 +338,20 @@ async function createFeatureTensor(data) {
 function calculateFeatureVariance(data) {
     const length = data.length;
     const numFeatures = data[0].length;
-    const featureVariances = Array(numFeatures).fill(0);
+    const _featureVariances = Array(numFeatures).fill(0);
     const sums = Array(numFeatures).fill(0);
     const squaredSums = Array(numFeatures).fill(0);
 
     data.forEach((tensor) => {
         tensor.forEach((featureValue, index) => {
             sums[index] += featureValue;
-            squaredSums[index] += Math.pow(featureValue, 2);
+            squaredSums[index] += featureValue ** 2;
         });
     });
 
     const averages = sums.map((s) => s / length);
     const variances = squaredSums.map((squaredSum, index) => {
-        const variance = squaredSum / length - Math.pow(averages[index], 2);
+        const variance = squaredSum / length - averages[index] ** 2;
         return variance > 0 ? variance : 0;
     });
     return variances;

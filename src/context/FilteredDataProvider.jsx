@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import data from '../recommender/data/entries.json';
 import { returnFilteredData } from '../recommender/utils/filter';
@@ -7,13 +7,13 @@ const FilteredDataContext = createContext();
 
 export const FilteredDataProvider = ({ children }) => {
     const [processedData, setProcessedData] = useState({
-        filteredGenres: [],
-        filteredThemes: [],
         filteredDemographics: [],
-        filteredProducers: [],
-        filteredStudios: [],
+        filteredGenres: [],
         filteredLicensors: [],
+        filteredProducers: [],
         filteredSeasons: [],
+        filteredStudios: [],
+        filteredThemes: [],
         processed: false,
     });
 
@@ -40,13 +40,13 @@ export const FilteredDataProvider = ({ children }) => {
             ] = await Promise.all(promises);
 
             setProcessedData({
-                filteredGenres,
-                filteredThemes,
                 filteredDemographics,
-                filteredProducers,
-                filteredStudios,
+                filteredGenres,
                 filteredLicensors,
+                filteredProducers,
                 filteredSeasons,
+                filteredStudios,
+                filteredThemes,
                 processed: true,
             });
         };
@@ -54,11 +54,15 @@ export const FilteredDataProvider = ({ children }) => {
         if (!processedData.processed) {
             processData();
         }
-    }, [data, processedData]);
+    }, [processedData]);
 
     const memoizedProcessedData = useMemo(() => processedData, [processedData]);
 
-    return <FilteredDataContext.Provider value={memoizedProcessedData}>{children}</FilteredDataContext.Provider>;
+    return (
+        <FilteredDataContext.Provider value={memoizedProcessedData}>
+            {children}
+        </FilteredDataContext.Provider>
+    );
 };
 
 export const useFilteredData = () => useContext(FilteredDataContext);

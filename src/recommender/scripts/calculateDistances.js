@@ -1,6 +1,6 @@
 import { distance, similarity } from 'ml-distance';
 
-import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
+import { returnOptimalK } from '../dataAccess/train.js';
 import { weightedDistance } from '../recommender.js';
 import { createFeatureTensor } from '../utils/normalize.js';
 import { initializeDataFile } from '../utils/utils.js';

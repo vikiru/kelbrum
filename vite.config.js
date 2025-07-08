@@ -3,9 +3,10 @@ import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react()],
+    build: {
+        sourcemap: false,
+    },
     optimizeDeps: {
-        include: ['lodash', 'ml-distance', 'minisearch', 'react-infinite-scroller'],
         exclude: [
             '@tailwindcss/forms',
             '@tailwindcss/typography',
@@ -42,8 +43,12 @@ export default defineConfig({
             'tailwindcss',
             'vite-plugin-top-level-await',
         ],
+        include: [
+            'lodash',
+            'ml-distance',
+            'minisearch',
+            'react-infinite-scroller',
+        ],
     },
-    build: {
-        sourcemap: false,
-    },
+    plugins: [react()],
 });

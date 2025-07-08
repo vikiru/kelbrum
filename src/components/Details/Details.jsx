@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 const Details = ({ anime }) => {
-    const excludedURL = 'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
+    const excludedURL =
+        'https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png';
     const [hasError, setHasError] = useState(anime.imageURL === excludedURL);
 
     const handleImageError = () => {
@@ -9,15 +10,21 @@ const Details = ({ anime }) => {
     };
 
     const trimmedStudios = useMemo(() => {
-        return anime.studios.length === 0 ? ['Unknown'] : anime.studios.map((studio) => studio.trim());
+        return anime.studios.length === 0
+            ? ['Unknown']
+            : anime.studios.map((studio) => studio.trim());
     }, [anime.studios]);
 
     const trimmedProducers = useMemo(() => {
-        return anime.producers.length === 0 ? ['Unknown'] : anime.producers.map((producer) => producer.trim());
+        return anime.producers.length === 0
+            ? ['Unknown']
+            : anime.producers.map((producer) => producer.trim());
     }, [anime.producers]);
 
     const trimmedLicensors = useMemo(() => {
-        return anime.licensors.length === 0 ? ['Unknown'] : anime.licensors.map((licensor) => licensor.trim());
+        return anime.licensors.length === 0
+            ? ['Unknown']
+            : anime.licensors.map((licensor) => licensor.trim());
     }, [anime.licensors]);
 
     return (
@@ -28,13 +35,16 @@ const Details = ({ anime }) => {
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="text-md mx-8 text-justify">
-                    <section id="anime-image" className="mx-4 mt-4 xs:block lg:hidden">
+                    <section
+                        className="mx-4 mt-4 xs:block lg:hidden"
+                        id="anime-image"
+                    >
                         {!hasError && anime.imageURL !== excludedURL && (
                             <img
-                                src={`${anime.imageURL}`}
                                 alt={`${anime.title} image`}
                                 className="object-fit h-auto max-h-[1500px] w-full rounded-lg shadow-sm transition-shadow duration-300 hover:shadow-xl"
                                 onError={handleImageError}
+                                src={`${anime.imageURL}`}
                             />
                         )}
                     </section>
@@ -46,56 +56,75 @@ const Details = ({ anime }) => {
 
                         <div className="mt-4 grid gap-4 pb-4">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Type</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Type
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.type}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Source</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Source
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.source}
                                 </p>
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Season</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Season
+                                </h2>
                                 <p className="text-lg capitalize text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.premiered || 'Unknown'}
                                 </p>
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Rating</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Rating
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.rating}
                                 </p>
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Episodes</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Episodes
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
-                                    {anime.episodes === 0 ? 'Unknown' : anime.episodes}
+                                    {anime.episodes === 0
+                                        ? 'Unknown'
+                                        : anime.episodes}
                                 </p>
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Score</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Score
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
-                                    {anime.score === 0 ? 'Unknown' : `${anime.score} /  10`}
+                                    {anime.score === 0
+                                        ? 'Unknown'
+                                        : `${anime.score} /  10`}
                                 </p>
                             </div>
                         </div>
                     </section>
                 </div>
 
-                <section id="anime-image" className="mx-4 mt-14 xs:hidden lg:block">
+                <section
+                    className="mx-4 mt-14 xs:hidden lg:block"
+                    id="anime-image"
+                >
                     {!hasError && anime.imageURL !== excludedURL && (
                         <img
-                            src={`${anime.imageURL}`}
                             alt={`${anime.title} image`}
                             className="h-auto max-h-[1500px] w-[80%] rounded-lg object-contain shadow-sm transition-shadow duration-300 hover:shadow-xl"
                             onError={handleImageError}
+                            src={`${anime.imageURL}`}
                         />
                     )}
                 </section>
@@ -108,7 +137,9 @@ const Details = ({ anime }) => {
                             Synopsis
                         </h2>
 
-                        <p className="text-left text-xl text-secondary dark:text-gray-100">{anime.synopsis}</p>
+                        <p className="text-left text-xl text-secondary dark:text-gray-100">
+                            {anime.synopsis}
+                        </p>
                     </section>
 
                     <section id="anime-additional-info">
@@ -118,7 +149,9 @@ const Details = ({ anime }) => {
 
                         <div className="grid gap-4">
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Tags</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Tags
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.genres
                                         .filter((g) => g !== 'Unknown')
@@ -152,7 +185,9 @@ const Details = ({ anime }) => {
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Studios</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Studios
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {trimmedStudios.map((studio, index) => (
                                         <span key={index}>
@@ -165,7 +200,9 @@ const Details = ({ anime }) => {
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Producers</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Producers
+                                </h2>
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {trimmedProducers.map((producer, index) => (
                                         <span key={index}>
@@ -178,7 +215,9 @@ const Details = ({ anime }) => {
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Licensors</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Licensors
+                                </h2>
 
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {trimmedLicensors.map((licensor, index) => (
@@ -192,7 +231,9 @@ const Details = ({ anime }) => {
                             </div>
 
                             <div className="rounded-lg bg-base-200 p-4 shadow-md dark:bg-gray-600">
-                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">Synonyms</h2>
+                                <h2 className="text-xl font-bold text-secondary lg:text-2xl 4xl:text-3xl">
+                                    Synonyms
+                                </h2>
 
                                 <p className="text-lg text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
                                     {anime.titles.map((synonym, index) => (
@@ -219,7 +260,9 @@ const Details = ({ anime }) => {
                                 </div>
 
                                 <div className="stat-value text-lg font-medium text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
-                                    {anime.rank === 0 ? 'Unknown' : `# ${anime.rank}`}
+                                    {anime.rank === 0
+                                        ? 'Unknown'
+                                        : `# ${anime.rank}`}
                                 </div>
                             </div>
 
@@ -229,7 +272,9 @@ const Details = ({ anime }) => {
                                 </div>
 
                                 <div className="stat-value text-lg font-medium text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
-                                    {anime.popularity === 0 ? 'Unknown' : `# ${anime.popularity}`}
+                                    {anime.popularity === 0
+                                        ? 'Unknown'
+                                        : `# ${anime.popularity}`}
                                 </div>
                             </div>
 
@@ -239,7 +284,9 @@ const Details = ({ anime }) => {
                                 </div>
 
                                 <div className="stat-value text-lg font-medium text-neutral lg:text-xl xl:text-2xl dark:text-gray-100">
-                                    {anime.favourites === 0 ? 'Unknown' : anime.favourites}
+                                    {anime.favourites === 0
+                                        ? 'Unknown'
+                                        : anime.favourites}
                                 </div>
                             </div>
 
@@ -249,7 +296,9 @@ const Details = ({ anime }) => {
                                 </div>
 
                                 <div className="stat-value text-lg font-medium text-neutral lg:text-xl xl:text-2xl  dark:text-gray-100">
-                                    {anime.members === 0 ? 'Unknown' : anime.members}
+                                    {anime.members === 0
+                                        ? 'Unknown'
+                                        : anime.members}
                                 </div>
                             </div>
                         </div>
@@ -263,11 +312,15 @@ const Details = ({ anime }) => {
                         <div className="flex space-x-2  pb-6">
                             {anime.pageURL !== 'Unknown' && (
                                 <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400 dark:bg-gray-600">
-                                    <a href={anime.pageURL} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                        href={anime.pageURL}
+                                        rel="noopener noreferrer"
+                                        target="_blank"
+                                    >
                                         <img
-                                            src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/myanimelist.svg"
-                                            className="h-10 w-10 rounded-lg object-cover lg:h-20 lg:w-20"
                                             alt="MyAnimeList Icon"
+                                            className="h-10 w-10 rounded-lg object-cover lg:h-20 lg:w-20"
+                                            src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/myanimelist.svg"
                                         />
                                     </a>
                                 </button>
@@ -275,11 +328,15 @@ const Details = ({ anime }) => {
 
                             {anime.trailerURL !== 'Unknown' && (
                                 <button className="rounded-lg bg-base-200 p-2 transition-colors duration-200 hover:bg-neutral-400 dark:bg-gray-600">
-                                    <a href={anime.trailerURL} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                        href={anime.trailerURL}
+                                        rel="noopener noreferrer"
+                                        target="_blank"
+                                    >
                                         <img
-                                            src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg"
-                                            className="h-10 w-10 rounded-lg object-cover lg:h-20 lg:w-20"
                                             alt="YouTube Icon"
+                                            className="h-10 w-10 rounded-lg object-cover lg:h-20 lg:w-20"
+                                            src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg"
                                         />
                                     </a>
                                 </button>

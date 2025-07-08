@@ -1,9 +1,14 @@
-import React, { useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 
 import DataCard from '../DataCard/DataCard';
 
-const DataList = ({ title, data, path, customSort, capitalizeTitle = false }) => {
+const DataList = ({
+    title,
+    data,
+    path,
+    customSort,
+    capitalizeTitle = false,
+}) => {
     const sortFunction = useMemo(() => {
         return (
             customSort ||
@@ -31,11 +36,11 @@ const DataList = ({ title, data, path, customSort, capitalizeTitle = false }) =>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {sortedData.map((item, index) => (
                     <DataCard
+                        capitalizeTitle={capitalizeTitle}
+                        index={data.indexOf(item)}
                         key={index}
                         path={path}
-                        index={data.indexOf(item)}
                         value={item}
-                        capitalizeTitle={capitalizeTitle}
                     />
                 ))}
             </div>

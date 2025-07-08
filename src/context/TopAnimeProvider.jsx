@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import data from '../recommender/data/entries.json';
 
@@ -9,7 +9,11 @@ export const TopAnimeProvider = ({ children }) => {
         return [...data].sort((a, b) => b.score - a.score).slice(0, 100);
     }, []);
 
-    return <TopAnimeContext.Provider value={{ topAnime }}>{children}</TopAnimeContext.Provider>;
+    return (
+        <TopAnimeContext.Provider value={{ topAnime }}>
+            {children}
+        </TopAnimeContext.Provider>
+    );
 };
 
 export const useTopAnime = () => useContext(TopAnimeContext);

@@ -1,8 +1,8 @@
 const seasons = [
-    { name: 'fall', months: ['Oct', 'Nov', 'Dec'] },
-    { name: 'spring', months: ['Apr', 'May', 'Jun'] },
-    { name: 'summer', months: ['Jul', 'Aug', 'Sep'] },
-    { name: 'winter', months: ['Jan', 'Feb', 'Mar'] },
+    { months: ['Oct', 'Nov', 'Dec'], name: 'fall' },
+    { months: ['Apr', 'May', 'Jun'], name: 'spring' },
+    { months: ['Jul', 'Aug', 'Sep'], name: 'summer' },
+    { months: ['Jan', 'Feb', 'Mar'], name: 'winter' },
 ];
 
 /**
@@ -19,7 +19,8 @@ function findSeasonalYearByAired(text) {
         };
     }
 
-    const regex = /(?:([a-zA-Z]+)\s*(\d{4})|(\d{4})\s*to\s*(\d{4})?|(\d{4})|([a-zA-Z]{3})\s*(\d{1,2}),\s*(\d{4}))/i;
+    const regex =
+        /(?:([a-zA-Z]+)\s*(\d{4})|(\d{4})\s*to\s*(\d{4})?|(\d{4})|([a-zA-Z]{3})\s*(\d{1,2}),\s*(\d{4}))/i;
     const matches = text.match(regex);
     if (!matches) {
         return {
@@ -29,13 +30,17 @@ function findSeasonalYearByAired(text) {
     }
 
     const season = matches[1] || null;
-    const year = matches[2] || matches[3] || matches[4] || matches[5] || matches[8];
+    const year =
+        matches[2] || matches[3] || matches[4] || matches[5] || matches[8];
 
-    const seasonMatch = season ? seasons.find((seasonObj) => seasonObj.months.includes(season)) : null;
+    const seasonMatch = season
+        ? seasons.find((seasonObj) => seasonObj.months.includes(season))
+        : null;
     const seasonName = seasonMatch
         ? seasonMatch.name
         : matches[6]
-          ? seasons.find((seasonObj) => seasonObj.months.includes(matches[6])).name
+          ? seasons.find((seasonObj) => seasonObj.months.includes(matches[6]))
+                .name
           : 'Unknown';
 
     const yearValue = year ? parseInt(year, 10) : 'Unknown';
@@ -119,7 +124,7 @@ function cleanDuration(text) {
     while ((match = regex.exec(text)) !== null) {
         const value = parseInt(match[1], 10);
         const unit = match[2];
-        if (!isNaN(value)) {
+        if (!Number.isNaN(value)) {
             if (unit === 'hr') {
                 hours += value;
             } else if (unit === 'min') {
@@ -159,7 +164,12 @@ function cleanArray(array) {
  * @returns {string} The cleaned premiered value or the original premiered value
  */
 function cleanPremiered(premiered, season, year) {
-    if (season !== undefined && season !== 'Unknown' && year !== undefined && year !== 'Unknown') {
+    if (
+        season !== undefined &&
+        season !== 'Unknown' &&
+        year !== undefined &&
+        year !== 'Unknown'
+    ) {
         return `${season} ${year}`;
     }
     return premiered;

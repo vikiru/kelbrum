@@ -1,16 +1,24 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-
-import { useFilteredData } from '../../context/FilteredDataProvider';
 import DataList from './../../components/DataList/DataList';
+import { useFilteredData } from '../../context/FilteredDataProvider';
 
 function LicensorsPage() {
     const { filteredLicensors } = useFilteredData();
     const location = useLocation();
     const isLicensorDetailPage = location.pathname === '/anime/licensors';
     return (
-        <section id="licensors" className="min-h-screen bg-secondary pb-16 dark:bg-gray-900">
-            {isLicensorDetailPage && <DataList title="Licensors" data={filteredLicensors} path="licensors" />}
+        <section
+            className="min-h-screen bg-secondary pb-16 dark:bg-gray-900"
+            id="licensors"
+        >
+            {isLicensorDetailPage && (
+                <DataList
+                    data={filteredLicensors}
+                    path="licensors"
+                    title="Licensors"
+                />
+            )}
             <Outlet />
         </section>
     );

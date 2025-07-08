@@ -1,58 +1,58 @@
 /** @type {import('tailwindcss').Config} */
 /* eslint-disable max-len */
-const colors = require('tailwindcss/colors');
+const _colors = require('tailwindcss/colors');
 
 const config = {
     content: ['./src/**/*.{js,ts,jsx,tsx}'],
     daisyui: {
+        base: true,
+        darkTheme: 'dark',
+        logs: true,
+        prefix: '',
+        styled: true,
+        themeRoot: ':root',
         themes: [
             {
-                lightTheme: {
-                    primary: '#FFFFFF',
-                    secondary: '#000000',
-                    accent: '#FF5733',
-                    neutral: '#333333',
-                    'base-100': '#F5F5F5',
-                    info: '#007BFF',
-                    success: '#28A745',
-                    warning: '#FFA500',
-                    error: '#DC3545',
-                },
                 darkTheme: {
+                    accent: '#CCCCCC',
+                    'base-100': '#F5F5F5',
+                    error: '#FF0000',
+                    info: '#0000FF',
+                    neutral: '#333333',
                     primary: '#000000',
                     secondary: '#FFFFFF',
-                    accent: '#CCCCCC',
-                    neutral: '#333333',
-                    'base-100': '#F5F5F5',
-                    info: '#0000FF',
                     success: '#008000',
                     warning: '#FFA500',
-                    error: '#FF0000',
+                },
+                lightTheme: {
+                    accent: '#FF5733',
+                    'base-100': '#F5F5F5',
+                    error: '#DC3545',
+                    info: '#007BFF',
+                    neutral: '#333333',
+                    primary: '#FFFFFF',
+                    secondary: '#000000',
+                    success: '#28A745',
+                    warning: '#FFA500',
                 },
             },
         ],
-        darkTheme: 'dark',
-        base: true,
-        styled: true,
         utils: true,
-        prefix: '',
-        logs: true,
-        themeRoot: ':root',
     },
+    plugins: [require('daisyui'), require('tailwind-scrollbar')],
     theme: {
         extend: {
-            screens: {
-                xs: '300px',
-                '3xl': '1920px',
-                '4xl': '2560px',
-                '5xl': '3840px',
-            },
             fontFamily: {
                 logo: ['Cinzel Decorative', 'serif'],
             },
+            screens: {
+                '3xl': '1920px',
+                '4xl': '2560px',
+                '5xl': '3840px',
+                xs: '300px',
+            },
         },
     },
-    plugins: [require('daisyui'), require('tailwind-scrollbar')],
 };
 
 export default config;

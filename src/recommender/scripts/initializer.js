@@ -1,6 +1,6 @@
-import { distance, similarity } from 'ml-distance';
+import { distance } from 'ml-distance';
 
-import { returnKmeansModel, returnOptimalK } from '../dataAccess/train.js';
+import { returnKmeansModel } from '../dataAccess/train.js';
 import { writeData } from '../dataAccess/writeFile.js';
 import { weightedDistance } from '../recommender.js';
 import { createFeatureTensor } from '../utils/normalize.js';
@@ -14,7 +14,7 @@ import { initializeDataFile } from '../utils/utils.js';
  * @param {number} indexB - The index of the second feature tensor in the featureArray
  * @param {Array} featureArray - An array containing the feature tensors
  */
-function testDistances(indexA, indexB, featureArray) {
+function _testDistances(indexA, indexB, featureArray) {
     const tensorA = featureArray[indexA];
     const tensorB = featureArray[indexB];
 
@@ -51,7 +51,10 @@ function testDistances(indexA, indexB, featureArray) {
     const euclideanDistanceVal = distance.euclidean(tensorA, tensorB);
     console.log(`Euclidean Distance: ${euclideanDistanceVal}`);
 
-    const squaredEuclideanDistanceVal = distance.squaredEuclidean(tensorA, tensorB);
+    const squaredEuclideanDistanceVal = distance.squaredEuclidean(
+        tensorA,
+        tensorB,
+    );
     console.log(`Squared Euclidean Distance: ${squaredEuclideanDistanceVal}`);
 
     const weightedDistanceVal = weightedDistance(tensorA, tensorB);
@@ -65,9 +68,18 @@ async function main() {
         const featureArray = featureTensor.arraySync();
         const titleIDMap = data.flatMap((d) => {
             const uniqueTitles = Array.from(new Set(d.titles));
-            return { title: d.title, synonyms: uniqueTitles, value: d.id, type: d.type };
+            return {
+                synonyms: uniqueTitles,
+                title: d.title,
+                type: d.type,
+                value: d.id,
+            };
         });
-        const kmeans = await returnKmeansModel(featureArray, 10, weightedDistance);
+        const kmeans = await returnKmeansModel(
+            featureArray,
+            10,
+            weightedDistance,
+        );
         await writeData('featureArray.json', featureArray);
         await writeData('titleIDMap.json', titleIDMap);
         await writeData('kmeans.json', kmeans);
