@@ -12,9 +12,13 @@ async function retrieveAnimeData(recommendations, data) {
     const indexes = new Set(recommendations.map((r) => r.index));
     const animeData = data.filter((d) => indexes.has(d.id));
     animeData.forEach((d) => {
-        d.similarity = recommendations.find((r) => r.index === d.id).similarity.toFixed(2);
+        d.similarity = recommendations
+            .find((r) => r.index === d.id)
+            .similarity.toFixed(2);
     });
-    return animeData.filter((a) => a.similarity <= MAX_THRESHOLD).sort((a, b) => a.similarity - b.similarity);
+    return animeData
+        .filter((a) => a.similarity <= MAX_THRESHOLD)
+        .sort((a, b) => a.similarity - b.similarity);
 }
 
 /**
@@ -37,7 +41,9 @@ async function shuffleRandom(arr) {
  * @returns {Array} An array of recommended items sorted by similarity
  */
 async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
-    const filteredSimilarities = similarities.sort((a, b) => a.similarity - b.similarity);
+    const filteredSimilarities = similarities.sort(
+        (a, b) => a.similarity - b.similarity,
+    );
     const recommendations = filteredSimilarities.slice(0, MAX_ANIME);
     return recommendations;
 }
@@ -52,11 +58,21 @@ async function returnRandomRecommendations(similarities, MAX_ANIME = 100) {
  * @param {array} excludedIds - Array of excluded anime indices
  * @returns {array} Sorted array of objects containing index and similarity
  */
-async function returnClusterSimilarities(clusterNumber, clusters, featureArray, id, excludedIds = []) {
+async function returnClusterSimilarities(
+    clusterNumber,
+    clusters,
+    featureArray,
+    id,
+    excludedIds = [],
+) {
     //const MAX_THRESHOLD = 0.4;
     const excludedSet = new Set(excludedIds);
     const otherAnimeIndices = clusters.reduce((indices, cluster, index) => {
-        if (cluster === clusterNumber && index !== id && !excludedSet.has(index)) {
+        if (
+            cluster === clusterNumber &&
+            index !== id &&
+            !excludedSet.has(index)
+        ) {
             indices.push(index);
         }
         return indices;
@@ -80,7 +96,9 @@ async function returnClusterSimilarities(clusterNumber, clusters, featureArray, 
         }),
     );
 
-    return similarityResults.filter((result) => result !== null).sort((a, b) => a.similarity - b.similarity);
+    return similarityResults
+        .filter((result) => result !== null)
+        .sort((a, b) => a.similarity - b.similarity);
 }
 
 /**
@@ -157,44 +175,47 @@ function getDistance(property, tensorA, tensorB) {
  */
 function weightedDistance(tensorA, tensorB) {
     const indices = {
-        type: [0, 1],
-        source: [1, 18],
-        rating: [18, 19],
-        genres: [19, 38],
         demographics: [38, 39],
-        themes: [39, 90],
-        synopsis: [90, 339],
         durationMinutes: [339, 340],
+        genres: [19, 38],
+        rating: [18, 19],
         score: [340, 341],
+        source: [1, 18],
+        synopsis: [90, 339],
+        themes: [39, 90],
+        type: [0, 1],
         year: [341, 342],
     };
 
     const weights = {
-        type: 0.8,
-        source: 0.2,
-        rating: 0.5,
-        genres: 0.4,
         demographics: 0.5,
-        themes: 0.55,
-        synopsis: 0.2,
-        score: 0.1,
         durationMinutes: 1,
+        genres: 0.4,
+        rating: 0.5,
+        score: 0.1,
+        source: 0.2,
+        synopsis: 0.2,
+        themes: 0.55,
+        type: 0.8,
         year: 0.1,
     };
 
     const shouldCreateNew = {
-        type: false,
-        source: false,
-        rating: false,
-        genres: true,
         demographics: false,
-        themes: true,
-        synopsis: true,
-        score: false,
         durationMinutes: false,
+        genres: true,
+        rating: false,
+        score: false,
+        source: false,
+        synopsis: true,
+        themes: true,
+        type: false,
         year: false,
     };
-    const weightSum = Object.values(weights).reduce((sum, currentValue) => sum + currentValue, 0);
+    const weightSum = Object.values(weights).reduce(
+        (sum, currentValue) => sum + currentValue,
+        0,
+    );
 
     let distanceSum = 0;
 
@@ -205,13 +226,19 @@ function weightedDistance(tensorA, tensorB) {
         let distance = 0;
 
         if (shouldCreateNew[feature]) {
-            const { newTensorA, newTensorB } = createNewTensors(firstTensor, secondTensor);
-            distance = newTensorA.length > 0 ? getDistance(feature, newTensorA, newTensorB) : 0;
+            const { newTensorA, newTensorB } = createNewTensors(
+                firstTensor,
+                secondTensor,
+            );
+            distance =
+                newTensorA.length > 0
+                    ? getDistance(feature, newTensorA, newTensorB)
+                    : 0;
         } else {
             distance = getDistance(feature, firstTensor, secondTensor);
         }
 
-        if (isNaN(distance)) {
+        if (Number.isNaN(distance)) {
             distanceSum += 0;
         } else {
             distanceSum += distance * weight;
@@ -232,4 +259,10 @@ async function compareTensors(tensorA, tensorB) {
     return weightedDistance(tensorA, tensorB);
 }
 
-export { shuffleRandom, returnClusterSimilarities, retrieveAnimeData, returnRandomRecommendations, weightedDistance };
+export {
+    shuffleRandom,
+    returnClusterSimilarities,
+    retrieveAnimeData,
+    returnRandomRecommendations,
+    weightedDistance,
+};

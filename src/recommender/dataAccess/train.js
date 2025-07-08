@@ -1,9 +1,6 @@
-import { distance, similarity } from 'ml-distance';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { kmeans } from 'ml-kmeans';
-import { dirname } from 'path';
-import path from 'path';
-import * as ss from 'simple-statistics';
-import { fileURLToPath } from 'url';
 
 import { checkFileExists, readJSONFile } from './readFile.js';
 import { writeData } from './writeFile.js';
@@ -26,11 +23,13 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
     for (let k = 2; k <= max; k++) {
         try {
             const result = await kmeans(featureArray, k, {
-                initialization: 'kmeans++',
                 distanceFunction: distanceFunction,
+                initialization: 'kmeans++',
             });
-            const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
-            const assignments = result.clusters;
+            const wcss = result
+                .computeInformation(featureArray)
+                .reduce((sum, info) => sum + info.error, 0);
+            const _assignments = result.clusters;
             console.log(k, wcss);
             results.push({ k, wcss });
         } catch (error) {
@@ -40,7 +39,9 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
         }
     }
 
-    const optimalK = results.reduce((prev, curr) => (curr.wcss < prev.wcss ? curr : prev)).k;
+    const optimalK = results.reduce((prev, curr) =>
+        curr.wcss < prev.wcss ? curr : prev,
+    ).k;
     await writeData(fileName, results);
     return { optimalK };
 }
@@ -65,10 +66,12 @@ async function returnKmeansModel(featureArray, k, distanceFunction) {
     } else {
         console.log('KMeans model file not found. Training a new model.');
         const kmeansModel = await kmeans(featureArray, k, {
-            initialization: 'kmeans++',
             distanceFunction: distanceFunction,
+            initialization: 'kmeans++',
         });
-        const wcss = kmeansModel.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
+        const wcss = kmeansModel
+            .computeInformation(featureArray)
+            .reduce((sum, info) => sum + info.error, 0);
         console.log(k, wcss);
         await writeData(modelFileName, kmeansModel);
         return kmeansModel;

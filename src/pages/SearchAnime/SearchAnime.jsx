@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-
-import { useTitleIDMap } from '../../context/TitleIDMapProvider';
 import SearchBar from './../../components/SearchBar/SearchBar';
+import { useTitleIDMap } from '../../context/TitleIDMapProvider';
 
 const SearchAnime = () => {
     const { titleIDMap } = useTitleIDMap();
@@ -12,8 +11,16 @@ const SearchAnime = () => {
     }, []);
 
     return (
-        <section id="anime-search" className="bg-secondary pb-16 dark:bg-gray-900">
-            <SearchBar valueMap={titleIDMap} path="" fields={fields} storeFields={fields} />
+        <section
+            className="bg-secondary pb-16 dark:bg-gray-900"
+            id="anime-search"
+        >
+            <SearchBar
+                fields={fields}
+                path=""
+                storeFields={fields}
+                valueMap={titleIDMap}
+            />
         </section>
     );
 };

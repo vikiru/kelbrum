@@ -1,7 +1,6 @@
-import fs from 'fs';
-import { dirname } from 'path';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -35,7 +34,8 @@ function getFileSizeUnit(bytes) {
  */
 function formatFileSize(bytes) {
     const unit = getFileSizeUnit(bytes);
-    const size = unit === 'B' ? bytes : unit === 'KB' ? bytes / 1024 : bytes / 1048576;
+    const size =
+        unit === 'B' ? bytes : unit === 'KB' ? bytes / 1024 : bytes / 1048576;
     return `${formatNumber(size)} ${unit}`;
 }
 
@@ -53,7 +53,9 @@ async function writeData(fileName, data) {
         await fs.promises.writeFile(filePath, dataString, 'utf8');
         const stats = await fs.promises.stat(filePath);
         const fileSizeInBytes = stats.size;
-        console.log(`Data successfully written to ${filePath}. \nFile size: ${formatFileSize(fileSizeInBytes)}`);
+        console.log(
+            `Data successfully written to ${filePath}. \nFile size: ${formatFileSize(fileSizeInBytes)}`,
+        );
     } catch (err) {
         console.error('Error writing file:', err);
         throw err;

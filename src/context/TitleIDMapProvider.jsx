@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import titleIDMap from '../recommender/data/titleIDMap.json';
 
@@ -12,7 +12,11 @@ export const TitleIDMapProvider = ({ children }) => {
         [],
     );
 
-    return <TitleIDMapContext.Provider value={state}>{children}</TitleIDMapContext.Provider>;
+    return (
+        <TitleIDMapContext.Provider value={state}>
+            {children}
+        </TitleIDMapContext.Provider>
+    );
 };
 
 export const useTitleIDMap = () => useContext(TitleIDMapContext);

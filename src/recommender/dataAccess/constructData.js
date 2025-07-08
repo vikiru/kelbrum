@@ -11,7 +11,10 @@ import { writeData } from './writeFile.js';
  */
 async function constructDataFile() {
     console.log('Starting to construct data files by reading input csv file.');
-    const animeCSV = await readAndProcessFile('../data/anime-dataset-2023.csv', 'AnimeEntry');
+    const animeCSV = await readAndProcessFile(
+        '../data/anime-dataset-2023.csv',
+        'AnimeEntry',
+    );
     let filteredData = filterAnimeData(animeCSV);
     filteredData = await handleMissingData(filteredData);
     filteredData.sort((a, b) => a.title.localeCompare(b.title));
@@ -19,7 +22,11 @@ async function constructDataFile() {
         entry.id = index;
         entry.malID = parseInt(entry.malID, 10);
         entry.durationMinutes = cleanDuration(entry.durationText);
-        entry.premiered = cleanPremiered(entry.premiered, entry.season, entry.year);
+        entry.premiered = cleanPremiered(
+            entry.premiered,
+            entry.season,
+            entry.year,
+        );
         entry.rating = cleanRating(entry.rating);
     });
     filteredData = filterAnimeData(filteredData);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import data from '../recommender/data/entries.json';
 
@@ -12,7 +12,9 @@ export const DataProvider = ({ children }) => {
         [],
     );
 
-    return <DataContext.Provider value={state}>{children}</DataContext.Provider>;
+    return (
+        <DataContext.Provider value={state}>{children}</DataContext.Provider>
+    );
 };
 
 export const useData = () => useContext(DataContext);

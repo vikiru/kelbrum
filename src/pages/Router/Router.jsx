@@ -1,19 +1,24 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-
-import TopScroller from '../../components/TopScroller/TopScroller';
-import Home from '../Home/Home';
 import Footer from './../../components/Footer/Footer';
 import NavBar from './../../components/NavBar/NavBar';
+import TopScroller from '../../components/TopScroller/TopScroller';
+import Home from '../Home/Home';
 
-const RecommendationsPage = React.lazy(() => import('../RecommendationsPage/RecommendationsPage'));
+const RecommendationsPage = React.lazy(
+    () => import('../RecommendationsPage/RecommendationsPage'),
+);
 const Pagination = React.lazy(() => import('../Pagination/Pagination'));
 const AnimeDetails = React.lazy(() => import('../AnimeDetails/AnimeDetails'));
 const TopAnimePage = React.lazy(() => import('../TopAnimePage/TopAnimePage'));
 const SearchAnime = React.lazy(() => import('../SearchAnime/SearchAnime'));
 const GenresPage = React.lazy(() => import('../GenresPage/GenresPage'));
-const LicensorsPage = React.lazy(() => import('../LicensorsPage/LicensorsPage'));
-const ProducersPage = React.lazy(() => import('../ProducersPage/ProducersPage'));
+const LicensorsPage = React.lazy(
+    () => import('../LicensorsPage/LicensorsPage'),
+);
+const ProducersPage = React.lazy(
+    () => import('../ProducersPage/ProducersPage'),
+);
 const StudiosPage = React.lazy(() => import('../StudiosPage/StudiosPage'));
 const SeasonsPage = React.lazy(() => import('../SeasonsPage/SeasonsPage'));
 
@@ -30,25 +35,37 @@ function Router() {
                 }
             >
                 <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="anime/:id" element={<AnimeDetails />} />
-                    <Route path="anime/top" element={<TopAnimePage />} />
-                    <Route path="anime/search" element={<SearchAnime />} />
-                    <Route path="anime/genres" element={<GenresPage />} />
-                    <Route path="anime/genres/:id" element={<Pagination />} />
-                    <Route path="anime/demographics" element={<GenresPage />} />
-                    <Route path="anime/demographics/:id" element={<Pagination />} />
-                    <Route path="anime/themes" element={<GenresPage />} />
-                    <Route path="anime/themes/:id" element={<Pagination />} />
-                    <Route path="anime/licensors" element={<LicensorsPage />} />
-                    <Route path="anime/licensors/:id" element={<Pagination />} />
-                    <Route path="anime/producers" element={<ProducersPage />} />
-                    <Route path="anime/producers/:id" element={<Pagination />} />
-                    <Route path="anime/studios" element={<StudiosPage />} />
-                    <Route path="anime/studios/:id" element={<Pagination />} />
-                    <Route path="anime/seasons" element={<SeasonsPage />} />
-                    <Route path="anime/seasons/:id" element={<Pagination />} />
-                    <Route path="anime/recommendations/:id" element={<RecommendationsPage />} />
+                    <Route element={<Home />} path="/" />
+                    <Route element={<AnimeDetails />} path="anime/:id" />
+                    <Route element={<TopAnimePage />} path="anime/top" />
+                    <Route element={<SearchAnime />} path="anime/search" />
+                    <Route element={<GenresPage />} path="anime/genres" />
+                    <Route element={<Pagination />} path="anime/genres/:id" />
+                    <Route element={<GenresPage />} path="anime/demographics" />
+                    <Route
+                        element={<Pagination />}
+                        path="anime/demographics/:id"
+                    />
+                    <Route element={<GenresPage />} path="anime/themes" />
+                    <Route element={<Pagination />} path="anime/themes/:id" />
+                    <Route element={<LicensorsPage />} path="anime/licensors" />
+                    <Route
+                        element={<Pagination />}
+                        path="anime/licensors/:id"
+                    />
+                    <Route element={<ProducersPage />} path="anime/producers" />
+                    <Route
+                        element={<Pagination />}
+                        path="anime/producers/:id"
+                    />
+                    <Route element={<StudiosPage />} path="anime/studios" />
+                    <Route element={<Pagination />} path="anime/studios/:id" />
+                    <Route element={<SeasonsPage />} path="anime/seasons" />
+                    <Route element={<Pagination />} path="anime/seasons/:id" />
+                    <Route
+                        element={<RecommendationsPage />}
+                        path="anime/recommendations/:id"
+                    />
                 </Routes>
             </Suspense>
             <Footer />
