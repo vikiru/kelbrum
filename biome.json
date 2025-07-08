@@ -1,71 +1,71 @@
 {
-    "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
-    "assist": {
-        "actions": {
-            "source": {
-                "organizeImports": "on",
-                "useSortedAttributes": "on",
-                "useSortedKeys": "on",
-                "useSortedProperties": "on"
-            }
-        },
-        "enabled": true
+  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on",
+        "useSortedAttributes": "on",
+        "useSortedKeys": "off",
+        "useSortedProperties": "on"
+      }
     },
-    "files": { "ignoreUnknown": true },
+    "enabled": true
+  },
+  "files": { "ignoreUnknown": true },
+  "formatter": {
+    "attributePosition": "auto",
+    "bracketSameLine": false,
+    "bracketSpacing": true,
+    "enabled": true,
+    "expand": "auto",
+    "formatWithErrors": false,
+    "includes": [
+      "**",
+      "!**/.github/",
+      "!**/.husky/",
+      "!**/.next/",
+      "!**/build/",
+      "!**/next/",
+      "!**/node_modules/",
+      "!**/public/",
+      "!**/dist/",
+      "!**/.prettierignore",
+      "!**/.gitignore",
+      "!**/.gitattributes",
+      "!**/LICENSE",
+      "!**/*.ico",
+      "!**/package-lock.json",
+      "!**/.env",
+      "!**/.env.*"
+    ],
+    "indentStyle": "space",
+    "indentWidth": 4,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "useEditorconfig": true
+  },
+  "html": { "formatter": { "selfCloseVoidElements": "always" } },
+  "javascript": {
     "formatter": {
-        "attributePosition": "auto",
-        "bracketSameLine": false,
-        "bracketSpacing": true,
-        "enabled": true,
-        "expand": "auto",
-        "formatWithErrors": false,
-        "includes": [
-            "**",
-            "!**/.github/",
-            "!**/.husky/",
-            "!**/.next/",
-            "!**/build/",
-            "!**/next/",
-            "!**/node_modules/",
-            "!**/public/",
-            "!**/dist/",
-            "!**/.prettierignore",
-            "!**/.gitignore",
-            "!**/.gitattributes",
-            "!**/LICENSE",
-            "!**/*.ico",
-            "!**/package-lock.json",
-            "!**/.env",
-            "!**/.env.*"
-        ],
-        "indentStyle": "space",
-        "indentWidth": 4,
-        "lineEnding": "lf",
-        "lineWidth": 80,
-        "useEditorconfig": true
+      "arrowParentheses": "always",
+      "attributePosition": "auto",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "linter": {
+    "domains": {
+      "next": "recommended",
+      "project": "recommended",
+      "react": "recommended"
     },
-    "html": { "formatter": { "selfCloseVoidElements": "always" } },
-    "javascript": {
-        "formatter": {
-            "arrowParentheses": "always",
-            "attributePosition": "auto",
-            "bracketSameLine": false,
-            "bracketSpacing": true,
-            "jsxQuoteStyle": "double",
-            "quoteProperties": "asNeeded",
-            "quoteStyle": "single",
-            "semicolons": "always",
-            "trailingCommas": "all"
-        }
-    },
-    "linter": {
-        "domains": {
-            "next": "recommended",
-            "project": "recommended",
-            "react": "recommended"
-        },
-        "enabled": true,
-        "rules": { "recommended": true }
-    },
-    "vcs": { "clientKind": "git", "enabled": true, "useIgnoreFile": true }
+    "enabled": true,
+    "rules": { "recommended": true }
+  },
+  "vcs": { "clientKind": "git", "enabled": true, "useIgnoreFile": true }
 }
