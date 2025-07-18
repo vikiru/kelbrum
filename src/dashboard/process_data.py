@@ -22,4 +22,10 @@ def fill_null_with_unknown(df: pl.DataFrame) -> pl.DataFrame:
 
 
 
-
+# TODO: create clean.py -> conv cols into better format (i.e. str sep -> list, premiered/aired -> season, year, episodes -> minutes and remove <24 mins)
+# TODO: see if there is anything else worth removing/cleaning
+# TODO: create sep module dedicated to fetching data. Must be able to 1) update existing data efficiently 2) fetch new data (check latest year/season and start from there)
+# TODO: create sep module for feature engineering, normalization and kmeans clustering
+# TODO: streamlit app -> create pages for overview of raw csv data (metadata, top anime by criteria, total unique values/counts, etc), 
+# page for showcasing clusters (total # of anime per cluster, cluster stats, error metrics, etc)
+# page for selecting two anime and seeing their metadata, tensors, distance/similarity
