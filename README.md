@@ -11,17 +11,11 @@
     <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="Kelbrum live site hosted via Firebase"/>
 </a>
 <br/>
- <a href="https://wakatime.com/@vikiru/projects/umhctwxtly">
-  <img src="https://wakatime.com/badge/user/5e62f99d-3a1e-4fd2-8f37-77919d626a67/project/018e1a22-364b-4b87-a797-b55b694a169d.svg"
-  alt="Wakatime Coding Stats for Kelbrum"/>
- </a>
- <br/>
- <a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
+<a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
   <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge"/>
  </a>
- <a href="https://github.com/prettier/prettier">
-  <img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style - Prettier"/>
- </a>
+<a href="https://biomejs.dev"><img alt="Static Badge" src="https://img.shields.io/badge/Formatted_with-Biome-60a5fa?style=flat&logo=biome">
+</a>
 <br/>
   <a href="https://github.com/vikiru/kelbrum/releases">
   <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
@@ -108,11 +102,6 @@ Documentation:
     -   Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/)
 -   Documentation site hosted via [GitHub Pages](https://pages.github.com/)
 
-Dev Tools:
-
--   [ESLint](https://eslint.org/)
--   [Prettier](https://prettier.io/)
--   [WakaTime](https://wakatime.com/)
 
 ## 📝 Prerequisites
 
@@ -183,9 +172,16 @@ npm run prettier
     -   [Machine Learning Glossary](https://developers.google.com/machine-learning/glossary)
     -   [Transforming Categorical Data](https://developers.google.com/machine-learning/data-prep/transform/transform-categorical)
 -   [Firebase](https://firebase.google.com/)
+-   [Starlight](https://starlight.astro.build/)
+-   [Astro](https://astro.build/)
+-   [starlight-links-validator](https://github.com/HiDeoo/starlight-links-validator)
+-   [starlight-theme-rapide](https://github.com/HiDeoo/starlight-theme-rapide)
 -   [Docusaurus](https://docusaurus.io/)
 -   [GitHub Pages](https://pages.github.com/)
 -   [Shields Badges](https://github.com/badges/shields)
+-   [Semantic Release](https://github.com/semantic-release/semantic-release)
+-   [Lefthook](https://github.com/evilmartians/lefthook)
+-   [Knip](https://github.com/webpro-nl/knip)
 -   [regex101](https://regex101.com/)
 -   [Favicon Generator](https://favicon.io/favicon-generator/)
 

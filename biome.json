@@ -13,18 +13,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**/*.js",
-      "**/*.mjs",
-      "**/*.cjs",
-      "**/*.ts",
-      "**/*.tsx",
-      "*.config.mjs",
-      "*.config.cjs",
-      "*.config.js",
-      "**/*.json",
-      "!!src/data/*.json"
-    ]
+    "includes": ["**/*.js", "**/*.mjs", "**/*.cjs", "**/*.ts", "**/*.tsx", "!src/data/*.json"]
   },
   "formatter": {
     "attributePosition": "auto",

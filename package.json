@@ -33,7 +33,7 @@
     "preview": "vite preview",
     "lint": "biome lint",
     "format": "biome check --write",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "unused": "knip",
     "postinstall": "lefthook install"
   },
@@ -67,6 +67,7 @@
     "minisearch": "^7.2.0",
     "ml-distance": "^4.0.1",
     "natural": "^8.1.0",
+    "nuqs": "^2.8.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-icons": "^5.5.0",
