@@ -34,7 +34,7 @@
 
 ---
 
-**Kelbrum** is an anime recommendation system designed to suggest anime titles similar to those chosen by users. It employs **K-means++** clustering with a custom distance function, which uses a combination of the **Manhattan** and **Dice** distance. The custom distance function assigns weighted values to each property of an anime such as its `type`, `genres`, `score` to compute the distance between two separate anime.
+**Kelbrum** is an anime recommendation system designed to suggest anime titles similar to those chosen by users. It uses **K-means++** clustering with a custom distance function, which is a combination of the **Manhattan** and **Dice** distance. The custom distance function assigns weighted values to each property of an anime such as its `type`, `genres`, `score` to compute the distance between two separate anime.
 
 The frontend of the project was initially set up using [Vite.js](https://vitejs.dev/) for development purposes, but has since transitioned to utilize [Create React App](https://create-react-app.dev/), in conjunction with [React](https://react.dev/), [React Router](https://reactrouter.com/), [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/).
 
