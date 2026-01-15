@@ -1,0 +1,72 @@
+{
+  "name": "kelbrum-docs",
+  "version": "2.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Visakan Kirubakaran",
+  "type": "module",
+  "keywords": [
+    "anime",
+    "daisyui",
+    "kelbrum",
+    "kmeans",
+    "machine-learning",
+    "react",
+    "react router",
+    "recommendation",
+    "similarity",
+    "system",
+    "tailwindcss",
+    "tensorflow"
+  ],
+  "browserslist": {
+    "production": [
+      "defaults",
+      ">0.01%",
+      "not dead",
+      "not op_mini all",
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
+    ],
+    "development": [
+      "defaults",
+      ">0.01%",
+      "not dead",
+      "not op_mini all",
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
+    ]
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "deploy": "gh-pages -d dist --dotfiles --nojekyll",
+    "lint": "biome lint",
+    "format": "biome check --write",
+    "postinstall": "lefthook install"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.6.1",
+    "@astrojs/starlight": "^0.37.2",
+    "astro": "^5.16.9",
+    "sharp": "^0.34.5",
+    "starlight-links-validator": "^0.19.2",
+    "starlight-theme-rapide": "^0.5.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "@playform/compress": "^0.2.1",
+    "@typescript/native-preview": "7.0.0-dev.20260114.1",
+    "gh-pages": "^6.3.0",
+    "lefthook": "^2.0.15",
+    "schema-dts": "^1.1.5",
+    "typescript": "^5.9.3"
+  }
+}
