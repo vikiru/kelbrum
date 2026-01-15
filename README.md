@@ -121,7 +121,7 @@ cd kelbrum
 2. Download and install all required dependencies.
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## 📜 Available Scripts
@@ -129,25 +129,49 @@ npm install
 1. Start the app in the development environment.
 
 ```bash
-npm start
+pnpm start
 ```
 
 2. Build the project files and optimize for production.
 
 ```bash
-npm run build
+pnpm build
 ```
 
-3. Lint all files and check if there are any issues, with [ESLint](https://eslint.org/).
+3. Preview the production build locally.
 
 ```bash
-npm run lint
+pnpm preview
 ```
 
-4. Fix all ESLint issues then format the files with [Prettier](https://prettier.io/).
+4. Lint files using [Biome](https://biomejs.dev/).
 
 ```bash
-npm run prettier
+pnpm lint
+```
+
+5. Format files using [Biome](https://biomejs.dev/).
+
+```bash
+pnpm format
+```
+
+6. Run TypeScript type checks without emitting files.
+
+```bash
+pnpm typecheck
+```
+
+7. Check unused dependencies and files with [Knip](https://github.com/webpro-nl/knip).
+
+```bash
+pnpm unused
+```
+
+8. Prepare Git hooks via [Lefthook](https://github.com/evilmartians/lefthook).
+
+```bash
+pnpm postinstall
 ```
 
 ## ✨ Acknowledgments
