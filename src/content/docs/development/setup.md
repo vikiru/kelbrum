@@ -1,8 +1,7 @@
 ---
 title: ⚡ Setup
+description: Step-by-step instructions to set up and run Kelbrum locally.
 ---
-
-## ⚡ Setup Instructions
 
 1. Clone this repository to your local machine.
 
@@ -14,5 +13,5 @@ cd kelbrum
 2. Download and install all required dependencies.
 
 ```bash
-npm install
+pnpm install
 ```

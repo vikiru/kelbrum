@@ -1,24 +1,23 @@
 ---
-title: Data Clustering with K-means
+title: 📊 Data Clustering with K-means
+description: Overview of my process in identifying distance functions and clustering algorithms to create Kelbrum.
 ---
-
-## Data Clustering with K-means
 
 ### Identifying Clustering Algorithms
 
-Once the data was [normalized](/normalize), the next step was to figure out how to group the data based on their similarity. Upon researching this topic, I found out that there were several algorithms to achieve this such as:
+Once the data was [normalized](/kelbrum/development/normalize), the next step was to figure out how to group the data based on their similarity. Upon researching this topic, I found out that there were several algorithms to achieve this such as:
 
--   **K-means clustering**
--   **K-mediods clustering**
--   **K-nearest neighbors**
--   **Hierarchal clustering**
--   **DBSCAN**
+- **K-means clustering**
+- **K-medoids clustering**
+- **K-nearest neighbors**
+- **Hierarchical clustering**
+- **DBSCAN**
 
 There were several other algorithms as well, however, I decided to use K-means clustering as I felt it was easier to understand and applicable for my use case.
 
 ### Choosing the Right Tools
 
-To cluster the data, several k-means clustering npm packages were looked at and finally, I finalized on using [ml-kmeans](https://github.com/mljs/kmeans) combining it with [ml-distance](https://github.com/mljs/distance) and [simple-statistics](https://github.com/simple-statistics/simple-statistics). Addtionally, to perform TF-IDF analysis on anime synopses, [natural](https://github.com/NaturalNode/natural) was used alongside [remove-stopwords](https://github.com/WorldBrain/remove-stopwords), [word-list](https://github.com/sindresorhus/word-list), and [lemmatizer](https://github.com/FinNLP/lemmatizer).
+To cluster the data, several k-means clustering npm packages were looked at and finally, I finalized on using [ml-kmeans](https://github.com/mljs/kmeans) combining it with [ml-distance](https://github.com/mljs/distance) and [simple-statistics](https://github.com/simple-statistics/simple-statistics). Additionally, to perform TF-IDF analysis on anime synopses, [natural](https://github.com/NaturalNode/natural) was used alongside [remove-stopwords](https://github.com/WorldBrain/remove-stopwords), [word-list](https://github.com/sindresorhus/word-list), and [lemmatizer](https://github.com/FinNLP/lemmatizer).
 
 **ml-distance** offered various distance and similarity calculations and **ml-kmeans** allowed for the use of custom distance functions so this worked out really well for me.
 
@@ -32,9 +31,9 @@ To combat the **curse of dimensionality**, I decided to use various normalizatio
 
 I was able to assess the effectiveness of clustering by identifying several metrics that indicate the efficiency of clustering, including:
 
--   **Within Cluster Sum of Squares (WCSS)**
--   **Elbow Method**
--   **Silhouette Score**
+- **Within Cluster Sum of Squares (WCSS)**
+- **Elbow Method**
+- **Silhouette Score**
 
 While other metrics were available, my primary focus was on the Within Cluster Sum of Squares (WCSS) and the silhouette score when feasible. Fortunately, calculating the WCSS was straightforward with the assistance of **ml-kmeans**, and the silhouette score was computed using **simple-statistics**. However, the computation of the silhouette score became increasingly computationally intensive as the value of k increased, due to the large size of the feature tensors, leading me to prioritize the WCSS. My objective was to achieve the lowest WCSS and the highest silhouette score possible.
 
@@ -42,13 +41,13 @@ While other metrics were available, my primary focus was on the Within Cluster S
 
 From my experiments, I learned that given my data set, the following functions worked out the best:
 
--   **Manhattan Distance**
--   **Dice Similarity**
--   **Jaccard Index**
--   **Gower's Distance**
--   **Cosine Similarity**
--   **Sørensen–Dice coefficient**
--   **Tanimoto Index**
+- **Manhattan Distance**
+- **Dice Similarity**
+- **Jaccard Index**
+- **Gower's Distance**
+- **Cosine Similarity**
+- **Sørensen–Dice coefficient**
+- **Tanimoto Index**
 
 ### Customizing the Distance Function
 
@@ -56,7 +55,7 @@ After additional experimentation, I attempted to develop a custom distance funct
 
 To develop the current weighted distance function, I compared anime that were known to be similar, utilizing various distance measures with both the concatenated tensors as a whole and each individual feature tensor. This approach helped identify which properties most significantly increased the distance between each anime. At the same time, I was experimenting with different normalization techniques and feature tensor combinations. Eventually, I added weights which required a considerable amount of trial and error to achieve the current satisfactory level of recommendations as I had to experiment with different weightings for each property and different distance measures for each.
 
-In the end, the manhattan distance was used for properties such as `type`, `rating`, and `demographics` where there was a numerical value and a need to seperate anime such as anime of type `TV` vs. `Movie`. The dice distance was used for all other properties such as `genres`, `themes`, `synopsis`, etc.
+In the end, the manhattan distance was used for properties such as `type`, `rating`, and `demographics` where there was a numerical value and a need to separate anime such as anime of type `TV` vs. `Movie`. The dice distance was used for all other properties such as `genres`, `themes`, `synopsis`, etc.
 
 ### Future Experimentation
 

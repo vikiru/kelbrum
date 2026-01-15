@@ -1,8 +1,7 @@
 ---
 title: 🔥 Motivation
+description: The motivation behind creating Kelbrum and the goals of this project.
 ---
-
-## 🔥 Motivation
 
 As someone who understands the challenge of discovering a new series to watch after completing another, I have always envisioned creating a tool akin to an AI which would be able to understand a users preferences given their past favourites or genre preferences as input and return series that they may like based on their similarity to the input data.
 
