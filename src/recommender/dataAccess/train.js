@@ -1,7 +1,6 @@
 import { distance, similarity } from 'ml-distance';
 import { kmeans } from 'ml-kmeans';
-import { dirname } from 'path';
-import path from 'path';
+import path, { dirname } from 'path';
 import * as ss from 'simple-statistics';
 import { fileURLToPath } from 'url';
 
@@ -22,27 +21,27 @@ const __dirname = dirname(__filename);
  * @returns {Promise<Object>} An object containing the optimal value of k and the silhouette score
  */
 async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
-    const results = [];
-    for (let k = 2; k <= max; k++) {
-        try {
-            const result = await kmeans(featureArray, k, {
-                initialization: 'kmeans++',
-                distanceFunction: distanceFunction,
-            });
-            const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
-            const assignments = result.clusters;
-            console.log(k, wcss);
-            results.push({ k, wcss });
-        } catch (error) {
-            console.error(`Error computing KMeans for k=${k}:`, error);
-            await writeData(fileName, results);
-            throw error;
-        }
+  const results = [];
+  for (let k = 2; k <= max; k++) {
+    try {
+      const result = await kmeans(featureArray, k, {
+        initialization: 'kmeans++',
+        distanceFunction: distanceFunction,
+      });
+      const wcss = result.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
+      const assignments = result.clusters;
+      console.log(k, wcss);
+      results.push({ k, wcss });
+    } catch (error) {
+      console.error(`Error computing KMeans for k=${k}:`, error);
+      await writeData(fileName, results);
+      throw error;
     }
+  }
 
-    const optimalK = results.reduce((prev, curr) => (curr.wcss < prev.wcss ? curr : prev)).k;
-    await writeData(fileName, results);
-    return { optimalK };
+  const optimalK = results.reduce((prev, curr) => (curr.wcss < prev.wcss ? curr : prev)).k;
+  await writeData(fileName, results);
+  return { optimalK };
 }
 
 /**
@@ -54,25 +53,25 @@ async function returnOptimalK(featureArray, max, distanceFunction, fileName) {
  * @returns {Promise<Object>} The KMeans model
  */
 async function returnKmeansModel(featureArray, k, distanceFunction) {
-    const modelFileName = 'kmeans.json';
-    const modelFilePath = path.resolve(__dirname, `../data/${modelFileName}`);
-    const modelExists = await checkFileExists(modelFileName);
+  const modelFileName = 'kmeans.json';
+  const modelFilePath = path.resolve(__dirname, `../data/${modelFileName}`);
+  const modelExists = await checkFileExists(modelFileName);
 
-    if (modelExists) {
-        console.log('Using existing KMeans model from file.');
-        const kmeansModel = await readJSONFile(modelFilePath);
-        return kmeansModel;
-    } else {
-        console.log('KMeans model file not found. Training a new model.');
-        const kmeansModel = await kmeans(featureArray, k, {
-            initialization: 'kmeans++',
-            distanceFunction: distanceFunction,
-        });
-        const wcss = kmeansModel.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
-        console.log(k, wcss);
-        await writeData(modelFileName, kmeansModel);
-        return kmeansModel;
-    }
+  if (modelExists) {
+    console.log('Using existing KMeans model from file.');
+    const kmeansModel = await readJSONFile(modelFilePath);
+    return kmeansModel;
+  } else {
+    console.log('KMeans model file not found. Training a new model.');
+    const kmeansModel = await kmeans(featureArray, k, {
+      initialization: 'kmeans++',
+      distanceFunction: distanceFunction,
+    });
+    const wcss = kmeansModel.computeInformation(featureArray).reduce((sum, info) => sum + info.error, 0);
+    console.log(k, wcss);
+    await writeData(modelFileName, kmeansModel);
+    return kmeansModel;
+  }
 }
 
 export { returnOptimalK, returnKmeansModel };

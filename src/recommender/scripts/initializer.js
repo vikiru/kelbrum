@@ -15,65 +15,65 @@ import { initializeDataFile } from '../utils/utils.js';
  * @param {Array} featureArray - An array containing the feature tensors
  */
 function testDistances(indexA, indexB, featureArray) {
-    const tensorA = featureArray[indexA];
-    const tensorB = featureArray[indexB];
+  const tensorA = featureArray[indexA];
+  const tensorB = featureArray[indexB];
 
-    const gowerDistance = distance.gower(tensorA, tensorB);
-    console.log(`Gower Distance: ${gowerDistance}`);
+  const gowerDistance = distance.gower(tensorA, tensorB);
+  console.log(`Gower Distance: ${gowerDistance}`);
 
-    const diceDistance = distance.dice(tensorA, tensorB);
-    console.log(`Dice Distance: ${diceDistance}`);
+  const diceDistance = distance.dice(tensorA, tensorB);
+  console.log(`Dice Distance: ${diceDistance}`);
 
-    const jaccardDistance = distance.jaccard(tensorA, tensorB);
-    console.log(`Jaccard Distance: ${jaccardDistance}`);
+  const jaccardDistance = distance.jaccard(tensorA, tensorB);
+  console.log(`Jaccard Distance: ${jaccardDistance}`);
 
-    const tanimotoDistance = distance.tanimoto(tensorA, tensorB);
-    console.log(`Tanimoto Distance: ${tanimotoDistance}`);
+  const tanimotoDistance = distance.tanimoto(tensorA, tensorB);
+  console.log(`Tanimoto Distance: ${tanimotoDistance}`);
 
-    const czekanowskiDistance = distance.czekanowski(tensorA, tensorB);
-    console.log(`Czekanowski Distance: ${czekanowskiDistance}`);
+  const czekanowskiDistance = distance.czekanowski(tensorA, tensorB);
+  console.log(`Czekanowski Distance: ${czekanowskiDistance}`);
 
-    const kulczynskiDistance = distance.kulczynski(tensorA, tensorB);
-    console.log(`Kulczynski Distance: ${kulczynskiDistance}`);
+  const kulczynskiDistance = distance.kulczynski(tensorA, tensorB);
+  console.log(`Kulczynski Distance: ${kulczynskiDistance}`);
 
-    const ruzickaDistance = distance.ruzicka(tensorA, tensorB);
-    console.log(`Ruzicka Distance: ${ruzickaDistance}`);
+  const ruzickaDistance = distance.ruzicka(tensorA, tensorB);
+  console.log(`Ruzicka Distance: ${ruzickaDistance}`);
 
-    const sorensenDistance = distance.sorensen(tensorA, tensorB);
-    console.log(`Sorensen Distance: ${sorensenDistance}`);
+  const sorensenDistance = distance.sorensen(tensorA, tensorB);
+  console.log(`Sorensen Distance: ${sorensenDistance}`);
 
-    const matusitaDistance = distance.matusita(tensorA, tensorB);
-    console.log(`Matusita Distance: ${matusitaDistance}`);
+  const matusitaDistance = distance.matusita(tensorA, tensorB);
+  console.log(`Matusita Distance: ${matusitaDistance}`);
 
-    const manhattanDistanceVal = distance.manhattan(tensorA, tensorB);
-    console.log(`Manhattan Distance: ${manhattanDistanceVal}`);
+  const manhattanDistanceVal = distance.manhattan(tensorA, tensorB);
+  console.log(`Manhattan Distance: ${manhattanDistanceVal}`);
 
-    const euclideanDistanceVal = distance.euclidean(tensorA, tensorB);
-    console.log(`Euclidean Distance: ${euclideanDistanceVal}`);
+  const euclideanDistanceVal = distance.euclidean(tensorA, tensorB);
+  console.log(`Euclidean Distance: ${euclideanDistanceVal}`);
 
-    const squaredEuclideanDistanceVal = distance.squaredEuclidean(tensorA, tensorB);
-    console.log(`Squared Euclidean Distance: ${squaredEuclideanDistanceVal}`);
+  const squaredEuclideanDistanceVal = distance.squaredEuclidean(tensorA, tensorB);
+  console.log(`Squared Euclidean Distance: ${squaredEuclideanDistanceVal}`);
 
-    const weightedDistanceVal = weightedDistance(tensorA, tensorB);
-    console.log(`Weighted Distance: ${weightedDistanceVal}`);
+  const weightedDistanceVal = weightedDistance(tensorA, tensorB);
+  console.log(`Weighted Distance: ${weightedDistanceVal}`);
 }
 
 async function main() {
-    try {
-        const data = await initializeDataFile();
-        const featureTensor = await createFeatureTensor(data);
-        const featureArray = featureTensor.arraySync();
-        const titleIDMap = data.flatMap((d) => {
-            const uniqueTitles = Array.from(new Set(d.titles));
-            return { title: d.title, synonyms: uniqueTitles, value: d.id, type: d.type };
-        });
-        const kmeans = await returnKmeansModel(featureArray, 10, weightedDistance);
-        await writeData('featureArray.json', featureArray);
-        await writeData('titleIDMap.json', titleIDMap);
-        await writeData('kmeans.json', kmeans);
-    } catch (err) {
-        console.error('Error occured:', err);
-    }
+  try {
+    const data = await initializeDataFile();
+    const featureTensor = await createFeatureTensor(data);
+    const featureArray = featureTensor.arraySync();
+    const titleIDMap = data.flatMap((d) => {
+      const uniqueTitles = Array.from(new Set(d.titles));
+      return { title: d.title, synonyms: uniqueTitles, value: d.id, type: d.type };
+    });
+    const kmeans = await returnKmeansModel(featureArray, 10, weightedDistance);
+    await writeData('featureArray.json', featureArray);
+    await writeData('titleIDMap.json', titleIDMap);
+    await writeData('kmeans.json', kmeans);
+  } catch (err) {
+    console.error('Error occured:', err);
+  }
 }
 
 main();

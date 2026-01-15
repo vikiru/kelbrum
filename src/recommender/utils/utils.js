@@ -10,8 +10,8 @@ import { filterAnimeData } from './filter.js';
  * @returns {number} The maximum value of the specified property.
  */
 function findMax(data, property) {
-    const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
-    return Math.max(...propArr);
+  const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
+  return Math.max(...propArr);
 }
 
 /**
@@ -22,8 +22,8 @@ function findMax(data, property) {
  * @returns {number} The minimum value of the specified property.
  */
 function findMin(data, property) {
-    const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
-    return Math.min(...propArr);
+  const propArr = data.map((d) => Number(d[property])).filter((arrItem) => !isNaN(arrItem));
+  return Math.min(...propArr);
 }
 
 /**
@@ -33,14 +33,14 @@ function findMin(data, property) {
  * @returns {Array} The sorted data
  */
 function sortData(data) {
-    const firstElement = data[0];
-    const type = typeof firstElement;
-    if (type === 'string') {
-        data.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    } else if (type === 'number') {
-        data.sort((a, b) => a - b);
-    }
-    return data;
+  const firstElement = data[0];
+  const type = typeof firstElement;
+  if (type === 'string') {
+    data.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  } else if (type === 'number') {
+    data.sort((a, b) => a - b);
+  }
+  return data;
 }
 
 /**
@@ -50,19 +50,19 @@ function sortData(data) {
  * @returns {Promise} The initialized data file.
  */
 async function initializeDataFile() {
-    const fileName = 'entries.json';
-    const fileExists = await checkFileExists(fileName);
+  const fileName = 'entries.json';
+  const fileExists = await checkFileExists(fileName);
 
-    if (!fileExists) {
-        console.log(`The file '${fileName}' does not exist. Constructing data files...`);
-        const data = await constructDataFile();
-        return data;
-    } else {
-        console.log(`The file '${fileName}' already exists. Reading data...`);
-        const data = await readAndProcessFile(fileName, 'AnimeEntry');
-        const filteredData = filterAnimeData(data);
-        return filteredData;
-    }
+  if (!fileExists) {
+    console.log(`The file '${fileName}' does not exist. Constructing data files...`);
+    const data = await constructDataFile();
+    return data;
+  } else {
+    console.log(`The file '${fileName}' already exists. Reading data...`);
+    const data = await readAndProcessFile(fileName, 'AnimeEntry');
+    const filteredData = filterAnimeData(data);
+    return filteredData;
+  }
 }
 
 export { findMax, findMin, sortData, initializeDataFile };

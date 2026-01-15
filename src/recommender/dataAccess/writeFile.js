@@ -1,6 +1,5 @@
 import fs from 'fs';
-import { dirname } from 'path';
-import path from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +13,7 @@ const __dirname = dirname(__filename);
  * @returns {string} The formatted number as a string
  */
 function formatNumber(num) {
-    return num.toFixed(2);
+  return num.toFixed(2);
 }
 
 /**
@@ -24,7 +23,7 @@ function formatNumber(num) {
  * @returns {string} The appropriate file size unit ('B', 'KB', or 'MB')
  */
 function getFileSizeUnit(bytes) {
-    return bytes < 1024 ? 'B' : bytes < 1048576 ? 'KB' : 'MB';
+  return bytes < 1024 ? 'B' : bytes < 1048576 ? 'KB' : 'MB';
 }
 
 /**
@@ -34,9 +33,9 @@ function getFileSizeUnit(bytes) {
  * @returns {string} The formatted file size with unit
  */
 function formatFileSize(bytes) {
-    const unit = getFileSizeUnit(bytes);
-    const size = unit === 'B' ? bytes : unit === 'KB' ? bytes / 1024 : bytes / 1048576;
-    return `${formatNumber(size)} ${unit}`;
+  const unit = getFileSizeUnit(bytes);
+  const size = unit === 'B' ? bytes : unit === 'KB' ? bytes / 1024 : bytes / 1048576;
+  return `${formatNumber(size)} ${unit}`;
 }
 
 /**
@@ -47,16 +46,16 @@ function formatFileSize(bytes) {
  * @returns {Promise<void>} A Promise that resolves when the data is successfully written
  */
 async function writeData(fileName, data) {
-    const filePath = path.resolve(__dirname, `../data/${fileName}`);
-    try {
-        const dataString = JSON.stringify(data, null);
-        await fs.promises.writeFile(filePath, dataString, 'utf8');
-        const stats = await fs.promises.stat(filePath);
-        const fileSizeInBytes = stats.size;
-        console.log(`Data successfully written to ${filePath}. \nFile size: ${formatFileSize(fileSizeInBytes)}`);
-    } catch (err) {
-        console.error('Error writing file:', err);
-        throw err;
-    }
+  const filePath = path.resolve(__dirname, `../data/${fileName}`);
+  try {
+    const dataString = JSON.stringify(data, null);
+    await fs.promises.writeFile(filePath, dataString, 'utf8');
+    const stats = await fs.promises.stat(filePath);
+    const fileSizeInBytes = stats.size;
+    console.log(`Data successfully written to ${filePath}. \nFile size: ${formatFileSize(fileSizeInBytes)}`);
+  } catch (err) {
+    console.error('Error writing file:', err);
+    throw err;
+  }
 }
 export { writeData };

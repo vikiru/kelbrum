@@ -1,8 +1,7 @@
 import { Buffer } from 'buffer';
 import fs from 'fs';
 import Papa from 'papaparse';
-import { dirname } from 'path';
-import path from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import { processAnimeData, processUserInteractionData } from '../utils/processData.js';
@@ -18,22 +17,22 @@ const __dirname = dirname(__filename);
  * @returns {boolean} True if the file exists, false if it does not
  */
 async function checkFileExists(fileName) {
-    const filePath = path.resolve(__dirname, `../data/${fileName}`);
-    try {
-        await fs.promises.access(filePath, fs.constants.F_OK);
-        return true;
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            return false;
-        } else {
-            throw error;
-        }
+  const filePath = path.resolve(__dirname, `../data/${fileName}`);
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+    return true;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return false;
+    } else {
+      throw error;
     }
+  }
 }
 
 async function readJSONFile(filePath) {
-    const fileData = await fs.promises.readFile(filePath, 'utf8');
-    return JSON.parse(fileData);
+  const fileData = await fs.promises.readFile(filePath, 'utf8');
+  return JSON.parse(fileData);
 }
 
 /**
@@ -43,11 +42,11 @@ async function readJSONFile(filePath) {
  * @returns {object[]} The parsed data from the CSV file.
  */
 async function readCSVFile(filePath) {
-    const results = Papa.parse(filePath, {
-        header: true,
-        skipEmptyLines: true,
-    });
-    return results.data;
+  const results = Papa.parse(filePath, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return results.data;
 }
 
 /**
@@ -58,32 +57,32 @@ async function readCSVFile(filePath) {
  * @returns {Promise<any>} A promise that resolves to the processed file data
  */
 async function readAndProcessFile(fileName, type) {
-    const filePath = path.resolve(__dirname, `../data/${fileName}`);
-    const fileExtension = path.extname(fileName).toLowerCase();
+  const filePath = path.resolve(__dirname, `../data/${fileName}`);
+  const fileExtension = path.extname(fileName).toLowerCase();
 
-    try {
-        const fileTypeHandlers = {
-            '.json': () => readJSONFile(filePath),
-            '.csv': async () => {
-                const data = await readCSVFile(filePath);
-                if (type === 'AnimeEntry') {
-                    return processAnimeData(data);
-                } else if (type === 'UserInteraction') {
-                    return processUserInteractionData(data);
-                }
-            },
-        };
-
-        const handler = fileTypeHandlers[fileExtension];
-        if (!handler) {
-            throw new Error(`Unsupported file type: ${fileExtension}`);
+  try {
+    const fileTypeHandlers = {
+      '.json': () => readJSONFile(filePath),
+      '.csv': async () => {
+        const data = await readCSVFile(filePath);
+        if (type === 'AnimeEntry') {
+          return processAnimeData(data);
+        } else if (type === 'UserInteraction') {
+          return processUserInteractionData(data);
         }
+      },
+    };
 
-        return await handler();
-    } catch (err) {
-        console.error(`Error reading file or parsing data: ${filePath}`, err);
-        throw err;
+    const handler = fileTypeHandlers[fileExtension];
+    if (!handler) {
+      throw new Error(`Unsupported file type: ${fileExtension}`);
     }
+
+    return await handler();
+  } catch (err) {
+    console.error(`Error reading file or parsing data: ${filePath}`, err);
+    throw err;
+  }
 }
 
 export { readCSVFile, readJSONFile, readAndProcessFile, checkFileExists };
