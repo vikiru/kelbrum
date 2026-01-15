@@ -1,4 +1,5 @@
 import process from 'node:process';
+
 const RATE_LIMIT_STATUS = 429;
 /**
  * Asynchronously fetches the data from the specified URL with the option to retry a certain number of times.
