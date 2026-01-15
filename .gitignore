@@ -1,3 +1,7 @@
+todos.md
+.vscode
+.astro
+dist
 */data/*.json
 .history/
 build/
