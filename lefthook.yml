@@ -1,0 +1,10 @@
+pre-commit:
+  jobs:
+    - name: Lint with Biome
+      glob: "*.{js,mjs,cjs,ts,tsx,jsx}"
+      run: pnpm exec biome check --colors=false {staged_files}
+
+commit-msg:
+  jobs:
+    - name: Validate commit message
+      run: pnpm exec commitlint --edit $1

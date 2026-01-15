@@ -1,0 +1,16 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "project": ["tsconfig.json"],
+  "entry": [
+    "*.{js,jsx,ts,tsx}",
+    "components/**/*.{js,jsx,ts,tsx}",
+    "context/**/*.{js,jsx,ts,tsx}",
+    "pages/**/*.{js,jsx,ts,tsx}",
+    "recommender/**/*.{js,jsx,ts,tsx}"
+  ],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "tags": ["-lintignore"]
+}
