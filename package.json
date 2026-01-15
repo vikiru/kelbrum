@@ -57,7 +57,7 @@
       "last 2 safari version"
     ]
   },
-"dependencies": {
+  "dependencies": {
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-virtual": "^3.13.0",
     "firebase": "^12.8.0",

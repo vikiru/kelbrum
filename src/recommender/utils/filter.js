@@ -8,9 +8,9 @@
  * @returns {Array} UniquePropertyValues - An array of unique values from the specified property.
  */
 function returnUniqueArray(data, property, filter = []) {
-    const allPropertyValues = data.flatMap((d) => d[property]).filter((value) => !filter.includes(value));
-    const uniquePropertyValues = Array.from(new Set(allPropertyValues)).filter((a) => a !== '');
-    return uniquePropertyValues;
+  const allPropertyValues = data.flatMap((d) => d[property]).filter((value) => !filter.includes(value));
+  const uniquePropertyValues = Array.from(new Set(allPropertyValues)).filter((a) => a !== '');
+  return uniquePropertyValues;
 }
 
 /**
@@ -20,12 +20,12 @@ function returnUniqueArray(data, property, filter = []) {
  * @returns {array} The filtered array of anime data.
  */
 function filterAnimeData(data) {
-    const excludedTypes = ['OVA', 'Special', 'Music', 'PV', 'TV Special'];
-    const excludedGenres = ['Erotica', 'Hentai'];
-    const filteredData = data.filter((d) => {
-        return !excludedTypes.includes(d.type) && !d.genres.some((genre) => excludedGenres.includes(genre));
-    });
-    return filteredData;
+  const excludedTypes = ['OVA', 'Special', 'Music', 'PV', 'TV Special'];
+  const excludedGenres = ['Erotica', 'Hentai'];
+  const filteredData = data.filter((d) => {
+    return !(excludedTypes.includes(d.type) || d.genres.some((genre) => excludedGenres.includes(genre)));
+  });
+  return filteredData;
 }
 
 /**
@@ -36,25 +36,25 @@ function filterAnimeData(data) {
  * @returns {Array} An array of objects with key-value pairs of unique values and their filtered data
  */
 async function returnFilteredData(data, property) {
-    const uniqueValues = returnUniqueArray(data, property);
-    const result = uniqueValues.map((value) => {
-        const filteredData = data.filter((d) => {
-            if (Array.isArray(d[property])) {
-                if (d[property].length === 0) {
-                    return value === 'Unknown';
-                }
-                return d[property].includes(value);
-            }
-            return d[property] === value;
-        });
-
-        return {
-            key: value,
-            values: filteredData,
-        };
+  const uniqueValues = returnUniqueArray(data, property);
+  const result = uniqueValues.map((value) => {
+    const filteredData = data.filter((d) => {
+      if (Array.isArray(d[property])) {
+        if (d[property].length === 0) {
+          return value === 'Unknown';
+        }
+        return d[property].includes(value);
+      }
+      return d[property] === value;
     });
 
-    return result;
+    return {
+      key: value,
+      values: filteredData,
+    };
+  });
+
+  return result;
 }
 
 export { returnFilteredData, filterAnimeData, returnUniqueArray };
