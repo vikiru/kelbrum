@@ -1,42 +1,31 @@
 {
   "name": "kelbrum",
   "description": "An anime recommendation system designed to recommend anime that is similar to user-selected anime.",
-  "author": "Visakan Kirubakaran",
   "version": "1.0.0",
-  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": "Visakan Kirubakaran",
   "repository": {
     "type": "git",
     "url": "https://github.com/vikiru/kelbrum"
   },
-  "keywords": [
-    "anime",
-    "recommendation",
-    "system",
-    "machine-learning",
-    "tensorflow",
-    "kelbrum",
-    "similarity",
-    "kmeans",
-    "react",
-    "react router",
-    "tailwindcss",
-    "daisyui"
-  ],
   "bugs": {
     "url": "https://github.com/vikiru/kelbrum/issues"
   },
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "biome lint",
-    "format": "biome check --write",
-    "typecheck": "tsgo --noEmit",
-    "unused": "knip",
-    "postinstall": "lefthook install"
-  },
+  "keywords": [
+    "anime",
+    "daisyui",
+    "kelbrum",
+    "kmeans",
+    "machine-learning",
+    "react",
+    "react router",
+    "recommendation",
+    "similarity",
+    "system",
+    "tailwindcss",
+    "tensorflow"
+  ],
   "browserslist": {
     "production": [
       "defaults",
@@ -56,6 +45,16 @@
       "last 2 firefox version",
       "last 2 safari version"
     ]
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "biome lint",
+    "format": "biome check --write",
+    "typecheck": "tsc --noEmit",
+    "unused": "knip",
+    "postinstall": "lefthook install"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.120.0",
