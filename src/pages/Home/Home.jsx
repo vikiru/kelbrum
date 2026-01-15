@@ -22,7 +22,7 @@ function Home() {
                             suggestions? Refresh and you'll be presented with even more!
                         </p>
                         <div className="mx-auto flex items-center justify-center rounded-full border-b-4 border-secondary bg-accent py-2 pt-2 hover:cursor-pointer xs:w-full lg:w-[50%] dark:border-primary">
-                            <Link to="/anime/search" className="flex-grow">
+                            <Link to="/anime/search" className="grow">
                                 <span className="rounded-lg py-3 text-lg text-white lg:px-6 xl:text-2xl">
                                     Start Your Journey
                                 </span>
