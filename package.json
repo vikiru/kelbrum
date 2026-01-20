@@ -92,7 +92,7 @@
     "@types/node": "^25.0.8",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "7.0.0-dev.20260114.1",
+    "@typescript/native-preview": "7.0.0-dev.20260119.1",
     "@vitejs/plugin-react": "^5.1.2",
     "cross-env": "^10.1.0",
     "csv-parse": "^6.1.0",
