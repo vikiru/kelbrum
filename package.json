@@ -97,7 +97,7 @@
     "cross-env": "^10.1.0",
     "csv-parse": "^6.1.0",
     "daisyui": "^5.5.14",
-    "knip": "^5.81.0",
+    "knip": "^5.82.1",
     "lefthook": "^2.0.15",
     "ml-kmeans": "^7.0.0",
     "papaparse": "^5.5.3",
