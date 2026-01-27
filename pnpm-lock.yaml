@@ -13,10 +13,10 @@ importers:
     dependencies:
       '@tanstack/react-router':
         specifier: ^1.120.0
-        version: 1.150.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 1.150.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       '@tanstack/react-virtual':
         specifier: ^3.13.0
-        version: 3.13.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 3.13.18(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       firebase:
         specifier: ^12.8.0
         version: 12.8.0
@@ -40,25 +40,25 @@ importers:
         version: 8.1.0
       nuqs:
         specifier: ^2.8.6
-        version: 2.8.6(@tanstack/react-router@1.150.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 2.8.6(@tanstack/react-router@1.150.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react-router@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react@19.2.4)
       react:
-        specifier: ^19.2.3
-        version: 19.2.3
+        specifier: ^19.2.4
+        version: 19.2.4
       react-dom:
         specifier: ^19.2.3
-        version: 19.2.3(react@19.2.3)
+        version: 19.2.3(react@19.2.4)
       react-icons:
         specifier: ^5.5.0
-        version: 5.5.0(react@19.2.3)
+        version: 5.5.0(react@19.2.4)
       react-infinite-scroller:
         specifier: ^1.2.6
-        version: 1.2.6(react@19.2.3)
+        version: 1.2.6(react@19.2.4)
       react-router-dom:
         specifier: ^7.12.0
-        version: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       react-slick:
         specifier: ^0.31.0
-        version: 0.31.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 0.31.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       remove-stopwords:
         specifier: ^1.0.3
         version: 1.0.3
@@ -76,7 +76,7 @@ importers:
         version: 4.3.5
       zustand:
         specifier: ^5.0.10
-        version: 5.0.10(@types/react@19.2.8)(immer@9.0.21)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
+        version: 5.0.10(@types/react@19.2.9)(immer@9.0.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.11
@@ -106,11 +106,11 @@ importers:
         specifier: ^25.0.8
         version: 25.0.8
       '@types/react':
-        specifier: ^19.2.8
-        version: 19.2.8
+        specifier: ^19.2.9
+        version: 19.2.9
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.8)
+        version: 19.2.3(@types/react@19.2.9)
       '@typescript/native-preview':
         specifier: 7.0.0-dev.20260114.1
         version: 7.0.0-dev.20260114.1
@@ -140,7 +140,7 @@ importers:
         version: 5.5.3
       react-scan:
         specifier: ^0.4.3
-        version: 0.4.3(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(rollup@4.55.1)
+        version: 0.4.3(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.4))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react-router@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react@19.2.4)(rollup@4.55.1)
       semantic-release:
         specifier: ^25.0.2
         version: 25.0.2(typescript@5.9.3)
@@ -149,7 +149,7 @@ importers:
         version: 7.8.8
       tailwind-scrollbar:
         specifier: ^4.0.2
-        version: 4.0.2(react@19.2.3)(tailwindcss@4.1.18)
+        version: 4.0.2(react@19.2.4)(tailwindcss@4.1.18)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -1615,8 +1615,8 @@ packages:
     peerDependencies:
       '@types/react': '*'
 
-  '@types/react@19.2.8':
-    resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
+  '@types/react@19.2.9':
+    resolution: {integrity: sha512-Lpo8kgb/igvMIPeNV2rsYKTgaORYdO1XGVZ4Qz3akwOj0ySGYMPlQWa8BaLn0G63D1aSaAQ5ldR06wCpChQCjA==}
 
   '@types/seedrandom@2.4.34':
     resolution: {integrity: sha512-ytDiArvrn/3Xk6/vtylys5tlY6eo7Ane0hvcx++TKo6RxQXuVfW0AF/oeWqAj9dN29SyhtawuXstgmPlwNcv/A==}
@@ -3424,8 +3424,8 @@ packages:
       react: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  react@19.2.3:
-    resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
+  react@19.2.4:
+    resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
     engines: {node: '>=0.10.0'}
 
   read-package-up@11.0.0:
@@ -5053,10 +5053,10 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@11.16.3':
     optional: true
 
-  '@pivanov/utils@0.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@pivanov/utils@0.0.2(react-dom@19.2.3(react@19.2.4))(react@19.2.4)':
     dependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
 
   '@pnpm/config.env-replace@1.1.0': {}
 
@@ -5389,29 +5389,29 @@ snapshots:
 
   '@tanstack/history@1.145.7': {}
 
-  '@tanstack/react-router@1.150.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@tanstack/react-router@1.150.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/history': 1.145.7
-      '@tanstack/react-store': 0.8.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@tanstack/react-store': 0.8.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       '@tanstack/router-core': 1.150.0
       isbot: 5.1.32
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  '@tanstack/react-store@0.8.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@tanstack/react-store@0.8.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/store': 0.8.0
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      use-sync-external-store: 1.6.0(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
+      use-sync-external-store: 1.6.0(react@19.2.4)
 
-  '@tanstack/react-virtual@3.13.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@tanstack/react-virtual@3.13.18(react-dom@19.2.3(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/virtual-core': 3.13.18
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
 
   '@tanstack/router-core@1.150.0':
     dependencies:
@@ -5543,15 +5543,15 @@ snapshots:
 
   '@types/prismjs@1.26.5': {}
 
-  '@types/react-dom@19.2.3(@types/react@19.2.8)':
+  '@types/react-dom@19.2.3(@types/react@19.2.9)':
     dependencies:
-      '@types/react': 19.2.8
+      '@types/react': 19.2.9
 
-  '@types/react-reconciler@0.28.9(@types/react@19.2.8)':
+  '@types/react-reconciler@0.28.9(@types/react@19.2.9)':
     dependencies:
-      '@types/react': 19.2.8
+      '@types/react': 19.2.9
 
-  '@types/react@19.2.8':
+  '@types/react@19.2.9':
     dependencies:
       csstype: 3.2.3
 
@@ -5687,10 +5687,10 @@ snapshots:
 
   binary-search@1.3.6: {}
 
-  bippy@0.3.34(@types/react@19.2.8)(react@19.2.3):
+  bippy@0.3.34(@types/react@19.2.9)(react@19.2.4):
     dependencies:
-      '@types/react-reconciler': 0.28.9(@types/react@19.2.8)
-      react: 19.2.3
+      '@types/react-reconciler': 0.28.9(@types/react@19.2.9)
+      react: 19.2.4
     transitivePeerDependencies:
       - '@types/react'
 
@@ -6935,14 +6935,14 @@ snapshots:
 
   num-sort@2.1.0: {}
 
-  nuqs@2.8.6(@tanstack/react-router@1.150.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
+  nuqs@2.8.6(@tanstack/react-router@1.150.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react-router@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react@19.2.4):
     dependencies:
       '@standard-schema/spec': 1.0.0
-      react: 19.2.3
+      react: 19.2.4
     optionalDependencies:
-      '@tanstack/react-router': 1.150.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react-router: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react-router-dom: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@tanstack/react-router': 1.150.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
+      react-router: 7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
+      react-router-dom: 7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
 
   object-assign@4.1.1: {}
 
@@ -7153,11 +7153,11 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prism-react-renderer@2.4.1(react@19.2.3):
+  prism-react-renderer@2.4.1(react@19.2.4):
     dependencies:
       '@types/prismjs': 1.26.5
       clsx: 2.1.1
-      react: 19.2.3
+      react: 19.2.4
 
   process-nextick-args@2.0.1: {}
 
@@ -7199,78 +7199,78 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  react-dom@19.2.3(react@19.2.3):
+  react-dom@19.2.3(react@19.2.4):
     dependencies:
-      react: 19.2.3
+      react: 19.2.4
       scheduler: 0.27.0
 
-  react-icons@5.5.0(react@19.2.3):
+  react-icons@5.5.0(react@19.2.4):
     dependencies:
-      react: 19.2.3
+      react: 19.2.4
 
-  react-infinite-scroller@1.2.6(react@19.2.3):
+  react-infinite-scroller@1.2.6(react@19.2.4):
     dependencies:
       prop-types: 15.8.1
-      react: 19.2.3
+      react: 19.2.4
 
   react-is@16.13.1: {}
 
   react-refresh@0.18.0: {}
 
-  react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4):
     dependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      react-router: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
+      react-router: 7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
 
-  react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  react-router@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4):
     dependencies:
       cookie: 1.1.1
-      react: 19.2.3
+      react: 19.2.4
       set-cookie-parser: 2.7.2
     optionalDependencies:
-      react-dom: 19.2.3(react@19.2.3)
+      react-dom: 19.2.3(react@19.2.4)
 
-  react-scan@0.4.3(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(rollup@4.55.1):
+  react-scan@0.4.3(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.4))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react-router@7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4))(react@19.2.4)(rollup@4.55.1):
     dependencies:
       '@babel/core': 7.28.6
       '@babel/generator': 7.28.6
       '@babel/types': 7.28.6
       '@clack/core': 0.3.5
       '@clack/prompts': 0.8.2
-      '@pivanov/utils': 0.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@pivanov/utils': 0.0.2(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       '@preact/signals': 1.3.2(preact@10.28.2)
       '@rollup/pluginutils': 5.3.0(rollup@4.55.1)
       '@types/node': 20.19.29
-      bippy: 0.3.34(@types/react@19.2.8)(react@19.2.3)
+      bippy: 0.3.34(@types/react@19.2.9)(react@19.2.4)
       esbuild: 0.25.12
       estree-walker: 3.0.3
       kleur: 4.1.5
       mri: 1.2.0
       playwright: 1.57.0
       preact: 10.28.2
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
       tsx: 4.21.0
     optionalDependencies:
-      react-router: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react-router-dom: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react-router: 7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
+      react-router-dom: 7.12.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4)
       unplugin: 2.1.0
     transitivePeerDependencies:
       - '@types/react'
       - rollup
       - supports-color
 
-  react-slick@0.31.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  react-slick@0.31.0(react-dom@19.2.3(react@19.2.4))(react@19.2.4):
     dependencies:
       classnames: 2.5.1
       json2mq: 0.2.0
       lodash.debounce: 4.0.8
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
+      react: 19.2.4
+      react-dom: 19.2.3(react@19.2.4)
       resize-observer-polyfill: 1.5.1
 
-  react@19.2.3: {}
+  react@19.2.4: {}
 
   read-package-up@11.0.0:
     dependencies:
@@ -7615,9 +7615,9 @@ snapshots:
 
   tagged-tag@1.0.0: {}
 
-  tailwind-scrollbar@4.0.2(react@19.2.3)(tailwindcss@4.1.18):
+  tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.1.18):
     dependencies:
-      prism-react-renderer: 2.4.1(react@19.2.3)
+      prism-react-renderer: 2.4.1(react@19.2.4)
       tailwindcss: 4.1.18
     transitivePeerDependencies:
       - react
@@ -7755,9 +7755,9 @@ snapshots:
 
   url-join@5.0.0: {}
 
-  use-sync-external-store@1.6.0(react@19.2.3):
+  use-sync-external-store@1.6.0(react@19.2.4):
     dependencies:
-      react: 19.2.3
+      react: 19.2.4
 
   util-deprecate@1.0.2: {}
 
@@ -7892,9 +7892,9 @@ snapshots:
 
   zod@4.3.5: {}
 
-  zustand@5.0.10(@types/react@19.2.8)(immer@9.0.21)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3)):
+  zustand@5.0.10(@types/react@19.2.9)(immer@9.0.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
     optionalDependencies:
-      '@types/react': 19.2.8
+      '@types/react': 19.2.9
       immer: 9.0.21
-      react: 19.2.3
-      use-sync-external-store: 1.6.0(react@19.2.3)
+      react: 19.2.4
+      use-sync-external-store: 1.6.0(react@19.2.4)
