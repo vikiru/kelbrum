@@ -57,7 +57,7 @@
     "postinstall": "lefthook install"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-router": "^1.157.16",
     "@tanstack/react-virtual": "^3.13.0",
     "firebase": "^12.8.0",
     "flexsearch": "^0.8.212",
