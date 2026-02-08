@@ -114,3 +114,13 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+.agent
+.claude
+.crush
+.cursor
+.gemini
+.kilocode
+.opencode
+.qwen
+openspec
