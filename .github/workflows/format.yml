@@ -1,35 +1,48 @@
 name: Format Files
-run-name: Format files using Biome
+run-name: Format files using Oxfmt
 on:
     push:
         branches:
             - main
-permissions:
-    contents: write
-    statuses: write
-    actions: write
+permissions: {}
+
+concurrency:
+    group: format-${{ github.ref }}
+    cancel-in-progress: true
 jobs:
     format:
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v4
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  persist-credentials: false
             - name: Setup github-actions[bot] git config
               run: |
                   git config --local user.name "github-actions[bot]"
                   git config --local user.email "github-actions[bot]@users.noreply.github.com"
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
               with:
-                  node-version: "lts/*"
+                  node-version: "22"
             - name: Setup pnpm
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.0.0
               with:
-                  version: 10
+                  version: 11.20.0
+            - name: Setup uv
+              uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d # v6.8.1
+              with:
+                  enable-cache: false
             - name: Install dependencies
-              run: pnpm install --frozen-lockfile # Install from frozen lockfile
+              run: pnpm install --frozen-lockfile --ignore-scripts
             - name: Format files
               run: pnpm run format
+            - name: Ruff formatting check
+              run: uvx ruff format src/packages
+            - name: Ruff lint
+              run: uvx ruff check src/packages
             - name: Check for changes
               id: changes
               run: |
@@ -46,6 +59,8 @@ jobs:
               run: echo "$CHANGES_EXIST"
             - name: Commit formatting changes via GitHub Actions, if changes exist
               if: steps.changes.outputs.changes_exist == 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: |-
                   git commit -m "chore: format files via github actions"
-                  git push
+                  git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
