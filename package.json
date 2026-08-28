@@ -50,8 +50,8 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "biome lint",
-    "format": "biome check --write",
+    "lint": "oxlint",
+    "format": "oxfmt --write",
     "typecheck": "tsc --noEmit",
     "unused": "knip",
     "postinstall": "lefthook install"
@@ -81,7 +81,6 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.8",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@semantic-release/git": "^10.0.1",
@@ -104,6 +103,8 @@
     "react-scan": "^0.4.3",
     "semantic-release": "^25.0.9",
     "simple-statistics": "^7.10.1",
+    "oxfmt": "^0.63.0",
+    "oxlint": "^1.79.0",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
