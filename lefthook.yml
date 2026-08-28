@@ -1,10 +1,35 @@
 pre-commit:
+  parallel: false
   jobs:
-    - name: Lint with Biome
-      glob: "*.{js,mjs,cjs,ts,tsx,jsx}"
-      run: pnpm exec biome check --colors=false {staged_files}
+    - name: Format frontend source files
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
+      run: 'pnpm oxfmt --write --ignore-path .gitignore {staged_files}'
+      stage_fixed: true
+
+    - name: Format Python files
+      root: src/packages
+      glob: '**/*.py'
+      run: 'uvx ruff format {staged_files}'
+      stage_fixed: true
+
+    - name: Validate frontend files
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
+      run: 'pnpm lint'
+
+    - name: Validate Python files
+      root: src/packages
+      glob: '**/*.py'
+      run: 'uvx ruff check --fix {staged_files}'
+      stage_fixed: true
 
 commit-msg:
   jobs:
     - name: Validate commit message
       run: pnpm exec commitlint --edit $1
+
+pre-push:
+  parallel: false
+  jobs:
+    - name: Frontend type verification
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
+      run: 'pnpm typecheck && pnpm lint'
