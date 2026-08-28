@@ -2,6 +2,7 @@
 plans
 public/data/*.json
 src/data/*.json
+src/packages/experiments/
 build
 
 todos.md
