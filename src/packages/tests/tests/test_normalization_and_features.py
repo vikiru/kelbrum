@@ -105,6 +105,25 @@ def test_weighted_distance_omits_numeric_weight_without_shared_dimensions() -> N
     assert weighted_distance(bundle, 0, 1, weights={'genres': 0.5, 'numeric': 0.5}) == 0.0
 
 
+def test_weighted_distance_omits_matching_missing_bucket_weight() -> None:
+    bundle = FeatureBundle(
+        np.asarray([10, 20], dtype=np.int64),
+        (
+            FeatureBlock('genres', 'multi-hot', csr_matrix([[1.0], [1.0]]), ('Drama',), ('genres',)),
+            FeatureBlock(
+                'year-bucket',
+                'one-hot',
+                csr_matrix([[1.0, 0.0], [1.0, 0.0]]),
+                ('missing', '2000+'),
+                ('year',),
+                np.asarray([False, False]),
+            ),
+        ),
+    )
+
+    assert weighted_distance(bundle, 0, 1, weights={'genres': 0.5, 'year-bucket': 0.5}) == 0.0
+
+
 def test_synopsis_features_clean_text_and_preserve_row_alignment() -> None:
     texts = ['  quiet\nforest  ', None, 'space adventure']
 
