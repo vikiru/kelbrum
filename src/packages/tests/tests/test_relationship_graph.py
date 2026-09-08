@@ -1,4 +1,6 @@
+from recommender.frozen_pipeline import raw_score_frozen_union
 from recommender.relationship_graph import build_relationship_index
+from recommender.union import PathEvidence, UnionCandidate
 
 
 def test_same_story_family_is_removed_and_candidates_are_canonicalized() -> None:
@@ -21,6 +23,40 @@ def test_manual_relationships_are_symmetric_and_fingerprinted() -> None:
     assert index.excluded_ids(1) == frozenset({1, 2})
     assert index.excluded_ids(2) == frozenset({1, 2})
     assert index.fingerprint()
+
+
+def test_frozen_union_keeps_highest_alias_score_and_merges_paths() -> None:
+    index = build_relationship_index(
+        (1, 2, 3, 4),
+        {
+            2: ((3, 'Sequel'), (4, 'Sequel')),
+            3: ((2, 'Prequel'),),
+            4: ((2, 'Prequel'),),
+        },
+        anime_types={2: 'TV', 3: 'TV', 4: 'TV'},
+    )
+    candidates = (
+        UnionCandidate(3, (PathEvidence('embedding', 1, 0.2),)),
+        UnionCandidate(
+            4,
+            (
+                PathEvidence('embedding', 1, 0.8),
+                PathEvidence('genres', 1, 0.8),
+            ),
+        ),
+    )
+
+    result = raw_score_frozen_union(
+        1,
+        candidates,
+        genres_by_id={},
+        themes_by_id={},
+        tags_by_id={},
+        demographics_by_id={},
+        relationship_index=index,
+    )
+
+    assert result == ((2, 4, 0.336, ('embedding', 'genres')),)
 
 
 def test_tv_origin_beats_movie_and_ona_entries_when_relationships_identify_origin() -> None:
