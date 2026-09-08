@@ -217,7 +217,7 @@ class Recommender:
     def raw_similarity_many(
         self,
         source_anime_ids: Sequence[int],
-    ) -> Mapping[int, tuple[tuple[int, float, tuple[str, ...]], ...]]:
+    ) -> Mapping[int, tuple[tuple[int, int, float, tuple[str, ...]], ...]]:
         """Return pre-qualification canonical similarity rows for experiments."""
         source_indices = tuple(self._index_by_id[source_anime_id] for source_anime_id in source_anime_ids)
         streamed = {
@@ -233,7 +233,7 @@ class Recommender:
             name: index.rank_many(source_indices, limit=self._retrieval_limit)
             for name, index in self._affinity_indexes.items()
         }
-        results: dict[int, tuple[tuple[int, float, tuple[str, ...]], ...]] = {}
+        results: dict[int, tuple[tuple[int, int, float, tuple[str, ...]], ...]] = {}
         unbounded_count = 0
         reduced_count = 0
         family_counts = {'semantic': 0, 'structured': 0, 'neighbourhood': 0, 'affinity': 0}
@@ -283,12 +283,13 @@ class Recommender:
             source_id: tuple(
                 RawRecommendation(
                     anime_id=candidate_id,
+                    winning_alias_id=winning_alias_id,
                     score=score,
                     retrieval_paths=paths,
                     semantic_available=any(path in SEMANTIC_EVIDENCE_PATHS for path in paths),
                     categorical_available=any(path in CATEGORICAL_EVIDENCE_PATHS for path in paths),
                 )
-                for candidate_id, score, paths in candidates
+                for candidate_id, winning_alias_id, score, paths in candidates
             )
             for source_id, candidates in raw_results.items()
         }
@@ -333,13 +334,13 @@ def raw_score_frozen_union(
     demographics_by_id: Mapping[int, Sequence[str] | frozenset[str]],
     relationship_index: RelationshipIndex | None = None,
     is_eligible: Callable[[int], bool] | None = None,
-) -> tuple[tuple[int, float, tuple[str, ...]], ...]:
+) -> tuple[tuple[int, int, float, tuple[str, ...]], ...]:
     """Score every structurally valid union candidate without qualification."""
     source_genres = frozenset(genres_by_id.get(source_anime_id, ()))
     source_themes = frozenset(themes_by_id.get(source_anime_id, ()))
     source_demographics = frozenset(demographics_by_id.get(source_anime_id, ()))
     source_tags = frozenset(tags_by_id.get(source_anime_id, ()))
-    scored: list[tuple[int, float, tuple[str, ...]]] = []
+    scored: list[tuple[int, int, float, tuple[str, ...]]] = []
     for candidate in candidates:
         candidate_id = candidate.anime_id
         if candidate_id == source_anime_id or (is_eligible is not None and not is_eligible(candidate_id)):
@@ -364,20 +365,28 @@ def raw_score_frozen_union(
             + GENRE_WEIGHT * genre_score
             + DEMOGRAPHIC_WEIGHT * demographic_score
         )
-        scored.append((canonical_id, score, tuple(sorted(item.path for item in candidate.evidence))))
-    deduplicated: dict[int, tuple[float, tuple[str, ...]]] = {}
-    for candidate_id, score, paths in scored:
-        deduplicated.setdefault(candidate_id, (score, paths))
+        scored.append((canonical_id, candidate_id, score, tuple(sorted(item.path for item in candidate.evidence))))
+    deduplicated: dict[int, tuple[int, float, set[str]]] = {}
+    for candidate_id, alias_id, score, paths in scored:
+        current = deduplicated.get(candidate_id)
+        if current is None:
+            deduplicated[candidate_id] = (alias_id, score, set(paths))
+            continue
+        best_alias_id, best_score, retained_paths = current
+        retained_paths.update(paths)
+        if score > best_score:
+            best_alias_id, best_score = alias_id, score
+        deduplicated[candidate_id] = (best_alias_id, best_score, retained_paths)
     return tuple(
-        (candidate_id, score, paths)
-        for candidate_id, (score, paths) in sorted(deduplicated.items(), key=_sort_scored_candidates)
+        (candidate_id, alias_id, score, tuple(sorted(paths)))
+        for candidate_id, (alias_id, score, paths) in sorted(deduplicated.items(), key=_sort_scored_candidates)
     )
 
 
 def _sort_scored_candidates(
-    item: tuple[int, tuple[float, tuple[str, ...]]],
+    item: tuple[int, tuple[int, float, set[str]]],
 ) -> tuple[float, int]:
-    return (-item[1][0], item[0])
+    return (-item[1][1], item[0])
 
 
 def _dice(source: frozenset[str] | set[str], candidate: Sequence[str] | frozenset[str] | set[str] | None) -> float:
