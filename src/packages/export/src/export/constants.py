@@ -1,0 +1,12 @@
+"""Stable frontend export policy constants."""
+
+DEFAULT_FEATURED_LIMIT = 100
+MINIMUM_HOMEPAGE_SCORE = 8.0
+
+DEFAULT_METADATA_CHUNK_SIZE = 1_000
+DEFAULT_FULL_ENTRY_CHUNK_SIZE = 500
+MIN_FULL_ENTRY_CHUNK_SIZE = 250
+MAX_FULL_ENTRY_CHUNK_SIZE = 1_000
+
+FILTER_NUMERIC_FIELDS = ('year', 'score', 'episodes')
+FILTER_CATEGORICAL_FIELDS = ('anime_type', 'rating', 'genre', 'theme')
