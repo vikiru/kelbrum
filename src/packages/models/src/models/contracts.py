@@ -41,6 +41,7 @@ class RawRecommendation(msgspec.Struct, frozen=True):
     """Ranked candidate evidence before display or qualification policy."""
 
     anime_id: int
+    winning_alias_id: int
     score: float
     retrieval_paths: tuple[str, ...]
     semantic_available: bool
