@@ -835,10 +835,12 @@ version = "0.1.0"
 source = { editable = "tests" }
 dependencies = [
     { name = "config" },
+    { name = "export" },
     { name = "features" },
     { name = "models" },
     { name = "normalization" },
     { name = "numpy" },
+    { name = "pipeline" },
     { name = "polars" },
     { name = "processing" },
     { name = "pytest" },
@@ -849,10 +851,12 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "config", editable = "config" },
+    { name = "export", editable = "export" },
     { name = "features", editable = "features" },
     { name = "models", editable = "models" },
     { name = "normalization", editable = "normalization" },
     { name = "numpy", specifier = ">=2.0" },
+    { name = "pipeline", editable = "pipeline" },
     { name = "polars", specifier = ">=1.0" },
     { name = "processing", editable = "processing" },
     { name = "pytest", specifier = ">=8.0" },
@@ -2360,6 +2364,7 @@ dependencies = [
     { name = "msgspec" },
     { name = "numpy" },
     { name = "orjson" },
+    { name = "polars" },
     { name = "scipy" },
 ]
 
@@ -2368,6 +2373,7 @@ requires-dist = [
     { name = "msgspec", specifier = ">=0.18" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "orjson", specifier = ">=3.10" },
+    { name = "polars", specifier = ">=1.0" },
     { name = "scipy", specifier = ">=1.14" },
 ]
 
