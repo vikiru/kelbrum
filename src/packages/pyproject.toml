@@ -59,7 +59,7 @@ select = [
   "T20",     # stray print statements
   "TRY",     # exception handling
   "PT",      # pytest conventions
-  "TCH",     # type-checking imports
+  "TC",      # type-checking imports
   "PLW0120", # unnecessary else after loop
   "PLW0602", # global variable read before assignment
   "PLW0603", # global statement
