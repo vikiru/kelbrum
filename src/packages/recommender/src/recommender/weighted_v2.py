@@ -405,6 +405,9 @@ def weighted_distance(
         block = blocks.get(name)
         if block is None or weight == 0.0:
             continue
+        row_available = block.availability()
+        if not row_available[left_index] or not row_available[right_index]:
+            continue
         left = _row(block, left_index)
         right = _row(block, right_index)
         if _is_unavailable(left) or _is_unavailable(right):
