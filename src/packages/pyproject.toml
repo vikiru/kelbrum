@@ -32,7 +32,7 @@ export = { workspace = true }
 [tool.ruff]
 line-length = 120
 target-version = "py313"
-extend-exclude = [".venv", "data"]
+extend-exclude = [".venv", "data", "experiments"]
 
 [tool.ruff.lint]
 select = [
@@ -116,7 +116,7 @@ python-version = "3.13"
 
 [tool.ty.src]
 include = ["*/src"]
-exclude = ["data/**", ".venv/**"]
+exclude = ["data/**", ".venv/**", "experiments/**"]
 
 [tool.pyright]
 include = [
