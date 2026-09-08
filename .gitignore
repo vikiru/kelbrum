@@ -1,8 +1,10 @@
 *.md
+*.json
 plans
 public/data/*.json
 src/data/*.json
-src/packages/experiments/
+experiments/
+src/packages/data/
 build
 
 todos.md
@@ -13,6 +15,10 @@ dist
 .history/
 build/
 *.csv
+*.npy
+*.npz
+*.npy.manifest.json
+*.npz.manifest.json
 .firebase/
 
 # Logs
@@ -195,6 +201,8 @@ skills-lock.json
 .iflow
 .qoder
 .roo
+.zvec-grep
+
 
 __pycache__/
 .ruff_cache/
