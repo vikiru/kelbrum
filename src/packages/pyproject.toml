@@ -1,0 +1,166 @@
+[project]
+name = "kelbrum-packages"
+version = "0.1.0"
+description = "Kelbrum offline data and recommendation packages"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = ["poethepoet>=0.48.0", "pyrefly>=1.1.1", "ruff>=0.16.0", "ty>=0.0.65"]
+
+[tool.uv]
+# The root coordinates workspace members but is not an installable package.
+package = false
+
+[tool.uv.workspace]
+members = ["config", "models", "storage", "processing", "normalization", "features", "catalogue", "recommender", "pipeline", "fetch", "export", "experiments", "tests"]
+
+[tool.uv.sources]
+config = { workspace = true }
+anime-catalogue = { workspace = true }
+models = { workspace = true }
+storage = { workspace = true }
+processing = { workspace = true }
+normalization = { workspace = true }
+features = { workspace = true }
+recommender = { workspace = true }
+pipeline = { workspace = true }
+fetch = { workspace = true }
+experiments = { workspace = true }
+export = { workspace = true }
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-exclude = [".venv", "data"]
+
+[tool.ruff.lint]
+select = [
+  "E",       # pycodestyle errors
+  "F",       # Pyflakes errors
+  "I",       # import ordering
+  "UP",      # Python syntax modernization
+  "A",       # builtin shadowing
+  "ARG",     # unused function arguments
+  "B",       # bug-prone patterns
+  "C4",      # comprehension simplification
+  "DTZ",     # timezone correctness
+  "ERA",     # commented-out code
+  "G",       # logging format
+  "LOG",     # logging best practices
+  "N",       # naming conventions
+  "PERF",    # performance anti-patterns
+  "PIE",     # miscellaneous simplifications
+  "PTH",     # pathlib usage
+  "RET",     # return consistency
+  "RUF",     # Ruff-specific rules
+  "S",       # security checks
+  "SIM",     # code simplification
+  "T20",     # stray print statements
+  "TRY",     # exception handling
+  "PT",      # pytest conventions
+  "TCH",     # type-checking imports
+  "PLW0120", # unnecessary else after loop
+  "PLW0602", # global variable read before assignment
+  "PLW0603", # global statement
+  "PLW0604", # global declaration at module level
+  "PLC0415", # imports outside module scope
+]
+ignore = ["TRY003"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py" = ["S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["anime_catalogue", "config", "experiments", "export", "fetch", "features", "models", "normalization", "pipeline", "processing", "recommender", "storage"]
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "single"
+line-ending = "lf"
+skip-magic-trailing-comma = false
+
+[tool.pyrefly]
+preset = "strict"
+project-includes = [
+  "config/src",
+  "models/src",
+  "catalogue/src",
+  "storage/src",
+  "processing/src",
+  "normalization/src",
+  "features/src",
+  "recommender/src",
+  "pipeline/src",
+  "fetch/src",
+  "export/src",
+  "tests/src",
+]
+search-path = [
+  "config/src",
+  "models/src",
+  "catalogue/src",
+  "storage/src",
+  "processing/src",
+  "normalization/src",
+  "features/src",
+  "recommender/src",
+  "pipeline/src",
+  "fetch/src",
+  "export/src",
+  "tests/src",
+]
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.src]
+include = ["*/src"]
+exclude = ["data/**", ".venv/**"]
+
+[tool.pyright]
+include = [
+  "config/src",
+  "models/src",
+  "catalogue/src",
+  "storage/src",
+  "processing/src",
+  "normalization/src",
+  "features/src",
+  "recommender/src",
+  "pipeline/src",
+  "fetch/src",
+  "export/src",
+  "tests/src",
+]
+exclude = ["data/**", ".venv/**"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+executionEnvironments = [
+  { root = ".", extraPaths = [
+    "config/src",
+    "models/src",
+    "catalogue/src",
+    "storage/src",
+    "processing/src",
+    "normalization/src",
+    "features/src",
+    "recommender/src",
+    "pipeline/src",
+    "fetch/src",
+    "export/src",
+    "tests/src",
+  ] },
+]
+
+[tool.poe.tasks]
+format = "ruff format ."
+lint = "ruff check ."
+typecheck = "pyrefly check"
+ty = "ty check"
+fetch-entries = "uv run --package fetch python -m fetch"
+download-minilm = "uv run --package features python -m features.model_download"
+run-pipeline = "uv run --package pipeline python -m pipeline"
+test = "uv run --package kelbrum-tests pytest -q tests --tb=short"
