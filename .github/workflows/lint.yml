@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - dev
 
 permissions: {}
 
@@ -32,6 +33,9 @@ jobs:
         uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d # v6.8.1
         with:
           enable-cache: false
+          python-version: '3.13'
+      - name: Install Python dev dependencies
+        run: uv --directory src/packages sync --dev --no-install-workspace
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Lint files
@@ -39,6 +43,12 @@ jobs:
       - name: Oxfmt formatting check
         run: pnpm exec oxfmt --check
       - name: Ruff lint
-        run: uvx ruff check src/packages
+        run: uv --directory src/packages run ruff check .
       - name: Ruff formatting check
-        run: uvx ruff format --check src/packages
+        run: uv --directory src/packages run ruff format --check .
+      - name: Pyrefly type check
+        run: uv --directory src/packages run pyrefly check
+      - name: ty type check
+        run: uv --directory src/packages run ty check
+      - name: Python tests
+        run: uv --directory src/packages run pytest -q tests/tests --tb=short
