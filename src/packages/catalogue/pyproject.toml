@@ -1,0 +1,10 @@
+[project]
+name = "anime-catalogue"
+version = "0.1.0"
+description = "Indexed normalized anime catalogue access"
+requires-python = ">=3.13"
+dependencies = ["polars>=1.0"]
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
