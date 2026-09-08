@@ -1,9 +1,10 @@
 name: Format Files
 run-name: Format files using Oxfmt
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+      - dev
 permissions: {}
 
 concurrency:
@@ -35,14 +36,17 @@ jobs:
               uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d # v6.8.1
               with:
                   enable-cache: false
+                  python-version: '3.13'
+            - name: Install Python dev dependencies
+              run: uv --directory src/packages sync --dev --no-install-workspace
             - name: Install dependencies
               run: pnpm install --frozen-lockfile --ignore-scripts
             - name: Format files
               run: pnpm run format
             - name: Ruff formatting check
-              run: uvx ruff format src/packages
+              run: uv --directory src/packages run ruff format .
             - name: Ruff lint
-              run: uvx ruff check src/packages
+              run: uv --directory src/packages run ruff check .
             - name: Check for changes
               id: changes
               run: |
