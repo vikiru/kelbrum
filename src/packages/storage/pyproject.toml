@@ -1,0 +1,10 @@
+[project]
+name = "storage"
+version = "0.1.0"
+description = "Kelbrum storage package"
+requires-python = ">=3.13"
+dependencies = ["msgspec>=0.18", "numpy>=2.0", "orjson>=3.10", "polars>=1.0", "scipy>=1.14"]
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
