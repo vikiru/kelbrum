@@ -9,6 +9,7 @@
   "trailingComma": "all",
   "bracketSpacing": true,
   "arrowParens": "always",
+  "ignorePatterns": ["frontend/src/routeTree.gen.ts"],
   "sortImports": {
     "groups": [
       "type-import",
@@ -19,5 +20,10 @@
       ["value-parent", "value-sibling", "value-index"],
       "unknown"
     ]
+  },
+  "sortTailwindcss": {
+    "stylesheet": "./frontend/src/styles.css",
+    "functions": ["clsx", "cn", "cva"],
+    "preserveWhitespace": true
   }
 }
