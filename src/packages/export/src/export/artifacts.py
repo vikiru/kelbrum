@@ -38,7 +38,7 @@ def write_metadata_chunks(
         raise ValueError('chunk_size must be positive')
     return tuple(
         write_frontend_json(
-            f'metadata-{bucket_start:06d}-{bucket_start + chunk_size - 1:06d}.json',
+            f'metadata-{bucket_start}-{bucket_start + chunk_size - 1}.json',
             {str(_metadata_id(metadata[index])): metadata[index] for index in indexes},
             output_dir=output_dir,
         )
@@ -97,7 +97,7 @@ def write_full_entries(
         }
         paths.append(
             write_frontend_json(
-                f'full-{bucket_start:06d}-{bucket_start + chunk_size - 1:06d}.json',
+                f'full-{bucket_start}-{bucket_start + chunk_size - 1}.json',
                 payload,
                 output_dir=output_dir / 'full',
             )
@@ -130,8 +130,8 @@ def write_full_entries_from_chunks(
     cached_recommendations: Mapping[int, Sequence[int]] = {}
     cached_scores: Mapping[int, Sequence[RecommendationScore]] = {}
     cached_explanations: Mapping[int, Sequence[object]] = {}
-    for start in range(0, len(ordered_entries), chunk_size):
-        chunk = ordered_entries[start : start + chunk_size]
+    for bucket_start, indexes in _entry_buckets(ordered_entries, chunk_size):
+        chunk = [ordered_entries[index] for index in indexes]
         payload: dict[str, object] = {}
         for entry in chunk:
             recommendation_chunk_number = entry_to_chunk.get(entry.mal_id)
@@ -155,7 +155,7 @@ def write_full_entries_from_chunks(
             )
         paths.append(
             write_frontend_json(
-                f'full-{chunk[0].mal_id:06d}-{chunk[-1].mal_id:06d}.json',
+                f'full-{bucket_start}-{bucket_start + chunk_size - 1}.json',
                 payload,
                 output_dir=output_dir / 'full',
             )
@@ -229,12 +229,15 @@ def _metadata_id(metadata: object) -> int:
 def _metadata_buckets(metadata: Sequence[object], width: int) -> tuple[tuple[int, tuple[int, ...]], ...]:
     buckets: dict[int, list[int]] = {}
     for index, item in enumerate(metadata):
-        buckets.setdefault((_metadata_id(item) // width) * width, []).append(index)
+        item_id = _metadata_id(item)
+        bucket_start = ((item_id - 1) // width) * width + 1
+        buckets.setdefault(bucket_start, []).append(index)
     return tuple((start, tuple(indexes)) for start, indexes in sorted(buckets.items()))
 
 
 def _entry_buckets(entries: Sequence[TenraiAnimeEntry], width: int) -> tuple[tuple[int, tuple[int, ...]], ...]:
     buckets: dict[int, list[int]] = {}
     for index, entry in enumerate(entries):
-        buckets.setdefault((entry.mal_id // width) * width, []).append(index)
+        bucket_start = ((entry.mal_id - 1) // width) * width + 1
+        buckets.setdefault(bucket_start, []).append(index)
     return tuple((start, tuple(indexes)) for start, indexes in sorted(buckets.items()))
