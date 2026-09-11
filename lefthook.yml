@@ -1,9 +1,9 @@
 pre-commit:
   parallel: false
   jobs:
-    - name: Format frontend source files
-      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
-      run: 'pnpm oxfmt --write --ignore-path .gitignore {staged_files}'
+    - name: Format staged frontend files
+      glob: '*.{js,mjs,cjs,ts,jsx,tsx,json,css}'
+      run: 'pnpm format {staged_files}'
       stage_fixed: true
 
     - name: Format Python files
@@ -13,8 +13,8 @@ pre-commit:
       stage_fixed: true
 
     - name: Validate frontend files
-      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
-      run: 'pnpm lint'
+      glob: '*.{js,mjs,cjs,ts,jsx,tsx}'
+      run: 'pnpm exec oxlint {staged_files}'
 
     - name: Validate Python files
       root: src/packages
@@ -32,7 +32,7 @@ pre-push:
   jobs:
     - name: Frontend type verification
       glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
-      run: 'pnpm typecheck && pnpm lint'
+      run: 'pnpm typecheck'
 
     - name: Python verification
       root: src/packages

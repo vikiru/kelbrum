@@ -1,12 +1,15 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "project": ["tsconfig.json"],
+  "project": ["frontend/tsconfig.json"],
   "entry": [
-    "*.{js,jsx,ts,tsx}",
-    "components/**/*.{js,jsx,ts,tsx}",
-    "context/**/*.{js,jsx,ts,tsx}",
-    "pages/**/*.{js,jsx,ts,tsx}",
-    "recommender/**/*.{js,jsx,ts,tsx}"
+    "frontend/src/router.tsx",
+    "frontend/src/routes/**",
+    "frontend/*.config.ts"
+  ],
+  "ignoreDependencies": [
+    "@semantic-release/git",
+    "@semantic-release/npm",
+    "semantic-release"
   ],
   "ignoreExportsUsedInFile": {
     "interface": true,
