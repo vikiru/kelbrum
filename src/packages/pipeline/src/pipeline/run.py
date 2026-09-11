@@ -14,6 +14,7 @@ from anime_catalogue import order_catalogue_frame
 from config import (
     canonical_dir,
     embedding_cache_dir,
+    frontend_data_dir,
     intermediate_dir,
     tenrai_checkpoint_path,
     tenrai_full_path,
@@ -24,6 +25,7 @@ from config import (
     tenrai_r_plus_snapshot_path,
     tenrai_snapshot_path,
 )
+from export.frontend import write_catalogue_artifacts, write_featured_artifacts
 from features.assemble import assemble_features
 from features.blocks import FeatureBundle
 from features.config import FeatureConfig
@@ -313,6 +315,7 @@ def write_recommendation_artifacts(
     full_entries: Sequence[TenraiAnimeEntry],
     *,
     output_dir: Path,
+    frontend_output_dir: Path,
     recommendation_config: RecommendationConfig,
     provenance: Mapping[str, object] | None = None,
     recommendation_batch_size: int = DEFAULT_RECOMMENDATION_BATCH_SIZE,
@@ -336,7 +339,7 @@ def write_recommendation_artifacts(
         records,
         full_entries,
         recommendation_path=recommendation_path,
-        output_dir=output_dir,
+        output_dir=frontend_output_dir,
         provenance=resolved_provenance,
     )
 
@@ -379,11 +382,17 @@ def run_catalogue_pipeline(
     output_entries = [entry for entry in output_entries if entry.mal_id in accepted_ids]
     processing_audit = read_json(audit_path, dict[str, object])
     write_manifest(run, str(output_dir / 'pipeline-manifest.json'))
+    frontend_output_dir = frontend_data_dir()
+    write_featured_artifacts(records, output_dir=frontend_output_dir)
+    write_catalogue_artifacts(
+        records, full_entries=output_entries, output_dir=frontend_output_dir, include_full_entries=False
+    )
     write_recommendation_artifacts(
         run,
         records,
         output_entries,
         output_dir=output_dir,
+        frontend_output_dir=frontend_output_dir,
         recommendation_config=recommendation_config,
         recommendation_batch_size=recommendation_batch_size,
         provenance={

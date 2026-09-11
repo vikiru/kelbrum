@@ -11,7 +11,7 @@ import polars as pl
 
 from anime_catalogue import order_catalogue_frame
 from models.labels import normalize_label
-from models.tenrai import CanonicalAnime, Images, ImageVariant, Taxonomy, TenraiAnimeEntry
+from models.tenrai import CanonicalAnime, Images, Taxonomy, TenraiAnimeEntry
 from processing.canonicalize import canonicalize
 from processing.constants import PROCESSING_AUDIT_SCHEMA_VERSION
 from processing.eligibility import (
@@ -37,7 +37,8 @@ CANONICAL_SCHEMA = {
     'mal_id': pl.Int64,
     'title': pl.String,
     'title_english': pl.String,
-    'image_url': pl.String,
+    'title_japanese': pl.String,
+    'images_json': pl.String,
     'anime_type': pl.String,
     'source': pl.String,
     'year': pl.Int64,
@@ -65,7 +66,10 @@ def canonical_frame(records: tuple[CanonicalAnime, ...]) -> pl.DataFrame:
             'mal_id': [record.mal_id for record in records],
             'title': [record.title for record in records],
             'title_english': [record.title_english for record in records],
-            'image_url': [_image_url(record) for record in records],
+            'title_japanese': [record.title_japanese for record in records],
+            'images_json': [
+                msgspec.json.encode(record.images).decode('utf-8') if record.images else None for record in records
+            ],
             'anime_type': [record.anime_type for record in records],
             'source': [record.source for record in records],
             'year': [record.year for record in records],
@@ -219,13 +223,13 @@ def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
     if not isinstance(mal_id, (int, float, str)):
         raise TypeError('canonical Parquet row has an invalid mal_id')
 
-    image_url = optional_str('image_url')
+    images_json = optional_str('images_json')
     return CanonicalAnime(
         mal_id=int(mal_id),
         url=None,
         title=str(row['title']),
         title_english=optional_str('title_english'),
-        title_japanese=None,
+        title_japanese=optional_str('title_japanese'),
         title_synonyms=(),
         anime_type=optional_str('anime_type'),
         source=optional_str('source'),
@@ -240,7 +244,7 @@ def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
         synopsis_features=optional_str('synopsis_features'),
         background=None,
         moreinfo=None,
-        images=_images(image_url),
+        images=_decode_images(images_json),
         trailer=None,
         external=(),
         streaming=(),
@@ -255,17 +259,10 @@ def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
     )
 
 
-def _image_url(record: CanonicalAnime) -> str | None:
-    if record.images is None:
+def _decode_images(images_json: str | None) -> Images | None:
+    if images_json is None:
         return None
-    for variant in (record.images.webp, record.images.jpg):
-        if variant and variant.image_url:
-            return variant.image_url
-    return None
-
-
-def _images(image_url: str | None) -> Images | None:
-    return None if image_url is None else Images(jpg=ImageVariant(image_url=image_url))
+    return msgspec.json.decode(images_json.encode('utf-8'), type=Images)
 
 
 def write_canonical_parquet(result: ProcessingResult, destination: Path) -> int:
