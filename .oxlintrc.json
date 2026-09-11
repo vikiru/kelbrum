@@ -1,6 +1,23 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "oxc", "node", "react", "jsx-a11y", "typescript", "import", "unicorn", "promise"],
+  "plugins": [
+    "eslint",
+    "oxc",
+    "node",
+    "react",
+    "react-perf",
+    "jsx-a11y",
+    "typescript",
+    "import",
+    "unicorn",
+    "promise"
+  ],
+  "jsPlugins": ["oxlint-tailwindcss"],
+  "settings": {
+    "tailwindcss": {
+      "entryPoint": "frontend/src/styles.css"
+    }
+  },
   "options": {
     "typeAware": false,
     "typeCheck": false
@@ -23,7 +40,20 @@
     "typescript/no-explicit-any": "error",
     "typescript/no-non-null-assertion": "warn",
     "no-unused-vars": "warn",
-    "no-console": ["warn", { "allow": ["warn", "error", "info"] }]
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    "tailwindcss/no-unknown-classes": "error",
+    "tailwindcss/no-duplicate-classes": "error",
+    "tailwindcss/no-conflicting-classes": "error",
+    "tailwindcss/no-deprecated-classes": "error"
   },
-  "ignorePatterns": ["dist/**", "build/**", "node_modules/**"]
+  "ignorePatterns": [
+    "dist/**",
+    "build/**",
+    "frontend/.output/**",
+    "frontend/.tanstack/**",
+    "frontend/dist/**",
+    "frontend/node_modules/**",
+    "frontend/src/routeTree.gen.ts",
+    "node_modules/**"
+  ]
 }
