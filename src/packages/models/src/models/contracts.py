@@ -4,6 +4,8 @@ from typing import Literal
 
 import msgspec
 
+from models.tenrai import Images
+
 MAX_RECOMMENDATIONS = 100
 
 
@@ -96,7 +98,8 @@ class AnimeMetadata(msgspec.Struct, frozen=True):
     mal_id: int = msgspec.field(name='malId')
     title: str
     title_english: str | None = msgspec.field(name='titleEnglish', default=None)
-    image_url: str | None = msgspec.field(name='imageUrl', default=None)
+    title_japanese: str | None = msgspec.field(name='titleJapanese', default=None)
+    images: Images | None = None
     year: int | None = None
     score: float | None = None
 
@@ -109,7 +112,7 @@ class AnimeDetail(msgspec.Struct, frozen=True):
     mal_id: int = msgspec.field(name='malId')
     title: str
     title_english: str | None = msgspec.field(name='titleEnglish', default=None)
-    image_url: str | None = msgspec.field(name='imageUrl', default=None)
+    images: Images | None = None
     year: int | None = None
     score: float | None = None
     synopsis: str | None = None

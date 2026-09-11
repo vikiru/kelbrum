@@ -27,7 +27,7 @@ def to_metadata(record: CanonicalAnime) -> AnimeMetadata:
         mal_id=record.mal_id,
         title=record.title,
         title_english=record.title_english,
-        image_url=_image_url(record),
+        images=record.images,
         year=record.year,
         score=record.score,
     )
@@ -68,6 +68,7 @@ def write_catalogue_artifacts(
     output_dir: Path | None = None,
     provenance: Mapping[str, object] | None = None,
     recommendation_chunks: Path | None = None,
+    include_full_entries: bool = True,
 ) -> None:
     """Write frontend metadata, indexes, recommendations, and separate full entries."""
     destination = output_dir or frontend_data_dir()
@@ -100,17 +101,21 @@ def write_catalogue_artifacts(
     search_path = write_search_metadata(ordered_records, output_dir=destination)
     _validate_id_projection(destination / 'filter-index.json', accepted_ids, 'ids')
     _validate_id_projection(search_path, accepted_ids, 'keys')
-    if recommendation_chunks is not None:
+    if include_full_entries and recommendation_chunks is not None:
         full_paths = write_full_entries_from_chunks(
             full_entries_tuple, output_dir=destination, recommendation_chunks=recommendation_chunks
         )
-    else:
+    elif include_full_entries:
         full_paths = write_full_entries(
             full_entries_tuple,
             output_dir=destination,
             recommendations=recommendations,
             recommendation_scores=recommendation_scores,
         )
+    else:
+        full_paths = ()
+    if full_paths:
+        _validate_full_projection(full_paths, accepted_ids)
     files = (*metadata_paths, search_path, *full_paths, destination / 'filter-index.json')
     provenance_payload = dict(provenance or {})
     build_identity = sha256(msgspec.json.encode(provenance_payload)).hexdigest()
@@ -145,8 +150,10 @@ def write_search_metadata(records: Iterable[CanonicalAnime], *, output_dir: Path
     payload = {
         str(record.mal_id): {
             'malId': record.mal_id,
+            'images': msgspec.to_builtins(record.images),
             'title': record.title,
             'titleEnglish': record.title_english,
+            'titleJapanese': record.title_japanese,
             'year': record.year,
             'score': record.score,
             'episodes': record.episodes,
@@ -184,20 +191,26 @@ def _validate_id_projection(path: Path, expected_ids: set[int], mode: str) -> No
         raise ValueError(f'{path.name} IDs do not match accepted processed IDs')
 
 
+def _validate_full_projection(paths: Sequence[Path], expected_ids: set[int]) -> None:
+    actual_ids: set[int] = set()
+    for path in paths:
+        payload = msgspec.json.decode(path.read_bytes())
+        if not isinstance(payload, dict):
+            raise TypeError(f'{path.name} must contain an object')
+        actual_ids.update(int(anime_id) for anime_id in payload)
+    if actual_ids != expected_ids:
+        missing_ids = sorted(expected_ids - actual_ids)
+        extra_ids = sorted(actual_ids - expected_ids)
+        raise ValueError(
+            f'full-entry IDs do not match accepted processed IDs; missing={missing_ids[:10]}, extra={extra_ids[:10]}'
+        )
+
+
 def _validate_full_entries(entries: Sequence[TenraiAnimeEntry]) -> None:
     if any(not entry.title.strip() or entry.mal_id <= 0 for entry in entries):
         raise ValueError('full entries contain invalid identity fields')
     if any(entry.type is None or entry.genres is None or entry.themes is None for entry in entries):
         raise ValueError('full entries are missing required Tenrai fields')
-
-
-def _image_url(record: CanonicalAnime) -> str | None:
-    if record.images is None:
-        return None
-    for variant in (record.images.webp, record.images.jpg):
-        if variant and variant.image_url:
-            return variant.image_url
-    return None
 
 
 def _record_id(record: CanonicalAnime) -> int:
