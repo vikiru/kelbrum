@@ -8,6 +8,7 @@ import msgspec
 from export.constants import (
     DEFAULT_FULL_ENTRY_CHUNK_SIZE,
     DEFAULT_METADATA_CHUNK_SIZE,
+    DEFAULT_SEARCH_METADATA_CHUNK_SIZE,
     FILTER_CATEGORICAL_FIELDS,
     FILTER_NUMERIC_FIELDS,
     MAX_FULL_ENTRY_CHUNK_SIZE,
@@ -46,6 +47,22 @@ def write_metadata_chunks(
     )
 
 
+def write_search_metadata_chunks(
+    metadata: Sequence[object], *, output_dir: Path, chunk_size: int = DEFAULT_SEARCH_METADATA_CHUNK_SIZE
+) -> tuple[Path, ...]:
+    """Write search metadata in deterministic ID-range chunks for paginated loading."""
+    if chunk_size < 1:
+        raise ValueError('chunk_size must be positive')
+    return tuple(
+        write_frontend_json(
+            f'anime-metadata-{bucket_start}-{bucket_start + chunk_size - 1}.json',
+            {str(_metadata_id(metadata[index])): metadata[index] for index in indexes},
+            output_dir=output_dir,
+        )
+        for bucket_start, indexes in _metadata_buckets(metadata, chunk_size)
+    )
+
+
 def write_filter_index(records: Sequence[CanonicalAnime], *, output_dir: Path) -> Path:
     """Write aligned numeric arrays and categorical ID postings for frontend filters."""
     numeric: dict[str, list[object]] = {field: [] for field in FILTER_NUMERIC_FIELDS}
@@ -58,6 +75,8 @@ def write_filter_index(records: Sequence[CanonicalAnime], *, output_dir: Path) -
             numeric[field].append(getattr(record, field))
         _add_posting(categorical['anime_type'], record.anime_type, record.mal_id)
         _add_posting(categorical['rating'], display_rating(record.rating), record.mal_id)
+        for item in record.demographics:
+            _add_posting(categorical['demographic'], display_label(item.name), record.mal_id)
         for item in record.genres:
             _add_posting(categorical['genre'], display_label(item.name), record.mal_id)
         for item in record.themes:
@@ -80,18 +99,16 @@ def write_full_entries(
     recommendation_scores: Mapping[int, Sequence[RecommendationScore]] | None = None,
     chunk_size: int = DEFAULT_FULL_ENTRY_CHUNK_SIZE,
 ) -> tuple[Path, ...]:
-    """Write complete entries keyed by ID in bounded frontend data chunks."""
+    """Write detail entries and recommendation IDs in bounded frontend data chunks."""
     _validate_full_entry_chunk_size(chunk_size)
+    del recommendation_scores
     recommendation_map = recommendations or {}
-    score_map = recommendation_scores or {}
     ordered_entries = sorted(entries, key=_entry_id)
     paths: list[Path] = []
     for bucket_start, indexes in _entry_buckets(ordered_entries, chunk_size):
         payload = {
             str(ordered_entries[index].mal_id): _full_entry_payload(
-                ordered_entries[index],
-                recommendation_map.get(ordered_entries[index].mal_id, ()),
-                recommendation_scores=score_map.get(ordered_entries[index].mal_id, ()),
+                ordered_entries[index], recommendation_map.get(ordered_entries[index].mal_id, ())
             )
             for index in indexes
         }
@@ -128,8 +145,6 @@ def write_full_entries_from_chunks(
     paths: list[Path] = []
     cached_chunk_number: int | None = None
     cached_recommendations: Mapping[int, Sequence[int]] = {}
-    cached_scores: Mapping[int, Sequence[RecommendationScore]] = {}
-    cached_explanations: Mapping[int, Sequence[object]] = {}
     for bucket_start, indexes in _entry_buckets(ordered_entries, chunk_size):
         chunk = [ordered_entries[index] for index in indexes]
         payload: dict[str, object] = {}
@@ -141,17 +156,9 @@ def write_full_entries_from_chunks(
                 cached_chunk_number = recommendation_chunk_number
                 path = recommendation_chunks / f'chunk-{cached_chunk_number:04d}.json'
                 cached_recommendations = _read_recommendation_chunk(path)
-                cached_scores = _read_recommendation_score_chunk(
-                    recommendation_chunks / f'scores-{cached_chunk_number:04d}.json'
-                )
-                cached_explanations = _read_recommendation_explanation_chunk(
-                    recommendation_chunks / f'explanations-{cached_chunk_number:04d}.json'
-                )
             payload[str(entry.mal_id)] = _full_entry_payload(
                 entry,
                 cached_recommendations.get(entry.mal_id, ()),
-                cached_explanations.get(entry.mal_id, ()),
-                cached_scores.get(entry.mal_id, ()),
             )
         paths.append(
             write_frontend_json(
@@ -169,18 +176,6 @@ def _read_recommendation_chunk(path: Path) -> Mapping[int, Sequence[int]]:
     return msgspec.json.decode(path.read_bytes(), type=dict[int, tuple[int, ...]])
 
 
-def _read_recommendation_explanation_chunk(path: Path) -> Mapping[int, Sequence[object]]:
-    if not path.is_file():
-        return {}
-    return msgspec.json.decode(path.read_bytes(), type=dict[int, tuple[object, ...]])
-
-
-def _read_recommendation_score_chunk(path: Path) -> Mapping[int, Sequence[RecommendationScore]]:
-    if not path.is_file():
-        raise FileNotFoundError(f'missing recommendation score chunk: {path}')
-    return msgspec.json.decode(path.read_bytes(), type=dict[int, tuple[RecommendationScore, ...]])
-
-
 def _add_posting(postings: dict[str, list[int]], value: str | None, anime_id: int) -> None:
     if value:
         postings.setdefault(value, []).append(anime_id)
@@ -194,8 +189,6 @@ def _validate_full_entry_chunk_size(chunk_size: int) -> None:
 def _full_entry_payload(
     entry: TenraiAnimeEntry,
     recommendations: Sequence[int],
-    explanations: Sequence[object] = (),
-    recommendation_scores: Sequence[RecommendationScore] = (),
 ) -> dict[str, object]:
     payload = msgspec.to_builtins(entry)
     if not isinstance(payload, dict):
@@ -205,10 +198,8 @@ def _full_entry_payload(
     payload['themes'] = [{**item, 'name': display_label(item['name'])} for item in payload.get('themes', [])]
     payload['durationMinutes'] = duration_to_minutes(entry.duration)
     payload['recommendations'] = list(dict.fromkeys(recommendations))
-    if recommendation_scores:
-        payload['recommendationScores'] = [msgspec.to_builtins(score) for score in recommendation_scores]
-    if explanations:
-        payload['recommendationExplanations'] = list(explanations)
+    payload.pop('recommendationScores', None)
+    payload.pop('recommendationExplanations', None)
     return payload
 
 

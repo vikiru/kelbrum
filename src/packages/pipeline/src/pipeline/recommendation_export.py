@@ -22,8 +22,8 @@ def export_catalogue_stage(
 ) -> None:
     """Build frontend artifacts from complete, checksummed recommendation chunks."""
     manifest = read_json(recommendation_path / 'manifest.json', dict[str, object])
-    if manifest.get('schema_version') != 'recommendation-chunks-v3':
-        raise ValueError('recommendation manifest does not include score and explanation sidecars')
+    if manifest.get('schema_version') != 'recommendation-chunks-v4':
+        raise ValueError('recommendation manifest does not contain production ID chunks')
     chunk_size = manifest.get('chunk_size')
     if not isinstance(chunk_size, int) or not (
         MIN_RECOMMENDATION_BATCH_SIZE <= chunk_size <= MAX_RECOMMENDATION_BATCH_SIZE

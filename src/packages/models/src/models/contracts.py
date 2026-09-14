@@ -108,6 +108,20 @@ class AnimeMetadata(msgspec.Struct, frozen=True):
             raise ValueError('mal_id must be positive')
 
 
+class AnimeCardMetadata(msgspec.Struct, frozen=True):
+    mal_id: int = msgspec.field(name='malId')
+    title: str
+    title_english: str | None = msgspec.field(name='titleEnglish', default=None)
+    title_japanese: str | None = msgspec.field(name='titleJapanese', default=None)
+    images: Images | None = None
+    year: int | None = None
+    score: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.mal_id <= 0:
+            raise ValueError('mal_id must be positive')
+
+
 class AnimeDetail(msgspec.Struct, frozen=True):
     mal_id: int = msgspec.field(name='malId')
     title: str

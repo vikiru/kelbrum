@@ -48,7 +48,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  frontend:
+  src/frontend:
     dependencies:
       '@base-ui/react':
         specifier: ^1.7.0

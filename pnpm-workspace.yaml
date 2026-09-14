@@ -1,5 +1,5 @@
 packages:
-  - frontend
+  - src/frontend
 
 minimumReleaseAge: 10080
 

@@ -47,14 +47,14 @@
     ]
   },
   "scripts": {
-    "start": "pnpm --dir frontend dev",
-    "build": "pnpm --dir frontend build",
-    "preview": "pnpm --dir frontend preview",
-    "lint": "pnpm --dir frontend lint",
-    "lint:typecheck": "pnpm --dir frontend lint:typecheck",
+    "start": "pnpm --dir src/frontend dev",
+    "build": "pnpm --dir src/frontend build",
+    "preview": "pnpm --dir src/frontend preview",
+    "lint": "pnpm --dir src/frontend lint",
+    "lint:typecheck": "pnpm --dir src/frontend lint:typecheck",
     "format": "oxfmt --write",
-    "format:check": "pnpm --dir frontend format:check",
-    "typecheck": "pnpm --dir frontend typecheck",
+    "format:check": "pnpm --dir src/frontend format:check",
+    "typecheck": "pnpm --dir src/frontend typecheck",
     "unused": "knip",
     "postinstall": "lefthook install"
   },
