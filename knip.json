@@ -1,10 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "project": ["frontend/tsconfig.json"],
+  "project": ["src/frontend/tsconfig.json"],
   "entry": [
-    "frontend/src/router.tsx",
-    "frontend/src/routes/**",
-    "frontend/*.config.ts"
+    "src/frontend/src/router.tsx",
+    "src/frontend/src/routes/**",
+    "src/frontend/*.config.ts"
   ],
   "ignoreDependencies": [
     "@semantic-release/git",

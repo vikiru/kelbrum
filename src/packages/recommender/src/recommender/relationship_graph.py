@@ -199,32 +199,35 @@ def _build_component_index(
     relations: Mapping[int, Sequence[tuple[int, str]]],
     anime_types: Mapping[int, str | None] | None,
 ) -> RelationshipIndex:
-    """Build exact connected families in linear graph time when depth is unbounded."""
+    """Build exact requested-ID families through relation-only bridge nodes."""
     ids = set(anime_ids)
     undirected: dict[int, set[int]] = {anime_id: set() for anime_id in ids}
     for source, targets in adjacency.items():
-        if source not in ids:
-            continue
+        undirected.setdefault(source, set())
         for target in targets:
-            if target in ids:
-                undirected[source].add(target)
-                undirected[target].add(source)
+            undirected.setdefault(target, set())
+            undirected[source].add(target)
+            undirected[target].add(source)
     families: dict[int, frozenset[int]] = {}
     canonical_by_id: dict[int, int] = {}
     non_origin_ids = _non_origin_ids(relations)
     unvisited = set(ids)
     while unvisited:
         root = unvisited.pop()
-        component = {root}
+        component: set[int] = set()
         queue = [root]
         while queue:
             current = queue.pop()
+            if current in component:
+                continue
+            component.add(current)
             for target in undirected[current]:
-                if target in unvisited:
-                    unvisited.remove(target)
-                    component.add(target)
+                if target not in component:
                     queue.append(target)
-        family = frozenset(component)
+        unvisited.difference_update(component)
+        family = frozenset(component.intersection(ids))
+        if not family:
+            continue
 
         def _canonical_key(anime_id: int) -> tuple[int, int, int]:
             return _canonical_sort_key(anime_id, anime_types, non_origin_ids)
@@ -272,7 +275,6 @@ def _strong_adjacency(
         for target, relation in targets
         if relation == 'Spin-Off'
     }
-    spin_off_ids = {anime_id for pair in spin_off_pairs for anime_id in pair}
     adjacency: dict[int, set[int]] = {}
     for source, targets in relations.items():
         strong_targets = adjacency.setdefault(source, set())
@@ -281,14 +283,7 @@ def _strong_adjacency(
             for target, relation in targets
             if (
                 relation in STRONG_SAME_STORY_RELATIONS
-                and not (
-                    relation == 'Parent Story'
-                    and (
-                        frozenset((source, target)) in spin_off_pairs
-                        or source in spin_off_ids
-                        or target in spin_off_ids
-                    )
-                )
+                and not (relation == 'Parent Story' and frozenset((source, target)) in spin_off_pairs)
             )
             or relation == MANUAL_RELATION
         )

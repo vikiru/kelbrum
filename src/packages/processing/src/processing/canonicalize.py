@@ -12,11 +12,21 @@ from processing.synopsis import feature_synopsis, feature_synopsis_column
 
 _HOURS = re.compile(r'(?P<hours>\d+)\s*hr(?:s)?', re.IGNORECASE)
 _MINUTES = re.compile(r'(?P<minutes>\d+)\s*min(?:s)?', re.IGNORECASE)
+_SYNOPSIS_ATTRIBUTION = re.compile(
+    r'\s*(?:\((?:source|written by|translated by):[^)]*\)|\[(?:source|written by|translated by):[^]]*\])\s*$',
+    re.IGNORECASE,
+)
+_SYNOPSIS_SOURCE = re.compile(r'\s*\(?source:\s*[^)\]]+\)?\s*$', re.IGNORECASE)
 
 
 def clean_synopsis(value: str | None) -> str | None:
-    """Compatibility wrapper for the feature-only synopsis projection."""
-    return feature_synopsis(value)
+    """Normalize synopsis text and remove trailing attribution boilerplate."""
+    if not value:
+        return None
+    cleaned = ' '.join(value.split())
+    cleaned = _SYNOPSIS_ATTRIBUTION.sub('', cleaned).strip()
+    cleaned = _SYNOPSIS_SOURCE.sub('', cleaned).strip()
+    return feature_synopsis(cleaned) if cleaned else None
 
 
 def clean_synopsis_column(frame: pl.DataFrame) -> pl.DataFrame:
@@ -36,7 +46,7 @@ def duration_to_minutes(value: str | None) -> int | None:
 
 def canonicalize(entry: TenraiAnimeEntry) -> CanonicalAnime:
     """Apply deterministic whitespace and missing-value cleaning."""
-    synopsis = ' '.join(entry.synopsis.split()) if entry.synopsis else None
+    synopsis = clean_synopsis(entry.synopsis)
     return CanonicalAnime(
         mal_id=entry.mal_id,
         url=entry.url,

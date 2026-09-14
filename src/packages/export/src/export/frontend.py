@@ -14,16 +14,20 @@ from export.artifacts import (
     write_full_entries,
     write_full_entries_from_chunks,
     write_metadata_chunks,
+    write_search_metadata_chunks,
 )
 from export.constants import DEFAULT_FEATURED_LIMIT, MINIMUM_HOMEPAGE_SCORE
-from models.contracts import AnimeMetadata, RecommendationScore
+from models.contracts import AnimeCardMetadata, RecommendationScore
 from models.tenrai import CanonicalAnime, TenraiAnimeEntry
 from processing.ratings import display_rating
+from recommender.relationship_graph import RelationshipIndex
+
+SUPPORTED_FRANCHISE_TYPES = frozenset({'tv', 'movie', 'ona'})
 
 
-def to_metadata(record: CanonicalAnime) -> AnimeMetadata:
+def to_card_metadata(record: CanonicalAnime) -> AnimeCardMetadata:
     """Convert one canonical record to the card-sized frontend contract."""
-    return AnimeMetadata(
+    return AnimeCardMetadata(
         mal_id=record.mal_id,
         title=record.title,
         title_english=record.title_english,
@@ -33,30 +37,112 @@ def to_metadata(record: CanonicalAnime) -> AnimeMetadata:
     )
 
 
-def top_anime(records: Iterable[CanonicalAnime], *, limit: int = DEFAULT_FEATURED_LIMIT) -> tuple[AnimeMetadata, ...]:
-    """Return the highest-scoring records with stable MAL ID tie-breaking."""
+def top_anime(
+    records: Iterable[CanonicalAnime],
+    *,
+    limit: int = DEFAULT_FEATURED_LIMIT,
+    relationship_index: RelationshipIndex | None = None,
+) -> tuple[AnimeCardMetadata, ...]:
+    """Return the highest-scoring distinct franchise groups."""
     _validate_limit(limit)
-    ordered = sorted(records, key=_ranking_key, reverse=True)
-    return tuple(to_metadata(record) for record in ordered[:limit])
+    return _rank_franchise_groups(tuple(records), relationship_index=relationship_index)[:limit]
 
 
 def homepage_candidates(
-    records: Iterable[CanonicalAnime], *, limit: int = DEFAULT_FEATURED_LIMIT
-) -> tuple[AnimeMetadata, ...]:
+    records: Iterable[CanonicalAnime],
+    *,
+    limit: int = DEFAULT_FEATURED_LIMIT,
+    relationship_index: RelationshipIndex | None = None,
+) -> tuple[AnimeCardMetadata, ...]:
     """Return eligible records scoring at least eight for the homepage."""
     _validate_limit(limit)
-    candidates = (record for record in records if record.score is not None and record.score >= MINIMUM_HOMEPAGE_SCORE)
-    return top_anime(candidates, limit=limit)
+    return tuple(
+        item
+        for item in top_anime(records, limit=limit, relationship_index=relationship_index)
+        if item.score is not None and item.score >= MINIMUM_HOMEPAGE_SCORE
+    )
 
 
-def write_featured_artifacts(records: Iterable[CanonicalAnime], output_dir: Path | None = None) -> None:
+def write_featured_artifacts(
+    records: Iterable[CanonicalAnime],
+    output_dir: Path | None = None,
+    *,
+    relationship_index: RelationshipIndex | None = None,
+) -> None:
     """Write card-only homepage and top-100 artifacts as minified UTF-8 JSON."""
     destination = output_dir or frontend_data_dir()
     available_records = tuple(records)
-    homepage = [msgspec.to_builtins(item) for item in homepage_candidates(available_records)]
-    top_100 = [msgspec.to_builtins(item) for item in top_anime(available_records)]
+    homepage = [
+        msgspec.to_builtins(item)
+        for item in homepage_candidates(available_records, relationship_index=relationship_index)
+    ]
+    top_100 = [
+        msgspec.to_builtins(item) for item in top_anime(available_records, relationship_index=relationship_index)
+    ]
     write_frontend_json('homepage.json', homepage, output_dir=destination)
     write_frontend_json('top-100.json', top_100, output_dir=destination)
+
+
+def _rank_franchise_groups(
+    records: tuple[CanonicalAnime, ...], *, relationship_index: RelationshipIndex | None
+) -> tuple[AnimeCardMetadata, ...]:
+    records_by_id = {record.mal_id: record for record in records}
+    supported_ids = {
+        record.mal_id for record in records if (record.anime_type or '').strip().casefold() in SUPPORTED_FRANCHISE_TYPES
+    }
+    groups: dict[frozenset[int], list[CanonicalAnime]] = {}
+    for record in records:
+        is_supported_type = (record.anime_type or '').strip().casefold() in SUPPORTED_FRANCHISE_TYPES
+        eligible_family = frozenset({record.mal_id})
+        if is_supported_type and relationship_index is not None:
+            eligible_family = frozenset(records_by_id).intersection(relationship_index.excluded_ids(record.mal_id))
+            eligible_family &= supported_ids
+        groups.setdefault(frozenset(eligible_family), []).append(record)
+
+    ranked: list[tuple[float, int, AnimeCardMetadata]] = []
+    for member_ids, members in groups.items():
+        scored_members = [member for member in members if member.score is not None]
+        if not scored_members:
+            continue
+        franchise_score = max(member.score for member in scored_members)
+        display_score = round(franchise_score, 2)
+        representative = _select_representative(
+            scored_members,
+            member_ids=member_ids,
+            relationship_index=relationship_index,
+        )
+        ranked.append(
+            (
+                franchise_score,
+                representative.mal_id,
+                AnimeCardMetadata(
+                    mal_id=representative.mal_id,
+                    title=representative.title,
+                    title_english=representative.title_english,
+                    images=representative.images,
+                    year=representative.year,
+                    score=display_score,
+                ),
+            )
+        )
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    return tuple(item[2] for item in ranked)
+
+
+def _select_representative(
+    members: Sequence[CanonicalAnime],
+    *,
+    member_ids: frozenset[int],
+    relationship_index: RelationshipIndex | None,
+) -> CanonicalAnime:
+    """Select the graph canonical origin, falling back to the lowest stable ID."""
+    records_by_id = {member.mal_id: member for member in members}
+    if relationship_index is not None:
+        canonical_id = relationship_index.canonical_id(min(member_ids))
+        canonical = records_by_id.get(canonical_id)
+        if canonical is not None:
+            return canonical
+    return min(members, key=lambda member: member.mal_id)
 
 
 def write_catalogue_artifacts(
@@ -95,10 +181,13 @@ def write_catalogue_artifacts(
             score_ids_for_source = {score.anime_id for score in recommendation_scores[source_id]}
             if recommendation_ids_for_source != score_ids_for_source:
                 raise ValueError(f'recommendation IDs and scores disagree for source {source_id}')
-    metadata = tuple(msgspec.to_builtins(to_metadata(record)) for record in ordered_records)
+    metadata = tuple(msgspec.to_builtins(to_card_metadata(record)) for record in ordered_records)
     metadata_paths = write_metadata_chunks(metadata, output_dir=destination)
     write_filter_index(ordered_records, output_dir=destination)
     search_path = write_search_metadata(ordered_records, output_dir=destination)
+    search_metadata_chunks = write_search_metadata_chunks(
+        tuple(_search_metadata_payload(record) for record in ordered_records), output_dir=destination / 'search'
+    )
     _validate_id_projection(destination / 'filter-index.json', accepted_ids, 'ids')
     _validate_id_projection(search_path, accepted_ids, 'keys')
     if include_full_entries and recommendation_chunks is not None:
@@ -116,7 +205,7 @@ def write_catalogue_artifacts(
         full_paths = ()
     if full_paths:
         _validate_full_projection(full_paths, accepted_ids)
-    files = (*metadata_paths, search_path, *full_paths, destination / 'filter-index.json')
+    files = (*metadata_paths, search_path, *search_metadata_chunks, *full_paths, destination / 'filter-index.json')
     provenance_payload = dict(provenance or {})
     build_identity = sha256(msgspec.json.encode(provenance_payload)).hexdigest()
     recommendation_source_count = (
@@ -138,6 +227,7 @@ def write_catalogue_artifacts(
             'full_files': [path.name for path in full_paths],
             'files': [_file_manifest(path, destination) for path in files],
             'search_metadata': 'search/anime-metadata-search.json',
+            'search_metadata_chunks': [path.relative_to(destination).as_posix() for path in search_metadata_chunks],
             'build_identity': build_identity,
             'provenance': provenance_payload,
         },
@@ -147,26 +237,27 @@ def write_catalogue_artifacts(
 
 def write_search_metadata(records: Iterable[CanonicalAnime], *, output_dir: Path) -> Path:
     """Write the Python-owned search/filter projection consumed by frontend indexing."""
-    payload = {
-        str(record.mal_id): {
-            'malId': record.mal_id,
-            'images': msgspec.to_builtins(record.images),
-            'title': record.title,
-            'titleEnglish': record.title_english,
-            'titleJapanese': record.title_japanese,
-            'year': record.year,
-            'score': record.score,
-            'episodes': record.episodes,
-            'type': record.anime_type,
-            'rating': display_rating(record.rating),
-            'genres': [item.name for item in record.genres],
-            'themes': [item.name for item in record.themes],
-            'demographics': [item.name for item in record.demographics],
-            'studios': [item.name for item in record.studios],
-        }
-        for record in sorted(records, key=_record_id)
-    }
+    payload = {str(record.mal_id): _search_metadata_payload(record) for record in sorted(records, key=_record_id)}
     return write_frontend_json('anime-metadata-search.json', payload, output_dir=output_dir / 'search')
+
+
+def _search_metadata_payload(record: CanonicalAnime) -> dict[str, object]:
+    return {
+        'malId': record.mal_id,
+        'images': msgspec.to_builtins(record.images),
+        'title': record.title,
+        'titleEnglish': record.title_english,
+        'titleJapanese': record.title_japanese,
+        'year': record.year,
+        'score': record.score,
+        'episodes': record.episodes,
+        'type': record.anime_type,
+        'rating': display_rating(record.rating),
+        'genres': [item.name for item in record.genres],
+        'themes': [item.name for item in record.themes],
+        'demographics': [item.name for item in record.demographics],
+        'studios': [item.name for item in record.studios],
+    }
 
 
 def _file_manifest(path: Path, root: Path) -> dict[str, object]:
@@ -215,10 +306,6 @@ def _validate_full_entries(entries: Sequence[TenraiAnimeEntry]) -> None:
 
 def _record_id(record: CanonicalAnime) -> int:
     return record.mal_id
-
-
-def _ranking_key(record: CanonicalAnime) -> tuple[bool, float, int]:
-    return record.score is not None, record.score or 0, -record.mal_id
 
 
 def _validate_limit(limit: int) -> None:

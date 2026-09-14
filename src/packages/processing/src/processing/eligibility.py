@@ -8,11 +8,13 @@ from urllib.parse import urlparse
 import msgspec
 
 from models.tenrai import TenraiAnimeEntry
-from models.tenrai_types import normalize_media_type
+from models.tenrai_types import AiringStatus, normalize_airing_status, normalize_media_type
+from processing.canonicalize import duration_to_minutes
 from processing.constants import (
     DEFAULT_ALLOWED_TYPES,
     DEFAULT_EXCLUDED_GENRE_IDS,
     DEFAULT_MAX_YEAR,
+    DEFAULT_MIN_MOVIE_DURATION_MINUTES,
     PLACEHOLDER_IMAGE_URL,
 )
 
@@ -25,6 +27,7 @@ class EligibilityPolicy(msgspec.Struct, frozen=True):
     require_trailer: bool = False
     allowed_types: frozenset[str] = DEFAULT_ALLOWED_TYPES
     excluded_genre_ids: frozenset[int] = DEFAULT_EXCLUDED_GENRE_IDS
+    min_movie_duration_minutes: int = DEFAULT_MIN_MOVIE_DURATION_MINUTES
     bypass_catalogue_filters: bool = False
     require_semantic_evidence: bool = True
 
@@ -36,6 +39,8 @@ class ExclusionReason(StrEnum):
     EXCLUDED_GENRE = 'excluded_genre'
     MISSING_SEMANTIC_EVIDENCE = 'missing_semantic_evidence'
     YEAR_AFTER_CUTOFF = 'year_after_cutoff'
+    NOT_YET_AIRED = 'not_yet_aired'
+    SHORT_MOVIE = 'short_movie'
     MISSING_PRIMARY_IMAGE = 'missing_primary_image'
     MISSING_TRAILER = 'missing_trailer'
     RECAP_OR_COMPILATION = 'recap_or_compilation'
@@ -138,6 +143,8 @@ def filter_entries(
     for entry in entries:
         reasons: list[ExclusionReason] = []
         if not active_policy.bypass_catalogue_filters:
+            if normalize_media_type(entry.type) == 'MOVIE' and _is_short_movie(entry, active_policy):
+                reasons.append(ExclusionReason.SHORT_MOVIE)
             if normalize_media_type(entry.type) not in active_policy.allowed_types:
                 reasons.append(ExclusionReason.TYPE_NOT_ALLOWED)
             genre_ids = {genre.mal_id for genre in entry.genres}
@@ -148,6 +155,8 @@ def filter_entries(
                 reasons.append(ExclusionReason.MISSING_SEMANTIC_EVIDENCE)
         if entry.year is not None and entry.year > active_policy.max_year:
             reasons.append(ExclusionReason.YEAR_AFTER_CUTOFF)
+        if normalize_airing_status(entry.status) is AiringStatus.NOT_YET_AIRED:
+            reasons.append(ExclusionReason.NOT_YET_AIRED)
         if active_policy.require_primary_image and not has_primary_image(entry):
             reasons.append(ExclusionReason.MISSING_PRIMARY_IMAGE)
         if active_policy.require_trailer and not has_trailer(entry):
@@ -167,3 +176,11 @@ def filter_entries(
         reasons_by_id=tuple(sorted(reasons_by_id.items())),
     )
     return accepted, audit
+
+
+def _is_short_movie(entry: TenraiAnimeEntry, policy: EligibilityPolicy) -> bool:
+    """Exclude known movie shorts while retaining movies with unknown duration."""
+    if policy.min_movie_duration_minutes < 1:
+        raise ValueError('min_movie_duration_minutes must be positive')
+    duration_minutes = duration_to_minutes(entry.duration)
+    return duration_minutes is not None and duration_minutes <= policy.min_movie_duration_minutes

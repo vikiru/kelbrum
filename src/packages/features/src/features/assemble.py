@@ -6,6 +6,7 @@ import numpy as np
 import polars as pl
 
 from anime_catalogue import order_catalogue_frame
+from config import bind_logger
 from features.blocks import FeatureBlock, FeatureBundle
 from features.config import FeatureConfig
 from features.encoders import episode_buckets, synopsis_embeddings, year_buckets
@@ -15,6 +16,8 @@ from features.tags import apply_tag_assignments
 from normalization.encoders import bucketize, multi_hot, one_hot
 from normalization.policy import apply_missing_policy
 from normalization.scalers import transform
+
+log = bind_logger(package='features', stage='assembly')
 
 
 def assemble_features(
@@ -46,6 +49,7 @@ def assemble_features(
     if 'synopsis_features' not in frame.columns:
         raise ValueError('feature assembly requires synopsis_features')
     ordered = order_catalogue_frame(frame)
+    log.info('Assembling feature blocks for {} records.', ordered.height)
     anime_ids = ordered['mal_id'].to_numpy().astype(np.int64, copy=False)
     blocks: list[FeatureBlock] = []
     categorical_columns = ('anime_type', 'source', 'rating')
@@ -213,4 +217,5 @@ def assemble_features(
                 np.asarray([bool(text and text.strip()) for text in synopsis_texts], dtype=bool),
             )
         )
+    log.info('Assembled {} feature blocks.', len(blocks))
     return FeatureBundle(anime_ids, tuple(blocks))

@@ -6,13 +6,15 @@ from pathlib import Path
 
 import msgspec
 
+from config import bind_logger
 from models.tenrai import TenraiAnimeEntry
 from recommender.manual_relationships import MANUAL_RELATIONSHIPS
 from recommender.relationship_graph import RelationshipIndex, anime_relations, build_relationship_index
 from storage.json_io import read_json, write_json
 
-RELATIONSHIP_GRAPH_SCHEMA_VERSION = 'relationship-graph-v3'
-RELATIONSHIP_POLICY_VERSION = 'strong-same-story-plus-manual-v2-origin-aware'
+RELATIONSHIP_GRAPH_SCHEMA_VERSION = 'relationship-graph-v4'
+RELATIONSHIP_POLICY_VERSION = 'strong-same-story-plus-manual-v3-exact-spin-off-parent-pairs'
+log = bind_logger(package='pipeline', stage='relationship-graph')
 
 
 class RelationshipGraphArtifacts(msgspec.Struct, frozen=True):
@@ -34,6 +36,7 @@ def load_or_build_relationship_graph(
     ordered_ids = tuple(anime_ids)
     graph = _load_graph_cache(graph_path, ordered_ids, full_artifact)
     if graph is None:
+        log.info('Building the relationship graph for {} records.', len(ordered_ids))
         graph = build_relationship_index(
             ordered_ids,
             relations,
@@ -41,6 +44,8 @@ def load_or_build_relationship_graph(
             anime_types=anime_types,
         )
         _write_graph_cache(graph_path, graph, ordered_ids, full_artifact)
+    else:
+        log.info('Reusing the cached relationship graph for {} records.', len(ordered_ids))
     return RelationshipGraphArtifacts(graph, relations)
 
 

@@ -1,7 +1,7 @@
 *.md
-!frontend/public/manifest.json
 plans
 *.json
+!src/frontend/public/manifest.json
 public/data/*.json
 src/data/*.json
 experiments/

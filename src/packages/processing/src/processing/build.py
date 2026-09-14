@@ -10,6 +10,7 @@ import msgspec
 import polars as pl
 
 from anime_catalogue import order_catalogue_frame
+from config import bind_logger
 from models.labels import normalize_label
 from models.tenrai import CanonicalAnime, Images, Taxonomy, TenraiAnimeEntry
 from processing.canonicalize import canonicalize
@@ -31,6 +32,9 @@ class ProcessingResult(msgspec.Struct, frozen=True):
     audit: EligibilityAudit
     duplicate_ids: tuple[int, ...]
     profile: str = 'tenrai-catalog'
+
+
+log = bind_logger(package='processing', stage='canonicalization')
 
 
 CANONICAL_SCHEMA = {
@@ -173,6 +177,7 @@ def process_snapshot(
 ) -> ProcessingResult:
     """Run the complete accepted-snapshot processing workflow."""
     entries = read_json(snapshot_path, list[TenraiAnimeEntry])
+    log.info('Loaded {} entries from the catalogue snapshot.', len(entries))
     result = build_canonical(
         entries,
         policy,
@@ -193,6 +198,7 @@ def process_snapshot(
             }
         ).decode('utf-8'),
     )
+    log.info('Canonicalization completed with {} accepted records.', len(result.records))
     return result
 
 

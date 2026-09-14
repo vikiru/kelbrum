@@ -32,7 +32,7 @@ def main() -> None:
         recommendation_config=RecommendationConfig(),
         output_dir=output_dir,
         overwrite_fetch=args.overwrite_fetch,
-        recommendation_batch_size=50,
+        recommendation_batch_size=1_000,
     )
 
 

@@ -205,6 +205,19 @@ class Recommender:
             source_id: self._present_raw_items(raw_results[source_id], limit=limit) for source_id in source_anime_ids
         }
 
+    def recommend_ids_many(
+        self,
+        source_anime_ids: Sequence[int],
+        *,
+        limit: int,
+    ) -> Mapping[int, tuple[int, ...]]:
+        """Return production recommendation IDs without materializing debug details."""
+        raw_results = self.raw_recommend_many(source_anime_ids)
+        return {
+            source_id: tuple(item.anime_id for item in self._surfacing_policy.surface(raw_results[source_id])[:limit])
+            for source_id in source_anime_ids
+        }
+
     def _present_raw_items(
         self,
         raw_items: Sequence[RawRecommendation],
