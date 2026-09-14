@@ -76,6 +76,7 @@ class TagId:
     RAKUGO = 'rakugo'
     PRISON_SETTING = 'prison_setting'
     AVIATION = 'aviation'
+    ASTRONAUT = 'astronaut'
     FAKE_RELATIONSHIP = 'fake_relationship'
     JUDO = 'judo'
     KENDO = 'kendo'
@@ -587,6 +588,14 @@ TAGS: tuple[Tag, ...] = (
         label='Aviation',
         definition=(
             'Piloting, designing, operating, or pursuing atmospheric aviation substantially drives the narrative.'
+        ),
+    ),
+    Tag(
+        id=TagId.ASTRONAUT,
+        label='Astronaut',
+        definition=(
+            'Astronaut training, professional space operations, or crewed spaceflight substantially drives the '
+            'narrative.'
         ),
     ),
     Tag(

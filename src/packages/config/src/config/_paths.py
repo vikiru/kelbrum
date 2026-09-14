@@ -87,7 +87,7 @@ def tenrai_parquet_path() -> Path:
 
 
 def frontend_data_dir() -> Path:
-    return repository_root() / 'frontend' / 'src' / 'data'
+    return repository_root() / 'src' / 'frontend' / 'src' / 'data'
 
 
 def model_cache_dir() -> Path:

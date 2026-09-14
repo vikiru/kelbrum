@@ -12,6 +12,7 @@ import polars as pl
 
 from anime_catalogue import order_catalogue_frame
 from config import (
+    bind_logger,
     canonical_dir,
     embedding_cache_dir,
     frontend_data_dir,
@@ -55,6 +56,7 @@ from storage.json_io import read_json, write_json
 
 DEFAULT_RECOMMENDATION_BATCH_SIZE = DEFAULT_BATCH_SIZE
 DEFAULT_CATALOGUE_BATCH_SIZE = 1_000
+log = bind_logger(package='pipeline')
 
 
 class CatalogueProfilePaths(msgspec.Struct, frozen=True):
@@ -137,6 +139,7 @@ def build_pipeline(
     source_artifact_sha256: str | None = None,
 ) -> PipelineRun:
     """Build all in-memory downstream artifacts from one canonical frame."""
+    log.info('Building features and recommendation indexes for {} records.', frame.height)
     ordered_frame = order_catalogue_frame(frame)
     ordered_ids = tuple(int(value) for value in ordered_frame.get_column('mal_id').to_list())
     cached_embeddings = _load_aligned_embedding_cache(embedding_cache, len(ordered_frame), ordered_ids)
@@ -165,6 +168,7 @@ def build_pipeline(
         synopsis_tfidf_config=synopsis_tfidf_config,
         synopsis_latent_config=synopsis_latent_config,
     )
+    log.info('Built {} feature blocks and the recommendation indexes.', len(bundle.blocks))
     return PipelineRun(bundle, recommender, manifest, same_story_relations or {})
 
 
@@ -191,6 +195,7 @@ def build_from_snapshot(
     if full_artifact is not None:
         validate_entrypoint_pair(entrypoint_snapshot or snapshot_path, full_artifact)
     active_policy = processing_policy or EligibilityPolicy()
+    log.info('Processing catalogue snapshot {}.', snapshot_id)
     records = _load_or_process_records(
         snapshot_path,
         parquet_path,
@@ -199,6 +204,7 @@ def build_from_snapshot(
         policy=active_policy,
     )
     frame = canonical_frame(records)
+    log.info('Processed {} eligible catalogue records.', len(records))
     graph = None
     relations: Mapping[int, Sequence[tuple[int, str]]] = {}
     if full_artifact is not None:
@@ -210,6 +216,7 @@ def build_from_snapshot(
         )
         graph = graph_artifacts.index
         relations = graph_artifacts.relations
+        log.info('Loaded the relationship graph for {} records.', len(records))
     run = build_pipeline(
         frame,
         feature_config=feature_config,
@@ -321,6 +328,7 @@ def write_recommendation_artifacts(
     recommendation_batch_size: int = DEFAULT_RECOMMENDATION_BATCH_SIZE,
 ) -> None:
     """Rank the processed catalogue and write frontend-owned artifacts."""
+    log.info('Generating recommendations for {} records.', len(records))
     recommendation_path = intermediate_dir() / f'{output_dir.name}-recommendations'
     resolved_provenance = dict(provenance or {})
     resolved_provenance['catalogue_fingerprint'] = sha256(
@@ -335,6 +343,7 @@ def write_recommendation_artifacts(
         source_identity=msgspec.json.encode(resolved_provenance).decode('utf-8'),
         batch_size=recommendation_batch_size,
     )
+    log.info('Recommendation chunks are complete. Exporting frontend catalogue artifacts.')
     export_catalogue_stage(
         records,
         full_entries,
@@ -357,18 +366,21 @@ def run_catalogue_pipeline(
     recommendation_batch_size: int = DEFAULT_CATALOGUE_BATCH_SIZE,
 ) -> PipelineRun:
     """Run one selected catalogue profile through enrichment and artifact generation."""
+    log.info('Starting the {} catalogue pipeline.', profile)
     profile_paths = _catalogue_profile_paths(profile)
     active_snapshot = snapshot_path or profile_paths.snapshot
     active_checkpoint = checkpoint_path or profile_paths.checkpoint
     active_full = full_artifact or profile_paths.full_artifact
     with TenraiClient() as client:
+        log.info('Loading the catalogue snapshot and enrichment data.')
         entries = load_or_fetch(client, active_snapshot, active_checkpoint, profile_paths.filters, overwrite_fetch)
         load_or_enrich(client, entries, active_full, overwrite_fetch, profile)
+        log.info('Catalogue input loading is complete.')
     del entries
     collect()
     parquet_path = output_dir / 'canonical.parquet'
     audit_path = output_dir / 'processing-audit.json'
-    run, records, _graph = build_from_snapshot(
+    run, records, graph = build_from_snapshot(
         active_full,
         parquet_path,
         audit_path,
@@ -383,7 +395,8 @@ def run_catalogue_pipeline(
     processing_audit = read_json(audit_path, dict[str, object])
     write_manifest(run, str(output_dir / 'pipeline-manifest.json'))
     frontend_output_dir = frontend_data_dir()
-    write_featured_artifacts(records, output_dir=frontend_output_dir)
+    write_featured_artifacts(records, output_dir=frontend_output_dir, relationship_index=graph)
+    log.info('Exported homepage and Top 100 artifacts.')
     write_catalogue_artifacts(
         records, full_entries=output_entries, output_dir=frontend_output_dir, include_full_entries=False
     )
@@ -412,6 +425,7 @@ def run_catalogue_pipeline(
     )
     del output_entries
     collect()
+    log.info('The {} catalogue pipeline completed successfully.', profile)
     return run
 
 

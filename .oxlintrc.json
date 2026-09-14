@@ -15,7 +15,7 @@
   "jsPlugins": ["oxlint-tailwindcss"],
   "settings": {
     "tailwindcss": {
-      "entryPoint": "frontend/src/styles.css"
+      "entryPoint": "src/frontend/src/styles.css"
     }
   },
   "options": {
@@ -49,11 +49,11 @@
   "ignorePatterns": [
     "dist/**",
     "build/**",
-    "frontend/.output/**",
-    "frontend/.tanstack/**",
-    "frontend/dist/**",
-    "frontend/node_modules/**",
-    "frontend/src/routeTree.gen.ts",
+    "src/frontend/.output/**",
+    "src/frontend/.tanstack/**",
+    "src/frontend/dist/**",
+    "src/frontend/node_modules/**",
+    "src/frontend/src/routeTree.gen.ts",
     "node_modules/**"
   ]
 }

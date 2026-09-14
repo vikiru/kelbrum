@@ -7,6 +7,9 @@ from processing.ratings import display_rating
 
 def test_clean_synopsis_normalizes_whitespace_and_missing_values() -> None:
     assert clean_synopsis('  A quiet\n forest   adventure. ') == 'A quiet forest adventure.'
+    assert clean_synopsis('A boxing story. (Source: ANN)') == 'A boxing story.'
+    assert clean_synopsis('A fantasy story. Source: Official Website') == 'A fantasy story.'
+    assert clean_synopsis('A mystery story. [Written by MAL Rewrite]') == 'A mystery story.'
     assert clean_synopsis(None) is None
     assert clean_synopsis('   ') is None
 

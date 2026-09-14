@@ -86,6 +86,22 @@ def test_movie_family_without_tv_origin_uses_deterministic_first_entry() -> None
     assert index.canonical_id(22) == 20
 
 
+def test_relation_only_bridge_connects_requested_entries_to_their_origin() -> None:
+    index = build_relationship_index(
+        (41219, 50207, 57067),
+        {
+            41219: ((50207, 'Sequel'),),
+            50207: ((41219, 'Prequel'), (55993, 'Sequel')),
+            55993: ((50207, 'Prequel'), (57067, 'Sequel')),
+            57067: ((55993, 'Prequel'),),
+        },
+        anime_types={41219: 'TV', 50207: 'ONA', 57067: 'ONA'},
+    )
+
+    assert index.canonical_id(57067) == 41219
+    assert index.excluded_ids(57067) == frozenset({41219, 50207, 57067})
+
+
 def test_original_and_remake_are_collapsed_by_alternative_version_relation() -> None:
     index = build_relationship_index(
         (30, 31),
@@ -109,7 +125,7 @@ def test_spin_off_remains_a_separate_recommendation_family() -> None:
     assert index.excluded_ids(40) == frozenset({40})
 
 
-def test_distinct_franchise_relations_remain_recommendable() -> None:
+def test_unrelated_parent_story_and_spin_off_relations_remain_distinct() -> None:
     relation_types = (
         'Alternative Setting',
         'Character',
@@ -124,9 +140,16 @@ def test_distinct_franchise_relations_remain_recommendable() -> None:
 
     index = build_relationship_index(anime_ids, relations, anime_types=anime_types)
 
-    for candidate_id in range(101, 107):
+    for candidate_id in range(101, 104):
         assert index.canonical_id(candidate_id) == candidate_id
         assert index.cleanup(100, (candidate_id,)) == (candidate_id,)
+
+    assert index.canonical_id(104) == 100
+    assert index.cleanup(100, (104,)) == ()
+    assert index.canonical_id(105) == 105
+    assert index.cleanup(100, (105,)) == (105,)
+    assert index.canonical_id(106) == 106
+    assert index.cleanup(100, (106,)) == (106,)
 
 
 def test_same_story_relations_still_collapse_inside_a_franchise() -> None:

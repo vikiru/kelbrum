@@ -9,7 +9,7 @@ from models.tenrai_types import normalize_media_type
 from processing.canonicalize import duration_to_minutes
 
 _PROMOTIONAL_TITLE = re.compile(
-    r'\b(?:pv|trailer|teaser|promotional|promo|commercial|cm|recap|digest|summary|preview|prologue)\b',
+    r'\b(?:pv|trailer|teaser|promotional|promo|commercial|cm|recap|digest|summary|preview|prologue|specials?|extra|install)\b|\bepisode\s+0\b',
     re.IGNORECASE,
 )
 
@@ -42,7 +42,7 @@ def cleanup_ona(
 
         title = f'{entry.title} {entry.title_english or ""}'
         duration_minutes = duration_to_minutes(entry.duration)
-        is_too_short = duration_minutes is not None and duration_minutes < min_duration_minutes
+        is_too_short = _is_short_form(entry, duration_minutes, min_duration_minutes)
         has_metadata = bool(entry.synopsis or entry.genres or entry.themes)
         missing_metadata = not has_metadata
         is_promotional = bool(_PROMOTIONAL_TITLE.search(title))
@@ -66,3 +66,12 @@ def cleanup_ona(
         promotional_ids=tuple(sorted(promotional_ids)),
         short_form_ids=tuple(sorted(short_form_ids)),
     )
+
+
+def _is_short_form(entry: TenraiAnimeEntry, duration_minutes: int | None, threshold: int) -> bool:
+    """Compare total runtime when the source duration is expressed per episode."""
+    if duration_minutes is None:
+        return False
+    if entry.episodes is not None and 'per ep' in (entry.duration or '').casefold():
+        return duration_minutes * entry.episodes <= threshold
+    return duration_minutes <= threshold

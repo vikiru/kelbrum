@@ -4,6 +4,12 @@ from features.tags import TagAssignment, TagId
 
 MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
     TagAssignment(
+        # Space Brothers and its films (12431, 17573, 22583, 53938), Planetes (329), Moonlight Mile (1941, 2929),
+        # Rocket Girls (1942).
+        anime_ids=(12431, 17573, 22583, 53938, 329, 1941, 2929, 1942),
+        tag_ids=(TagId.ASTRONAUT,),
+    ),
+    TagAssignment(
         # Ajin (31580, 30868, 30869, 30870, 33253), Undead Unluck (52741, 63177).
         anime_ids=(31580, 30868, 30869, 30870, 33253, 52741, 63177),
         tag_ids=(TagId.IMMORTALITY,),
@@ -954,6 +960,11 @@ MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
         tag_ids=(TagId.ABILITY_BATTLES, TagId.DUNGEON),
     ),
     TagAssignment(
+        # Magi: The Kingdom of Magic (18115), Magi: Sinbad no Bouken (31741).
+        anime_ids=(18115, 31741),
+        tag_ids=(TagId.ABILITY_BATTLES, TagId.DUNGEON),
+    ),
+    TagAssignment(
         # Arifureta (36882, 40507).
         anime_ids=(36882, 40507),
         tag_ids=(TagId.DUNGEON,),
@@ -1166,8 +1177,8 @@ MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
     ),
     TagAssignment(
         # Hajime no Ippo (263, 5258, 19647), Ashita no Joe (2402, 2920, 2921, 2922),
-        # Megalo Box (36563, 40729), Ring ni Kakero 1 (23), Ganbare Genki (3213), Levius (39574).
-        anime_ids=(263, 5258, 19647, 2402, 2920, 2921, 2922, 36563, 40729, 23, 3213, 39574),
+        # Megalo Box (36563, 40729), Eiji (6076), Ring ni Kakero 1 (23), Ganbare Genki (3213), Levius (39574).
+        anime_ids=(263, 5258, 19647, 2402, 2920, 2921, 2922, 36563, 40729, 6076, 23, 3213, 39574),
         tag_ids=(TagId.BOXING,),
     ),
     TagAssignment(

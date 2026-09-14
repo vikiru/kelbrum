@@ -522,6 +522,7 @@ dependencies = [
     { name = "config" },
     { name = "models" },
     { name = "processing" },
+    { name = "recommender" },
     { name = "storage" },
 ]
 
@@ -530,6 +531,7 @@ requires-dist = [
     { name = "config", editable = "config" },
     { name = "models", editable = "models" },
     { name = "processing", editable = "processing" },
+    { name = "recommender", editable = "recommender" },
     { name = "storage", editable = "storage" },
 ]
 
