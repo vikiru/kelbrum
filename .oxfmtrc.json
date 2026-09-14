@@ -9,7 +9,11 @@
   "trailingComma": "all",
   "bracketSpacing": true,
   "arrowParens": "always",
-  "ignorePatterns": ["src/frontend/src/routeTree.gen.ts"],
+  "ignorePatterns": [
+    "src/frontend/src/routeTree.gen.ts",
+    ".github/",
+    "src/packages/"
+  ],
   "sortImports": {
     "groups": [
       "type-import",
