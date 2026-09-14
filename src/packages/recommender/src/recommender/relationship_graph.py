@@ -221,9 +221,7 @@ def _build_component_index(
             if current in component:
                 continue
             component.add(current)
-            for target in undirected[current]:
-                if target not in component:
-                    queue.append(target)
+            queue.extend(target for target in undirected[current] if target not in component)
         unvisited.difference_update(component)
         family = frozenset(component.intersection(ids))
         if not family:
