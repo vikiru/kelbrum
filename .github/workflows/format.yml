@@ -38,7 +38,7 @@ jobs:
                   enable-cache: false
                   python-version: '3.13'
             - name: Install Python dev dependencies
-              run: uv --directory src/packages sync --dev --no-install-workspace
+              run: uv --directory src/packages sync --all-packages --dev
             - name: Install dependencies
               run: pnpm install --frozen-lockfile --ignore-scripts
             - name: Format files
