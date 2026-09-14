@@ -102,9 +102,10 @@ def _rank_franchise_groups(
     ranked: list[tuple[float, int, AnimeCardMetadata]] = []
     for member_ids, members in groups.items():
         scored_members = [member for member in members if member.score is not None]
-        if not scored_members:
+        scores = [member.score for member in scored_members if member.score is not None]
+        if not scores:
             continue
-        franchise_score = max(member.score for member in scored_members)
+        franchise_score = max(scores)
         display_score = round(franchise_score, 2)
         representative = _select_representative(
             scored_members,
