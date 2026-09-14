@@ -3,6 +3,7 @@
 from collections.abc import Iterable, Mapping, Sequence
 from datetime import UTC, datetime
 from hashlib import sha256
+from operator import attrgetter, itemgetter
 from pathlib import Path
 
 import msgspec
@@ -126,7 +127,8 @@ def _rank_franchise_groups(
                 ),
             )
         )
-    ranked.sort(key=lambda item: (-item[0], item[1]))
+    ranked.sort(key=itemgetter(1))
+    ranked.sort(key=itemgetter(0), reverse=True)
     return tuple(item[2] for item in ranked)
 
 
@@ -143,7 +145,7 @@ def _select_representative(
         canonical = records_by_id.get(canonical_id)
         if canonical is not None:
             return canonical
-    return min(members, key=lambda member: member.mal_id)
+    return min(members, key=attrgetter('mal_id'))
 
 
 def write_catalogue_artifacts(
