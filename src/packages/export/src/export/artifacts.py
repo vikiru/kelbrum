@@ -101,14 +101,15 @@ def write_full_entries(
 ) -> tuple[Path, ...]:
     """Write detail entries and recommendation IDs in bounded frontend data chunks."""
     _validate_full_entry_chunk_size(chunk_size)
-    del recommendation_scores
     recommendation_map = recommendations or {}
     ordered_entries = sorted(entries, key=_entry_id)
     paths: list[Path] = []
     for bucket_start, indexes in _entry_buckets(ordered_entries, chunk_size):
         payload = {
             str(ordered_entries[index].mal_id): _full_entry_payload(
-                ordered_entries[index], recommendation_map.get(ordered_entries[index].mal_id, ())
+                ordered_entries[index],
+                recommendation_map.get(ordered_entries[index].mal_id, ()),
+                (recommendation_scores or {}).get(ordered_entries[index].mal_id, ()),
             )
             for index in indexes
         }
@@ -189,6 +190,7 @@ def _validate_full_entry_chunk_size(chunk_size: int) -> None:
 def _full_entry_payload(
     entry: TenraiAnimeEntry,
     recommendations: Sequence[int],
+    recommendation_scores: Sequence[RecommendationScore] = (),
 ) -> dict[str, object]:
     payload = msgspec.to_builtins(entry)
     if not isinstance(payload, dict):
@@ -198,7 +200,10 @@ def _full_entry_payload(
     payload['themes'] = [{**item, 'name': display_label(item['name'])} for item in payload.get('themes', [])]
     payload['durationMinutes'] = duration_to_minutes(entry.duration)
     payload['recommendations'] = list(dict.fromkeys(recommendations))
-    payload.pop('recommendationScores', None)
+    if recommendation_scores:
+        payload['recommendationScores'] = msgspec.to_builtins(recommendation_scores)
+    else:
+        payload.pop('recommendationScores', None)
     payload.pop('recommendationExplanations', None)
     return payload
 
