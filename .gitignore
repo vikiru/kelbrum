@@ -1,6 +1,7 @@
 *.md
 plans
 *.json
+!src/frontend/package.json
 !src/frontend/public/manifest.json
 public/data/*.json
 src/data/*.json
