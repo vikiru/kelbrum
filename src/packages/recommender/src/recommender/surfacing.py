@@ -1,18 +1,19 @@
 """Conservative variable-length display policy for ranked recommendations."""
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 
-from models.contracts import RawRecommendation
+import msgspec
+
+from recommender.contracts import RawRecommendation
 
 DEFAULT_MINIMUM_SCORE = 0.20
 DEFAULT_MAXIMUM_RESULTS = 100
 
 
-@dataclass(frozen=True, slots=True)
-class SurfacingPolicy:
+class SurfacingPolicy(msgspec.Struct, frozen=True):
     """Apply the temporary v2 display floor without changing similarity scores."""
 
+    name = 'minimum-score-v1'
     minimum_score: float = DEFAULT_MINIMUM_SCORE
     maximum_results: int = DEFAULT_MAXIMUM_RESULTS
 
