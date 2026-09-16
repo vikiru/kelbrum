@@ -51,4 +51,4 @@ jobs:
       - name: ty type check
         run: uv --directory src/packages run ty check
       - name: Python tests
-        run: uv --directory src/packages run pytest -q tests/tests --tb=short
+        run: uv --directory src/packages run pytest -q tests/src/tests --tb=short
