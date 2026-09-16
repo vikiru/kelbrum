@@ -6,7 +6,7 @@ from enum import StrEnum
 
 import msgspec
 
-from models.tenrai import TenraiAnimeEntry
+from fetch.contracts import TenraiAnimeEntry
 
 
 class OriginLanguage(StrEnum):
@@ -45,6 +45,12 @@ def infer_origin_language(
     if override is not None:
         override_evidence = OriginEvidence(override, 'manual_override', str(entry.mal_id), 1.5)
         return OriginLanguageFeature(override, 1.0, (override_evidence,))
+
+    evidence = [*_relation_evidence(entry), *_script_evidence(entry.title)]
+    return _summarize_evidence(evidence)
+
+
+def _relation_evidence(entry: TenraiAnimeEntry) -> list[OriginEvidence]:
     evidence: list[OriginEvidence] = []
     for relation in entry.relations:
         for target in relation.entry:
@@ -56,17 +62,25 @@ def infer_origin_language(
                 evidence.append(OriginEvidence(OriginLanguage.CHINESE, 'relation', name, 1.0))
             elif media_type == 'manga' or (not media_type and target.type and target.type.casefold() == 'manga'):
                 evidence.append(OriginEvidence(OriginLanguage.JAPANESE, 'relation', name, 1.0))
+    return evidence
 
-    if _HANGUL.search(entry.title):
-        evidence.append(OriginEvidence(OriginLanguage.KOREAN, 'title_script', entry.title, 0.5))
-    elif _HIRAGANA.search(entry.title) or _KATAKANA.search(entry.title):
-        evidence.append(OriginEvidence(OriginLanguage.JAPANESE, 'title_script', entry.title, 0.5))
+
+def _script_evidence(title: str) -> list[OriginEvidence]:
+    if _HANGUL.search(title):
+        return [OriginEvidence(OriginLanguage.KOREAN, 'title_script', title, 0.5)]
+    if _HIRAGANA.search(title) or _KATAKANA.search(title):
+        return [OriginEvidence(OriginLanguage.JAPANESE, 'title_script', title, 0.5)]
+    return []
+
+
+def _summarize_evidence(evidence: list[OriginEvidence]) -> OriginLanguageFeature:
+    """Select the strongest language evidence and convert it to confidence."""
+    if not evidence:
+        return OriginLanguageFeature(None, 0.0, ())
 
     totals: dict[OriginLanguage, float] = {}
     for item in evidence:
         totals[item.language] = totals.get(item.language, 0.0) + item.weight
-    if not totals:
-        return OriginLanguageFeature(None, 0.0, ())
     language = max(totals, key=totals.__getitem__)
     total = totals[language]
     confidence = min(total / 1.5, 1.0)

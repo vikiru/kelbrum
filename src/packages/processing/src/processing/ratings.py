@@ -1,8 +1,7 @@
 """Canonical rating normalization for compatibility and eligibility rules."""
 
+import re
 from enum import StrEnum
-
-import msgspec
 
 
 class RatingClass(StrEnum):
@@ -12,10 +11,8 @@ class RatingClass(StrEnum):
     PG_13 = 'PG_13'
     R = 'R'
     R_PLUS = 'R_PLUS'
+    R_X = 'R_X'
 
-
-GENERAL_AUDIENCE_RATINGS = frozenset({RatingClass.G, RatingClass.PG, RatingClass.PG_13})
-MATURE_RATINGS = frozenset({RatingClass.R, RatingClass.R_PLUS})
 
 DISPLAY_RATINGS = {
     RatingClass.UNKNOWN: 'Unknown',
@@ -24,50 +21,25 @@ DISPLAY_RATINGS = {
     RatingClass.PG_13: 'PG-13',
     RatingClass.R: 'R',
     RatingClass.R_PLUS: 'R+',
+    RatingClass.R_X: 'Rx',
 }
 
-
-class RatingDecision(msgspec.Struct, frozen=True):
-    allowed: bool
-    reason: str
-    parent_rating: str
-    candidate_rating: str
-
-
-class RatingPolicy:
-    """Apply asymmetric maturity rules without changing stored catalogue ratings."""
-
-    def evaluate(self, parent_rating: str | None, candidate_rating: str | None) -> RatingDecision:
-        parent = normalize_rating(parent_rating)
-        candidate = normalize_rating(candidate_rating)
-        if RatingClass.UNKNOWN in (parent, candidate):
-            return RatingDecision(False, 'unknown_rating_fail_closed', parent.value, candidate.value)
-        allowed = _rating_allowed(parent, candidate)
-        return RatingDecision(allowed, 'retained' if allowed else 'rating_excluded', parent.value, candidate.value)
-
-
-def _rating_allowed(parent: RatingClass, candidate: RatingClass) -> bool:
-    if parent in GENERAL_AUDIENCE_RATINGS:
-        return candidate in GENERAL_AUDIENCE_RATINGS
-    if parent in MATURE_RATINGS:
-        return candidate in GENERAL_AUDIENCE_RATINGS | MATURE_RATINGS
-    return False
+_RATING_PATTERNS: tuple[tuple[re.Pattern[str], RatingClass], ...] = (
+    (re.compile(r'^RX'), RatingClass.R_X),
+    (re.compile(r'R\+'), RatingClass.R_PLUS),
+    (re.compile(r'^R'), RatingClass.R),
+    (re.compile(r'PG(?:-13| 13)'), RatingClass.PG_13),
+    (re.compile(r'^PG'), RatingClass.PG),
+    (re.compile(r'^G'), RatingClass.G),
+)
 
 
 def normalize_rating(value: str | None) -> RatingClass:
+    """Map an API rating string to the normalized rating class used by policy."""
     normalized = (value or '').strip().upper()
-    if not normalized:
-        return RatingClass.UNKNOWN
-    if normalized.startswith('RX') or 'R+' in normalized:
-        return RatingClass.R_PLUS
-    if normalized.startswith('R'):
-        return RatingClass.R
-    if 'PG-13' in normalized or 'PG 13' in normalized:
-        return RatingClass.PG_13
-    if normalized.startswith('PG'):
-        return RatingClass.PG
-    if normalized.startswith('G'):
-        return RatingClass.G
+    for pattern, rating_class in _RATING_PATTERNS:
+        if pattern.search(normalized):
+            return rating_class
     return RatingClass.UNKNOWN
 
 

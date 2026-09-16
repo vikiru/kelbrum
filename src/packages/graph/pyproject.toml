@@ -1,9 +1,9 @@
 [project]
-name = "models"
+name = "graph"
 version = "0.1.0"
-description = "Kelbrum models package"
+description = "Pure relationship graph construction and family policies"
 requires-python = ">=3.13"
-dependencies = ["msgspec>=0.18"]
+dependencies = ["msgspec>=0.18", "orjson>=3.10"]
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]

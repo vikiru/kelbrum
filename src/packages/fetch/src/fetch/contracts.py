@@ -1,5 +1,3 @@
-"""Typed projections of the Tenrai catalogue response."""
-
 import msgspec
 
 
@@ -88,16 +86,6 @@ class ExternalLink(msgspec.Struct, frozen=True, forbid_unknown_fields=False):
     url: str
 
 
-class StreamingLink(msgspec.Struct, frozen=True, forbid_unknown_fields=False):
-    name: str
-    url: str
-
-
-class ThemeSongs(msgspec.Struct, frozen=True, forbid_unknown_fields=False):
-    openings: list[str] = msgspec.field(default_factory=list)
-    endings: list[str] = msgspec.field(default_factory=list)
-
-
 class RelationEntry(msgspec.Struct, frozen=True, forbid_unknown_fields=False):
     """Anime-side relation target returned by full-detail responses."""
 
@@ -152,8 +140,6 @@ class TenraiAnimeEntry(msgspec.Struct, frozen=True, forbid_unknown_fields=False)
     images: Images | None = None
     trailer: Trailer | None = None
     external: list[ExternalLink] = msgspec.field(default_factory=list)
-    streaming: list[StreamingLink] = msgspec.field(default_factory=list)
-    theme: ThemeSongs | None = None
     producers: list[NamedResource] = msgspec.field(default_factory=list)
     licensors: list[NamedResource] = msgspec.field(default_factory=list)
     studios: list[NamedResource] = msgspec.field(default_factory=list)
@@ -184,37 +170,3 @@ class TenraiListResponse[EntryT](msgspec.Struct, frozen=True):
 
 class TenraiObjectResponse[EntryT](msgspec.Struct, frozen=True):
     data: EntryT
-
-
-class CanonicalAnime(msgspec.Struct, frozen=True):
-    mal_id: int
-    url: str | None
-    title: str
-    title_english: str | None
-    title_japanese: str | None
-    title_synonyms: tuple[str, ...]
-    anime_type: str | None
-    source: str | None
-    rating: str | None
-    season: str | None
-    episodes: int | None
-    duration_minutes: int | None
-    year: int | None
-    status: str | None
-    score: float | None
-    synopsis: str | None
-    synopsis_features: str | None
-    background: str | None
-    moreinfo: str | None
-    images: Images | None
-    trailer: Trailer | None
-    external: tuple[ExternalLink, ...]
-    streaming: tuple[StreamingLink, ...]
-    theme: ThemeSongs | None
-    studios: tuple[NamedResource, ...]
-    producers: tuple[NamedResource, ...]
-    licensors: tuple[NamedResource, ...]
-    genres: tuple[Taxonomy, ...]
-    themes: tuple[Taxonomy, ...]
-    demographics: tuple[Taxonomy, ...]
-    relations: tuple[AnimeRelation, ...]

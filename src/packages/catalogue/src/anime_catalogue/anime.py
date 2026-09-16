@@ -6,6 +6,34 @@ import msgspec
 import polars as pl
 
 
+class AnimeEntry(msgspec.Struct, frozen=True):
+    """Immutable local view of one catalogue entry with entry-level semantics."""
+
+    anime_id: int
+    title: str
+    genres: tuple[str, ...]
+    themes: tuple[str, ...]
+    demographics: tuple[str, ...]
+    rating: str
+    synopsis_features: str
+
+    def preferred_title(self) -> str:
+        """Return the display title selected for this entry."""
+        return self.title
+
+    def genre_names(self) -> tuple[str, ...]:
+        """Return the normalized genre labels for this entry."""
+        return self.genres
+
+    def theme_names(self) -> tuple[str, ...]:
+        """Return the normalized theme labels for this entry."""
+        return self.themes
+
+    def has_synopsis(self) -> bool:
+        """Return whether this entry has usable synopsis text."""
+        return bool(self.synopsis_features.strip())
+
+
 class AnimeCatalogue(msgspec.Struct, frozen=True):
     """Stable row-aligned catalogue facts used by downstream components."""
 
@@ -72,13 +100,32 @@ class AnimeCatalogue(msgspec.Struct, frozen=True):
     def title_for_id(self, anime_id: int) -> str:
         return self.titles[self.row_for_id(anime_id)]
 
+    def entry_for_id(self, anime_id: int) -> AnimeEntry:
+        """Return one local entry view without materializing the collection."""
+        return self.entry_for_row(self.row_for_id(anime_id))
+
+    def entry_for_row(self, row: int) -> AnimeEntry:
+        """Return one local entry view by aligned row number."""
+        try:
+            return AnimeEntry(
+                anime_id=self.anime_ids[row],
+                title=self.titles[row],
+                genres=self.genres[row],
+                themes=self.themes[row],
+                demographics=self.demographics[row],
+                rating=self.ratings[row],
+                synopsis_features=self.synopsis_features[row],
+            )
+        except IndexError as error:
+            raise IndexError(f'catalogue row out of range: {row}') from error
+
     def synopsis_available(self, anime_id: int) -> bool:
         return bool(self.synopsis_features[self.row_for_id(anime_id)].strip())
 
     def validate_aligned_ids(self, aligned_ids: Sequence[int], *, source_name: str = 'aligned data') -> None:
         """Reject feature or cache rows that do not use this catalogue's ID order."""
         expected = self.anime_ids
-        actual = tuple(int(anime_id) for anime_id in aligned_ids)
+        actual = tuple(aligned_ids)
         if actual != expected:
             raise ValueError(f'{source_name} IDs do not match catalogue row order')
 

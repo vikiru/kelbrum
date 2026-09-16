@@ -1,17 +1,48 @@
 """Kelbrum features package."""
 
-from features.categorical import CategoricalFeatureStore
-from features.manual_theme_corrections import MANUAL_THEME_ADDITIONS
-from features.tag_assignment import MANUAL_TAG_ASSIGNMENTS
-from features.tags import TAGS, Tag, TagAssignment, apply_tag_assignments, validate_tags_against_taxonomy
+from features.blocks import AvailabilityPolicy
+from features.categorical_blocks import CategoricalEncoding, CategoricalProperty, default_categorical_properties
+from features.composition import FeatureAssemblyPlan, FeatureStage, FeatureStageObserver, default_feature_stages
+from features.config import EmbeddingModel, EmbeddingSource, FeatureConfig
+from features.tag_assignment import (
+    MANUAL_TAG_ASSIGNMENTS,
+    TAG_ASSIGNMENT_REGISTRY,
+    TagAssignmentRegistry,
+    tag_assignment_registry_identity,
+)
+from features.tags import (
+    TAG_REGISTRY,
+    TAGS,
+    Tag,
+    TagAssignment,
+    TagRegistry,
+    apply_tag_assignments,
+    tag_registry_identity,
+    validate_tags_against_taxonomy,
+)
 
 __all__ = [
     'MANUAL_TAG_ASSIGNMENTS',
-    'MANUAL_THEME_ADDITIONS',
     'TAGS',
-    'CategoricalFeatureStore',
+    'TAG_ASSIGNMENT_REGISTRY',
+    'TAG_REGISTRY',
+    'AvailabilityPolicy',
+    'CategoricalEncoding',
+    'CategoricalProperty',
+    'EmbeddingModel',
+    'EmbeddingSource',
+    'FeatureAssemblyPlan',
+    'FeatureConfig',
+    'FeatureStage',
+    'FeatureStageObserver',
     'Tag',
     'TagAssignment',
+    'TagAssignmentRegistry',
+    'TagRegistry',
     'apply_tag_assignments',
+    'default_categorical_properties',
+    'default_feature_stages',
+    'tag_assignment_registry_identity',
+    'tag_registry_identity',
     'validate_tags_against_taxonomy',
 ]

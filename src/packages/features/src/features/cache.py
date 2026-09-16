@@ -1,11 +1,19 @@
 """Versioned metadata and validation for catalogue feature caches."""
 
-import hashlib
-import json
-from datetime import UTC, datetime
 from pathlib import Path
 
 import msgspec
+import orjson
+
+from config import derive_payload_identity
+from features.tag_assignment import tag_assignment_registry_identity
+from features.tags import tag_registry_identity
+
+FEATURE_ALGORITHM_DESCRIPTOR = {
+    'text_features': 'bm25-idf-and-latent-synopsis',
+    'numeric_features': 'configured-transforms-and-buckets',
+    'missingness': 'explicit-row-and-dimension-availability',
+}
 
 
 class FeatureCacheMetadata(msgspec.Struct, frozen=True):
@@ -17,19 +25,28 @@ class FeatureCacheMetadata(msgspec.Struct, frozen=True):
     ordered_ids_hash: str
     source_snapshot_id: str | None
     configuration_hash: str
-    created_at: str
 
 
 def ordered_ids_hash(ordered_ids: list[int] | tuple[int, ...]) -> str:
     """Hash the exact catalogue row order used by an aligned cache."""
-    payload = json.dumps([int(value) for value in ordered_ids], separators=(',', ':')).encode()
-    return hashlib.sha256(payload).hexdigest()
+    return derive_payload_identity(ordered_ids)
 
 
-def configuration_hash(configuration: object) -> str:
+def configuration_hash(
+    configuration: object,
+    *,
+    tag_vocabulary_identity: str | None = None,
+    tag_assignment_identity: str | None = None,
+) -> str:
     """Hash JSON-compatible feature configuration deterministically."""
-    payload = json.dumps(configuration, sort_keys=True, separators=(',', ':'), default=str).encode()
-    return hashlib.sha256(payload).hexdigest()
+    return derive_payload_identity(
+        {
+            'feature_algorithm': FEATURE_ALGORITHM_DESCRIPTOR,
+            'configuration': configuration,
+            'tag_vocabulary_identity': tag_vocabulary_identity or tag_registry_identity(),
+            'tag_assignment_identity': tag_assignment_identity or tag_assignment_registry_identity(),
+        }
+    )
 
 
 def new_cache_metadata(
@@ -48,7 +65,6 @@ def new_cache_metadata(
         ordered_ids_hash=ordered_ids_hash(ordered_ids),
         source_snapshot_id=source_snapshot_id,
         configuration_hash=configuration_hash(configuration),
-        created_at=datetime.now(UTC).isoformat(),
     )
 
 
@@ -59,6 +75,7 @@ def validate_cache_metadata(
     ordered_ids: list[int] | tuple[int, ...],
     source_snapshot_id: str | None,
     configuration: object,
+    schema_version: str = 'feature-cache-v1',
 ) -> None:
     """Raise when cache identity does not match the requested feature build."""
     expected = new_cache_metadata(
@@ -66,8 +83,10 @@ def validate_cache_metadata(
         ordered_ids=ordered_ids,
         source_snapshot_id=source_snapshot_id,
         configuration=configuration,
-        schema_version=metadata.schema_version,
+        schema_version=schema_version,
     )
+    if metadata.schema_version != expected.schema_version:
+        raise ValueError('feature cache schema is incompatible')
     if metadata.model_name != expected.model_name:
         raise ValueError('feature cache model does not match the requested model')
     if metadata.catalogue_length != expected.catalogue_length:
@@ -87,9 +106,9 @@ def metadata_path(cache_path: Path) -> Path:
 
 def encode_metadata(metadata: FeatureCacheMetadata) -> bytes:
     """Encode cache metadata as compact typed JSON for a sidecar writer."""
-    return msgspec.json.encode(metadata)
+    return orjson.dumps(msgspec.to_builtins(metadata), option=orjson.OPT_SORT_KEYS)
 
 
 def decode_metadata(payload: bytes) -> FeatureCacheMetadata:
     """Decode and validate the typed cache metadata envelope."""
-    return msgspec.json.decode(payload, type=FeatureCacheMetadata)
+    return msgspec.convert(orjson.loads(payload), type=FeatureCacheMetadata)

@@ -5,8 +5,8 @@ from collections.abc import Sequence
 
 import msgspec
 
-from models.tenrai import TenraiAnimeEntry
-from models.tenrai_types import normalize_media_type
+from fetch.contracts import TenraiAnimeEntry
+from fetch.types import normalize_media_type
 
 _PROMOTIONAL_MARKERS = re.compile(
     r'\b(?:promo(?:tional)? video|pv|trailer|commercial|game trailer|music video|recap|preview|teaser|short)\b',
