@@ -7,11 +7,12 @@ dependencies = [
   "export",
   "pipeline",
   "config",
-  "models",
   "processing",
   "normalization",
   "features",
   "recommender",
+  "graph",
+  "storage",
   "numpy>=2.0",
   "polars>=1.0",
   "scipy>=1.14",
@@ -26,5 +27,5 @@ build-backend = "uv_build"
 module-name = "tests"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["src/tests"]
 addopts = "-q --tb=short"

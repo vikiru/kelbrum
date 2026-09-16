@@ -1,6 +1,7 @@
-from models.tenrai import TenraiAnimeEntry
+from fetch.contracts import TenraiAnimeEntry
 from processing.eligibility import EligibilityPolicy, filter_entries
-from processing.ratings import RatingPolicy, display_rating
+from processing.ratings import display_rating
+from recommender.rating_policy import RatingPolicy
 
 
 def test_rating_policy_is_asymmetric_by_maturity_level() -> None:
