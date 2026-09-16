@@ -1,5 +1,7 @@
 """Validated feature assembly configuration."""
 
+from enum import StrEnum
+
 import msgspec
 
 from features.constants import (
@@ -9,6 +11,8 @@ from features.constants import (
     DEFAULT_YEAR_BOUNDARIES,
 )
 from normalization.policy import MissingPolicy
+
+_NGRAM_RANGE_LENGTH = 2
 
 
 def _default_numeric_transforms() -> dict[str, tuple[str, ...]]:
@@ -20,12 +24,37 @@ def _default_numeric_transforms() -> dict[str, tuple[str, ...]]:
     }
 
 
+class EmbeddingSource(StrEnum):
+    """Identify where an embedding model is resolved from."""
+
+    LOCAL = 'local'
+    REMOTE = 'remote'
+
+
+class EmbeddingModel(msgspec.Struct, frozen=True, forbid_unknown_fields=True):
+    """Describe one embedding model without ambiguous path and boolean flags."""
+
+    source: EmbeddingSource
+    identifier: str
+    revision: str | None = None
+
+    def __post_init__(self) -> None:
+        """Reject empty model references and invalid revision combinations."""
+        if not self.identifier.strip():
+            raise ValueError('embedding model identifier cannot be empty')
+        if self.source is EmbeddingSource.LOCAL and self.revision is not None:
+            raise ValueError('local embedding models do not accept a remote revision')
+
+    @property
+    def local_only(self) -> bool:
+        """Return whether model loading must stay on the local filesystem."""
+        return self.source is EmbeddingSource.LOCAL
+
+
 class FeatureConfig(msgspec.Struct, frozen=True):
     """Behavioral choices that identify a feature bundle."""
 
-    embedding_model: str | None = None
-    embedding_model_path: str | None = None
-    embedding_local_only: bool = True
+    embedding: EmbeddingModel | None = None
     source_snapshot_id: str | None = None
     include_studios: bool = False
     include_quality_features: bool = False
@@ -63,7 +92,7 @@ class FeatureConfig(msgspec.Struct, frozen=True):
             raise ValueError('invalid synopsis configuration')
         self._validate_numeric_transforms(self.numeric_transforms)
         ngram_range = self.synopsis_ngram_range
-        if len(ngram_range) != 2 or ngram_range[0] < 1 or ngram_range[0] > ngram_range[1]:
+        if len(ngram_range) != _NGRAM_RANGE_LENGTH or ngram_range[0] < 1 or ngram_range[0] > ngram_range[1]:
             raise ValueError('synopsis ngram range must be an ordered positive pair')
 
     @staticmethod

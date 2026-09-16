@@ -1,6 +1,6 @@
 """Stable processing policy constants."""
 
-PROCESSING_AUDIT_SCHEMA_VERSION = 'processing-v6-duration-parsing'
+PROCESSING_AUDIT_SCHEMA_VERSION = 'processing-v7-lossless-canonical-records'
 DEFAULT_MAX_YEAR = 2026
 DEFAULT_ALLOWED_TYPES = frozenset({'TV', 'ONA', 'MOVIE'})
 DEFAULT_EXCLUDED_GENRE_IDS = frozenset({9, 12, 49})

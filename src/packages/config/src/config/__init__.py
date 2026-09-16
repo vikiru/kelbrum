@@ -20,18 +20,27 @@ from config._paths import (
     tenrai_snapshot_path,
     workspace_root,
 )
+from config.events import LogEvent, emit_event, peak_memory_mb, timed_event
+from config.identity import IdentityInputs, derive_identity, derive_payload_identity, derive_stage_identity
 from config.logger import bind_logger, setup_logging
 from config.settings import Settings
 
 __all__ = [
+    'IdentityInputs',
+    'LogEvent',
     'Settings',
     'bind_logger',
     'canonical_dir',
+    'derive_identity',
+    'derive_payload_identity',
+    'derive_stage_identity',
     'embedding_cache_dir',
+    'emit_event',
     'frontend_data_dir',
     'huggingface_model_dir',
     'intermediate_dir',
     'model_cache_dir',
+    'peak_memory_mb',
     'results_dir',
     'setup_logging',
     'synopsis_embedding_dir',
@@ -44,5 +53,6 @@ __all__ = [
     'tenrai_r_plus_full_path',
     'tenrai_r_plus_snapshot_path',
     'tenrai_snapshot_path',
+    'timed_event',
     'workspace_root',
 ]

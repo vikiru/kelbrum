@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fetch.checkpoint import SnapshotManifest, save_manifest
-from models.tenrai import TenraiAnimeEntry
+from fetch.contracts import TenraiAnimeEntry
 from storage.json_io import write_json
 
 

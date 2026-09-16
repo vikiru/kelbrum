@@ -1,8 +1,8 @@
-"""Decoders for external and persisted model boundaries."""
+"""Decoders for the Tenrai transport boundary."""
 
 import msgspec
 
-from models.tenrai import TenraiAnimeEntry, TenraiListResponse
+from fetch.contracts import TenraiAnimeEntry, TenraiListResponse
 
 
 def decode_catalogue(payload: bytes) -> TenraiListResponse[TenraiAnimeEntry]:

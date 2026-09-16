@@ -3,12 +3,12 @@
 import re
 
 import msgspec
-import polars as pl
 
-from models.labels import normalize_label
-from models.tenrai import CanonicalAnime, Taxonomy, TenraiAnimeEntry
-from models.tenrai_types import normalize_media_type
-from processing.synopsis import feature_synopsis, feature_synopsis_column
+from fetch.contracts import Taxonomy, TenraiAnimeEntry
+from fetch.types import normalize_media_type
+from processing.contracts import CanonicalAnime
+from processing.labels import normalize_label
+from processing.synopsis import feature_synopsis
 
 _HOURS = re.compile(r'(?P<hours>\d+)\s*hr(?:s)?', re.IGNORECASE)
 _MINUTES = re.compile(r'(?P<minutes>\d+)\s*min(?:s)?', re.IGNORECASE)
@@ -27,11 +27,6 @@ def clean_synopsis(value: str | None) -> str | None:
     cleaned = _SYNOPSIS_ATTRIBUTION.sub('', cleaned).strip()
     cleaned = _SYNOPSIS_SOURCE.sub('', cleaned).strip()
     return feature_synopsis(cleaned) if cleaned else None
-
-
-def clean_synopsis_column(frame: pl.DataFrame) -> pl.DataFrame:
-    """Compatibility wrapper for the feature-only synopsis column."""
-    return frame.with_columns(feature_synopsis_column(frame).get_column('synopsis_features').alias('synopsis'))
 
 
 def duration_to_minutes(value: str | None) -> int | None:
@@ -70,8 +65,6 @@ def canonicalize(entry: TenraiAnimeEntry) -> CanonicalAnime:
         images=entry.images,
         trailer=entry.trailer,
         external=tuple(entry.external),
-        streaming=tuple(entry.streaming),
-        theme=entry.theme,
         studios=tuple(entry.studios),
         producers=tuple(entry.producers),
         licensors=tuple(entry.licensors),

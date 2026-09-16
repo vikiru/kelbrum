@@ -10,6 +10,8 @@ from storage.json_io import read_json, write_json
 
 class FetchCheckpoint(msgspec.Struct, frozen=True):
     mode: str
+    route: str = 'tenrai-anime'
+    profile: str = '-'
     next_page: int = 1
     completed_pages: tuple[int, ...] = ()
     failed_pages: tuple[int, ...] = ()
@@ -36,26 +38,33 @@ class SnapshotManifest(msgspec.Struct, frozen=True):
     record_count: int
     fetched_date: str
     schema_version: str = 'tenrai-v1'
+    route: str = 'tenrai-anime'
+    profile: str = '-'
     accepted_count: int | None = None
     rejected_count: int | None = None
     rejection_reasons: tuple[tuple[str, int], ...] = ()
 
 
 def save_checkpoint(path: Path, checkpoint: FetchCheckpoint) -> None:
+    """Persist resumable catalogue-fetch state atomically as JSON."""
     write_json(path, checkpoint)
 
 
 def load_checkpoint(path: Path) -> FetchCheckpoint:
+    """Load and validate resumable catalogue-fetch state from JSON."""
     return read_json(path, FetchCheckpoint)
 
 
 def save_enrichment_checkpoint(path: Path, checkpoint: EnrichmentCheckpoint) -> None:
+    """Persist resumable enrichment state atomically as JSON."""
     write_json(path, checkpoint)
 
 
 def load_enrichment_checkpoint(path: Path) -> EnrichmentCheckpoint:
+    """Load and validate resumable enrichment state from JSON."""
     return read_json(path, EnrichmentCheckpoint)
 
 
 def save_manifest(path: Path, manifest: SnapshotManifest) -> None:
+    """Persist the completed snapshot manifest atomically as JSON."""
     write_json(path, manifest)

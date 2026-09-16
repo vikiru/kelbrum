@@ -7,8 +7,9 @@ from urllib.parse import urlparse
 
 import msgspec
 
-from models.tenrai import TenraiAnimeEntry
-from models.tenrai_types import AiringStatus, normalize_airing_status, normalize_media_type
+from config import derive_payload_identity
+from fetch.contracts import TenraiAnimeEntry
+from fetch.types import AiringStatus, normalize_airing_status, normalize_media_type
 from processing.canonicalize import duration_to_minutes
 from processing.constants import (
     DEFAULT_ALLOWED_TYPES,
@@ -54,7 +55,7 @@ class EligibilityAudit(msgspec.Struct, frozen=True):
     rejected_ids: tuple[int, ...]
     reasons_by_rule: tuple[tuple[str, int], ...]
     reasons_by_id: tuple[tuple[int, tuple[str, ...]], ...]
-    policy_version: str = 'eligibility-v2'
+    policy_identity: str = ''
 
 
 def is_valid_url(value: str | None) -> bool:
@@ -141,26 +142,7 @@ def filter_entries(
     reason_counts: dict[str, int] = {}
     reasons_by_id: dict[int, tuple[str, ...]] = {}
     for entry in entries:
-        reasons: list[ExclusionReason] = []
-        if not active_policy.bypass_catalogue_filters:
-            if normalize_media_type(entry.type) == 'MOVIE' and _is_short_movie(entry, active_policy):
-                reasons.append(ExclusionReason.SHORT_MOVIE)
-            if normalize_media_type(entry.type) not in active_policy.allowed_types:
-                reasons.append(ExclusionReason.TYPE_NOT_ALLOWED)
-            genre_ids = {genre.mal_id for genre in entry.genres}
-            excluded_genres = genre_ids & active_policy.excluded_genre_ids
-            if excluded_genres:
-                reasons.append(ExclusionReason.EXCLUDED_GENRE)
-            if active_policy.require_semantic_evidence and not has_recommendation_evidence(entry, tagged_anime_ids):
-                reasons.append(ExclusionReason.MISSING_SEMANTIC_EVIDENCE)
-        if entry.year is not None and entry.year > active_policy.max_year:
-            reasons.append(ExclusionReason.YEAR_AFTER_CUTOFF)
-        if normalize_airing_status(entry.status) is AiringStatus.NOT_YET_AIRED:
-            reasons.append(ExclusionReason.NOT_YET_AIRED)
-        if active_policy.require_primary_image and not has_primary_image(entry):
-            reasons.append(ExclusionReason.MISSING_PRIMARY_IMAGE)
-        if active_policy.require_trailer and not has_trailer(entry):
-            reasons.append(ExclusionReason.MISSING_TRAILER)
+        reasons = _entry_rejection_reasons(entry, active_policy, tagged_anime_ids)
         if reasons:
             rejected_ids.append(entry.mal_id)
             reasons_by_id[entry.mal_id] = tuple(reason.value for reason in reasons)
@@ -174,8 +156,50 @@ def filter_entries(
         rejected_ids=tuple(sorted(rejected_ids)),
         reasons_by_rule=tuple(sorted(reason_counts.items())),
         reasons_by_id=tuple(sorted(reasons_by_id.items())),
+        policy_identity=derive_payload_identity(active_policy),
     )
     return accepted, audit
+
+
+def _entry_rejection_reasons(
+    entry: TenraiAnimeEntry,
+    policy: EligibilityPolicy,
+    tagged_anime_ids: Collection[int],
+) -> list[ExclusionReason]:
+    """Collect every applicable rejection reason for one catalogue entry."""
+    reasons = _catalogue_filter_reasons(entry, policy, tagged_anime_ids)
+    if entry.year is not None and entry.year > policy.max_year:
+        reasons.append(ExclusionReason.YEAR_AFTER_CUTOFF)
+    if normalize_airing_status(entry.status) is AiringStatus.NOT_YET_AIRED:
+        reasons.append(ExclusionReason.NOT_YET_AIRED)
+    if policy.require_primary_image and not has_primary_image(entry):
+        reasons.append(ExclusionReason.MISSING_PRIMARY_IMAGE)
+    if policy.require_trailer and not has_trailer(entry):
+        reasons.append(ExclusionReason.MISSING_TRAILER)
+    return reasons
+
+
+def _catalogue_filter_reasons(
+    entry: TenraiAnimeEntry,
+    policy: EligibilityPolicy,
+    tagged_anime_ids: Collection[int],
+) -> list[ExclusionReason]:
+    """Return reasons controlled by the production catalogue filters."""
+    if policy.bypass_catalogue_filters:
+        return []
+
+    reasons: list[ExclusionReason] = []
+    media_type = normalize_media_type(entry.type)
+    if media_type == 'MOVIE' and _is_short_movie(entry, policy):
+        reasons.append(ExclusionReason.SHORT_MOVIE)
+    if media_type not in policy.allowed_types:
+        reasons.append(ExclusionReason.TYPE_NOT_ALLOWED)
+    genre_ids = {genre.mal_id for genre in entry.genres}
+    if genre_ids & policy.excluded_genre_ids:
+        reasons.append(ExclusionReason.EXCLUDED_GENRE)
+    if policy.require_semantic_evidence and not has_recommendation_evidence(entry, tagged_anime_ids):
+        reasons.append(ExclusionReason.MISSING_SEMANTIC_EVIDENCE)
+    return reasons
 
 
 def _is_short_movie(entry: TenraiAnimeEntry, policy: EligibilityPolicy) -> bool:
