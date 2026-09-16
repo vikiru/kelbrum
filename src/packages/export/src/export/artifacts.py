@@ -1,6 +1,6 @@
 """Domain-specific frontend artifact projections."""
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 
 import msgspec
@@ -14,12 +14,14 @@ from export.constants import (
     MAX_FULL_ENTRY_CHUNK_SIZE,
     MIN_FULL_ENTRY_CHUNK_SIZE,
 )
-from models.contracts import RecommendationScore
-from models.labels import display_label
-from models.tenrai import CanonicalAnime, TenraiAnimeEntry
+from export.contracts import RecommendationChunkManifest
+from export.labels import display_label
+from export.manifest import validate_recommendation_manifest
+from fetch.contracts import NamedResource, Taxonomy, TenraiAnimeEntry
 from processing.canonicalize import duration_to_minutes
+from processing.contracts import CanonicalAnime
 from processing.ratings import display_rating
-from storage.json_io import write_json
+from storage.json_io import read_json, write_json
 
 
 def write_frontend_json(filename: str, value: object, *, output_dir: Path) -> Path:
@@ -37,6 +39,7 @@ def write_metadata_chunks(
     """Write deterministic card/search metadata chunks for bounded frontend loading."""
     if chunk_size < 1:
         raise ValueError('chunk_size must be positive')
+    _validate_unique_ids((_metadata_id(item) for item in metadata), 'metadata')
     return tuple(
         write_frontend_json(
             f'metadata-{bucket_start}-{bucket_start + chunk_size - 1}.json',
@@ -53,6 +56,7 @@ def write_search_metadata_chunks(
     """Write search metadata in deterministic ID-range chunks for paginated loading."""
     if chunk_size < 1:
         raise ValueError('chunk_size must be positive')
+    _validate_unique_ids((_metadata_id(item) for item in metadata), 'search metadata')
     return tuple(
         write_frontend_json(
             f'anime-metadata-{bucket_start}-{bucket_start + chunk_size - 1}.json',
@@ -96,11 +100,11 @@ def write_full_entries(
     *,
     output_dir: Path,
     recommendations: Mapping[int, Sequence[int]] | None = None,
-    recommendation_scores: Mapping[int, Sequence[RecommendationScore]] | None = None,
     chunk_size: int = DEFAULT_FULL_ENTRY_CHUNK_SIZE,
 ) -> tuple[Path, ...]:
     """Write detail entries and recommendation IDs in bounded frontend data chunks."""
     _validate_full_entry_chunk_size(chunk_size)
+    _validate_unique_ids((entry.mal_id for entry in entries), 'full entries')
     recommendation_map = recommendations or {}
     ordered_entries = sorted(entries, key=_entry_id)
     paths: list[Path] = []
@@ -109,7 +113,6 @@ def write_full_entries(
             str(ordered_entries[index].mal_id): _full_entry_payload(
                 ordered_entries[index],
                 recommendation_map.get(ordered_entries[index].mal_id, ()),
-                (recommendation_scores or {}).get(ordered_entries[index].mal_id, ()),
             )
             for index in indexes
         }
@@ -133,15 +136,14 @@ def write_full_entries_from_chunks(
     """Write full entries while loading one recommendation checkpoint at a time."""
     _validate_full_entry_chunk_size(chunk_size)
     ordered_entries = sorted(entries, key=_entry_id)
-    manifest = msgspec.json.decode((recommendation_chunks / 'manifest.json').read_bytes(), type=dict[str, object])
-    chunk_ids = manifest.get('chunk_ids')
-    if not isinstance(chunk_ids, dict):
-        raise TypeError('recommendation manifest is missing chunk IDs')
+    manifest = read_json(recommendation_chunks / 'manifest.json', RecommendationChunkManifest)
+    validate_recommendation_manifest(
+        manifest,
+        tuple(entry.mal_id for entry in ordered_entries),
+        recommendation_chunks,
+    )
     entry_to_chunk = {
-        int(anime_id): int(chunk_number)
-        for chunk_number, anime_ids in chunk_ids.items()
-        if isinstance(anime_ids, list)
-        for anime_id in anime_ids
+        anime_id: int(chunk_number) for chunk_number, anime_ids in manifest.chunk_ids.items() for anime_id in anime_ids
     }
     paths: list[Path] = []
     cached_chunk_number: int | None = None
@@ -172,17 +174,33 @@ def write_full_entries_from_chunks(
 
 
 def _read_recommendation_chunk(path: Path) -> Mapping[int, Sequence[int]]:
+    """Load one recommendation chunk and convert its string keys to IDs."""
     if not path.is_file():
         raise FileNotFoundError(f'missing recommendation chunk: {path}')
-    return msgspec.json.decode(path.read_bytes(), type=dict[int, tuple[int, ...]])
+    payload = read_json(path, dict[str, tuple[int, ...]])
+    try:
+        return {int(anime_id): recommendations for anime_id, recommendations in payload.items()}
+    except ValueError as error:
+        raise ValueError(f'recommendation chunk contains a non-numeric anime ID: {path}') from error
 
 
 def _add_posting(postings: dict[str, list[int]], value: str | None, anime_id: int) -> None:
+    """Add an anime ID to a categorical posting list when its value is present."""
     if value:
         postings.setdefault(value, []).append(anime_id)
 
 
+def _validate_unique_ids(ids: Iterable[int], label: str) -> None:
+    """Reject duplicate or non-positive IDs before building keyed projections."""
+    values = tuple(ids)
+    if any(anime_id <= 0 for anime_id in values):
+        raise ValueError(f'{label} require positive anime IDs')
+    if len(values) != len(set(values)):
+        raise ValueError(f'{label} must have unique anime IDs')
+
+
 def _validate_full_entry_chunk_size(chunk_size: int) -> None:
+    """Reject full-entry chunk sizes outside the bounded export policy."""
     if not MIN_FULL_ENTRY_CHUNK_SIZE <= chunk_size <= MAX_FULL_ENTRY_CHUNK_SIZE:
         raise ValueError(f'chunk_size must be between {MIN_FULL_ENTRY_CHUNK_SIZE} and {MAX_FULL_ENTRY_CHUNK_SIZE}')
 
@@ -190,39 +208,63 @@ def _validate_full_entry_chunk_size(chunk_size: int) -> None:
 def _full_entry_payload(
     entry: TenraiAnimeEntry,
     recommendations: Sequence[int],
-    recommendation_scores: Sequence[RecommendationScore] = (),
 ) -> dict[str, object]:
-    payload = msgspec.to_builtins(entry)
-    if not isinstance(payload, dict):
-        raise TypeError('Tenrai full entry did not encode as an object')
-    payload['rating'] = display_rating(entry.rating)
-    payload['genres'] = [{**item, 'name': display_label(item['name'])} for item in payload.get('genres', [])]
-    payload['themes'] = [{**item, 'name': display_label(item['name'])} for item in payload.get('themes', [])]
-    payload['durationMinutes'] = duration_to_minutes(entry.duration)
-    payload['recommendations'] = list(dict.fromkeys(recommendations))
-    if recommendation_scores:
-        payload['recommendationScores'] = msgspec.to_builtins(recommendation_scores)
-    else:
-        payload.pop('recommendationScores', None)
-    payload.pop('recommendationExplanations', None)
+    """Project one source entry into the frontend detail payload."""
+    payload: dict[str, object] = {
+        'mal_id': entry.mal_id,
+        'title': entry.title,
+        'url': entry.url,
+        'title_english': entry.title_english,
+        'title_japanese': entry.title_japanese,
+        'type': entry.type,
+        'source': entry.source,
+        'episodes': entry.episodes,
+        'duration': entry.duration,
+        'durationMinutes': duration_to_minutes(entry.duration),
+        'status': entry.status,
+        'year': entry.year,
+        'rating': display_rating(entry.rating),
+        'season': entry.season,
+        'score': entry.score,
+        'synopsis': entry.synopsis,
+        'images': msgspec.to_builtins(entry.images),
+        'trailer': {'url': entry.trailer.url} if entry.trailer is not None else None,
+        'genres': _taxonomy_payload(entry.genres),
+        'themes': _taxonomy_payload(entry.themes),
+        'demographics': _taxonomy_payload(entry.demographics),
+        'studios': _taxonomy_payload(entry.studios),
+        'recommendations': list(dict.fromkeys(recommendations)),
+    }
     return payload
 
 
+def _taxonomy_payload(values: Sequence[Taxonomy | NamedResource]) -> list[dict[str, object]]:
+    """Project only the taxonomy fields consumed by the frontend details page."""
+    return [
+        {'mal_id': value.mal_id, 'name': display_label(value.name), 'type': value.type, 'url': value.url}
+        for value in values
+    ]
+
+
 def _entry_id(entry: TenraiAnimeEntry) -> int:
+    """Return the stable sort key for a source entry."""
     return entry.mal_id
 
 
 def _canonical_id(record: CanonicalAnime) -> int:
+    """Return the stable sort key for a processed record."""
     return record.mal_id
 
 
 def _metadata_id(metadata: object) -> int:
+    """Extract and validate the ID required for metadata bucketing."""
     if not isinstance(metadata, dict) or not isinstance(metadata.get('malId'), int):
         raise TypeError('metadata must contain an integer malId')
     return metadata['malId']
 
 
 def _metadata_buckets(metadata: Sequence[object], width: int) -> tuple[tuple[int, tuple[int, ...]], ...]:
+    """Group metadata positions by deterministic ID-range buckets."""
     buckets: dict[int, list[int]] = {}
     for index, item in enumerate(metadata):
         item_id = _metadata_id(item)
@@ -232,6 +274,7 @@ def _metadata_buckets(metadata: Sequence[object], width: int) -> tuple[tuple[int
 
 
 def _entry_buckets(entries: Sequence[TenraiAnimeEntry], width: int) -> tuple[tuple[int, tuple[int, ...]], ...]:
+    """Group full-entry positions by deterministic ID-range buckets."""
     buckets: dict[int, list[int]] = {}
     for index, entry in enumerate(entries):
         bucket_start = ((entry.mal_id - 1) // width) * width + 1

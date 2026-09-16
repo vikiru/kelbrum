@@ -17,7 +17,7 @@ export const AnimeCardMetadataSchema = z.object({
   title: z.string().min(1),
   titleEnglish: z.string().min(1).nullable(),
   titleJapanese: z.string().min(1).nullable().optional(),
-  score: z.number().min(0).max(10),
+  score: z.number().min(0).max(10).nullable(),
   year: z.number().int().nullable(),
 });
 
@@ -31,40 +31,36 @@ const AnimeResourceSchema = z.object({
   url: z.string().url().nullable().optional(),
 });
 
-export const AnimeEntrySchema = z.looseObject({
-  mal_id: z.number().int().positive(),
-  title: z.string().min(1),
-  url: z.string().url().nullable(),
-  title_english: z.string().nullable(),
-  title_japanese: z.string().nullable(),
-  title_synonyms: z.array(z.string()),
-  type: z.string().nullable(),
-  source: z.string().nullable(),
-  episodes: z.number().int().nonnegative().nullable(),
-  duration: z.string().nullable(),
-  durationMinutes: z.number().int().nonnegative().nullable(),
-  status: z.string().nullable(),
-  airing: z.boolean().nullable(),
-  year: z.number().int().nullable(),
-  rating: z.string().nullable(),
-  season: z.string().nullable(),
-  score: z.number().min(0).max(10).nullable(),
-  rank: z.number().int().positive().nullable(),
-  synopsis: z.string().nullable(),
-  background: z.string().nullable(),
-  images: AnimeImagesSchema.nullable(),
-  trailer: z.object({ url: z.string().url().nullable() }).nullable(),
-  genres: z.array(AnimeResourceSchema),
-  themes: z.array(AnimeResourceSchema),
-  demographics: z.array(AnimeResourceSchema),
-  studios: z.array(AnimeResourceSchema),
-  producers: z.array(AnimeResourceSchema),
-  licensors: z.array(AnimeResourceSchema),
-  recommendations: z
-    .array(z.number().int().positive())
-    .nullish()
-    .transform((value) => value ?? []),
-});
+export const AnimeEntrySchema = z
+  .object({
+    mal_id: z.number().int().positive(),
+    title: z.string().min(1),
+    url: z.string().url().nullable(),
+    title_english: z.string().nullable(),
+    title_japanese: z.string().nullable(),
+    type: z.string().nullable(),
+    source: z.string().nullable(),
+    episodes: z.number().int().nonnegative().nullable(),
+    duration: z.string().nullable(),
+    durationMinutes: z.number().int().nonnegative().nullable(),
+    status: z.string().nullable(),
+    year: z.number().int().nullable(),
+    rating: z.string().nullable(),
+    season: z.string().nullable(),
+    score: z.number().min(0).max(10).nullable(),
+    synopsis: z.string().nullable(),
+    images: AnimeImagesSchema.nullable(),
+    trailer: z.object({ url: z.string().url().nullable() }).nullable(),
+    genres: z.array(AnimeResourceSchema),
+    themes: z.array(AnimeResourceSchema),
+    demographics: z.array(AnimeResourceSchema),
+    studios: z.array(AnimeResourceSchema),
+    recommendations: z
+      .array(z.number().int().positive())
+      .nullish()
+      .transform((value) => value ?? []),
+  })
+  .strict();
 
 export const AnimeEntryChunkSchema = z.record(z.string(), AnimeEntrySchema);
 
@@ -108,6 +104,7 @@ export const AnimeArtifactManifestSchema = z.object({
     }),
   ),
   search_metadata: z.string(),
+  search_metadata_chunks: z.array(z.string()),
   build_identity: z.string(),
   provenance: z.record(z.string(), z.unknown()),
 });
