@@ -2,10 +2,13 @@
 
 from collections.abc import Iterable, Sequence
 from enum import StrEnum
+from heapq import nsmallest
+from math import isfinite
+from typing import Protocol
 
 import msgspec
 
-from models.contracts import RecommendationResult
+from recommender.contracts import RecommendationResult
 
 
 class PathEvidence(msgspec.Struct, frozen=True):
@@ -31,10 +34,47 @@ class UnionCandidate(msgspec.Struct, frozen=True):
         return min(item.rank for item in self.evidence)
 
 
+class UnionPolicy(Protocol):
+    """Strategy for converting path-ranked candidates into scoring inputs."""
+
+    name: str
+    identity: str
+
+    def merge(self, path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]]) -> tuple[UnionCandidate, ...]: ...
+
+
+class EvidenceUnion:
+    """Merge each candidate ID once while retaining every path nomination."""
+
+    name = 'evidence_union'
+    identity = 'evidence_union-v1'
+
+    def merge(self, path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]]) -> tuple[UnionCandidate, ...]:
+        return build_union(path_results)
+
+
+class NoUnion:
+    """Keep path nominations independent until the scoring stage."""
+
+    name = 'no_union'
+    identity = 'no_union-v1'
+
+    def merge(self, path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]]) -> tuple[UnionCandidate, ...]:
+        candidates: list[UnionCandidate] = []
+        for path, results in path_results:
+            if not path.strip():
+                raise ValueError('retrieval path name cannot be empty')
+            for rank, (anime_id, score) in enumerate(results, start=1):
+                if anime_id <= 0:
+                    raise ValueError('retrieval results require positive IDs')
+                candidates.append(UnionCandidate(anime_id, (PathEvidence(path, rank, score),)))
+        return tuple(candidates)
+
+
 class RetrievalMode(StrEnum):
     """Select the candidate budget applied before frozen scoring."""
 
-    LEGACY_UNION = 'legacy_union'
+    UNION = 'union'
     FAMILY_REDUCED = 'family_reduced'
 
 
@@ -58,6 +98,8 @@ class RetrievalDiagnostics(msgspec.Struct, frozen=True):
     unbounded_candidate_count: int
     reduced_candidate_count: int
     family_candidate_counts: dict[str, int]
+    path_timings_ms: dict[str, float] = msgspec.field(default_factory=dict)
+    path_candidate_counts: dict[str, int] = msgspec.field(default_factory=dict)
 
 
 PATH_FAMILIES = {
@@ -75,11 +117,37 @@ PATH_FAMILIES = {
     'demographic': 'affinity',
     'studio': 'affinity',
 }
-RETRIEVAL_REDUCER_VERSION = 'family-reducer-v1'
+AVAILABLE_RETRIEVAL_PATHS = (
+    'weighted-v2',
+    'genres',
+    'themes',
+    'tags',
+    'bm25',
+    'lsa',
+    'embedding',
+    'demographic',
+    'studio',
+)
+RETRIEVAL_REDUCER_POLICY = {
+    'family_reduction': 'budgeted-path-evidence',
+    'tie_break': 'candidate-id-ascending',
+    'invalid_scores': 'discard-non-finite-and-non-positive',
+}
 RETRIEVAL_PATH_ORDER = tuple(PATH_FAMILIES)
 SEMANTIC_EVIDENCE_PATHS = frozenset({'bm25', 'lsa', 'embedding'})
 CATEGORICAL_EVIDENCE_PATHS = frozenset({'genres', 'themes', 'tags', 'demographic', 'studio', 'weighted-v2'})
 DEFAULT_RETRIEVAL_FAMILY_BUDGET = RetrievalFamilyBudget()
+
+
+def validate_retrieval_paths(paths: Sequence[str]) -> tuple[str, ...]:
+    """Validate and preserve the caller's explicit retrieval path order."""
+    active = tuple(paths)
+    if len(set(active)) != len(active):
+        raise ValueError('retrieval paths must be unique')
+    unknown = set(active) - set(AVAILABLE_RETRIEVAL_PATHS)
+    if unknown:
+        raise ValueError(f'unsupported retrieval paths: {", ".join(sorted(unknown))}')
+    return active
 
 
 def reduce_path_results(
@@ -89,17 +157,17 @@ def reduce_path_results(
     budgets: RetrievalFamilyBudget = DEFAULT_RETRIEVAL_FAMILY_BUDGET,
 ) -> tuple[tuple[str, tuple[tuple[int, float], ...]], ...]:
     """Apply family budgets while preserving original path evidence and order."""
-    if mode is RetrievalMode.LEGACY_UNION:
+    for path, _ in path_results:
+        if path not in PATH_FAMILIES:
+            raise ValueError(f'unknown retrieval path: {path}')
+    if mode is RetrievalMode.UNION:
         return tuple((path, tuple(results)) for path, results in path_results)
     family_candidates: dict[str, dict[int, float]] = {}
     for path, results in path_results:
-        try:
-            family = PATH_FAMILIES[path]
-        except KeyError as error:
-            raise ValueError(f'unknown retrieval path: {path}') from error
+        family = PATH_FAMILIES[path]
         candidates = family_candidates.setdefault(family, {})
         for candidate_id, score in results:
-            candidates[candidate_id] = max(candidates.get(candidate_id, float('-inf')), float(score))
+            candidates[candidate_id] = max(candidates.get(candidate_id, float('-inf')), score)
     family_limits = {
         'semantic': budgets.semantic,
         'structured': budgets.structured,
@@ -112,8 +180,8 @@ def reduce_path_results(
 
     retained: set[int] = set()
     for family, candidates in family_candidates.items():
-        ranked = sorted(candidates.items(), key=_sort_candidate_score)
-        retained.update(candidate_id for candidate_id, _ in ranked[: family_limits[family]])
+        ranked = nsmallest(family_limits[family], candidates.items(), key=_sort_candidate_score)
+        retained.update(candidate_id for candidate_id, _ in ranked)
     return tuple(
         (path, tuple((candidate_id, score) for candidate_id, score in results if candidate_id in retained))
         for path, results in path_results
@@ -128,10 +196,17 @@ def build_union(
     for path, results in path_results:
         if not path.strip():
             raise ValueError('retrieval path name cannot be empty')
+        unique_results: dict[int, tuple[int, float]] = {}
         for rank, (anime_id, score) in enumerate(results, start=1):
             if anime_id <= 0 or rank <= 0:
                 raise ValueError('retrieval results require positive IDs and ranks')
-            collected.setdefault(anime_id, []).append(PathEvidence(path, rank, float(score)))
+            if not isfinite(score):
+                raise ValueError('retrieval scores must be finite')
+            previous = unique_results.get(anime_id)
+            if previous is None or score > previous[1]:
+                unique_results[anime_id] = (rank, score)
+        for anime_id, (rank, score) in unique_results.items():
+            collected.setdefault(anime_id, []).append(PathEvidence(path, rank, score))
     candidates = [
         UnionCandidate(anime_id, tuple(sorted(evidence, key=_evidence_order)))
         for anime_id, evidence in collected.items()
