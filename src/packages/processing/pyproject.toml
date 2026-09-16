@@ -3,7 +3,7 @@ name = "processing"
 version = "0.1.0"
 description = "Kelbrum processing package"
 requires-python = ">=3.13"
-dependencies = ["anime-catalogue", "models", "msgspec>=0.18", "polars>=1.0", "storage"]
+dependencies = ["anime-catalogue", "config", "fetch", "msgspec>=0.18", "polars>=1.0", "storage"]
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]
