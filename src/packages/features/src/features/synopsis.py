@@ -10,6 +10,8 @@ from sklearn.decomposition import NMF, TruncatedSVD
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.preprocessing import normalize
 
+_MIN_PROJECTION_INPUT_SIZE = 2
+
 
 class TfidfConfig(msgspec.Struct, frozen=True):
     """Stable TF-IDF vectorizer settings."""
@@ -61,7 +63,12 @@ def tfidf(texts: Sequence[str | None], config: TfidfConfig | None = None) -> Syn
         max_features=active.max_features,
         strip_accents='unicode',
     )
-    matrix = vectorizer.fit_transform(cleaned)
+    try:
+        matrix = vectorizer.fit_transform(cleaned)
+    except ValueError as error:
+        if 'no terms remain' not in str(error).lower() and 'empty vocabulary' not in str(error).lower():
+            raise
+        return SynopsisFeatures(csr_matrix((len(cleaned), 0), dtype=np.float32), ())
     return SynopsisFeatures(csr_matrix(matrix, dtype=np.float32), tuple(vectorizer.get_feature_names_out()))
 
 
@@ -73,7 +80,12 @@ def bm25(texts: Sequence[str | None], *, k1: float = 1.5, b: float = 0.75) -> Sy
     cleaned = clean_synopses(texts)
     if not any(cleaned):
         return SynopsisFeatures(csr_matrix((len(cleaned), 0), dtype=np.float32), ())
-    counts = csr_matrix(base.fit_transform(cleaned), dtype=np.float32)
+    try:
+        counts = csr_matrix(base.fit_transform(cleaned), dtype=np.float32)
+    except ValueError as error:
+        if 'empty vocabulary' not in str(error).lower():
+            raise
+        return SynopsisFeatures(csr_matrix((len(cleaned), 0), dtype=np.float32), ())
     lengths = np.asarray(counts.sum(axis=1)).ravel()
     average_length = float(lengths.mean()) if len(lengths) else 0.0
     denominator = np.full(lengths.shape, k1, dtype=np.float32)
@@ -82,6 +94,9 @@ def bm25(texts: Sequence[str | None], *, k1: float = 1.5, b: float = 0.75) -> Sy
     data = counts.data.copy()
     row_indices = np.repeat(np.arange(counts.shape[0]), np.diff(counts.indptr))
     data *= (k1 + 1.0) / (data + denominator[row_indices])
+    document_frequency = np.bincount(counts.indices, minlength=counts.shape[1]).astype(np.float32)
+    inverse_document_frequency = np.log1p((counts.shape[0] - document_frequency + 0.5) / (document_frequency + 0.5))
+    data *= inverse_document_frequency[counts.indices]
     weighted = csr_matrix((data, counts.indices, counts.indptr), shape=counts.shape)
     normalized = normalize(weighted, norm='l2', axis=1, copy=False).tocsr()
     return SynopsisFeatures(normalized, tuple(base.get_feature_names_out()))
@@ -91,7 +106,7 @@ def lsa(tfidf_features: SynopsisFeatures, config: LatentConfig | None = None) ->
     """Project TF-IDF features into a normalized LSA/SVD matrix."""
     active = config or LatentConfig()
     rows, columns = tfidf_features.matrix.shape
-    if rows < 2 or columns < 2:
+    if rows < _MIN_PROJECTION_INPUT_SIZE or columns < _MIN_PROJECTION_INPUT_SIZE:
         return np.zeros((rows, 0), dtype=np.float32)
     dimensions = min(active.dimensions, rows - 1, columns - 1)
     projected = TruncatedSVD(n_components=dimensions, random_state=active.random_state).fit_transform(
