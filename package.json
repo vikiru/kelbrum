@@ -66,8 +66,8 @@
     "knip": "^5.88.1",
     "lefthook": "^2.1.12",
     "oxfmt": "^0.63.0",
-    "oxlint": "^1.81.0",
-    "oxlint-tailwindcss": "^1.10.2",
+    "oxlint": "^1.82.0",
+    "oxlint-tailwindcss": "^1.11.0",
     "oxlint-tsgolint": "^7.0.2001",
     "semantic-release": "^25.0.9",
     "typescript": "^5.9.3"
