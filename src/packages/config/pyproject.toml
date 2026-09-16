@@ -3,7 +3,7 @@ name = "config"
 version = "0.1.0"
 description = "Shared paths, settings, reproducibility, and logging"
 requires-python = ">=3.13"
-dependencies = ["loguru>=0.7.3", "msgspec>=0.18"]
+dependencies = ["loguru>=0.7.3", "msgspec>=0.18", "orjson>=3.10"]
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]

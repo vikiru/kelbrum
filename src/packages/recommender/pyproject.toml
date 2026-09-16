@@ -5,11 +5,10 @@ description = "Kelbrum recommender package"
 requires-python = ">=3.13"
 dependencies = [
   "anime-catalogue",
-  "models",
+  "graph",
   "features",
   "normalization",
   "config",
-  "storage",
   "msgspec>=0.18",
   "numpy>=2.0",
   "scipy>=1.14",

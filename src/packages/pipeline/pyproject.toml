@@ -6,7 +6,6 @@ requires-python = ">=3.13"
 dependencies = [
   "anime-catalogue",
   "config",
-  "models",
   "storage",
   "processing",
   "normalization",
@@ -14,6 +13,7 @@ dependencies = [
   "recommender",
   "export",
   "fetch",
+  "graph",
   "msgspec>=0.18",
   "numpy>=2.0",
 ]
