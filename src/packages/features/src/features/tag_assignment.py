@@ -1,6 +1,38 @@
-"""Curated v1 tag assignments."""
+"""Typed, feature-owned curated tag assignments."""
 
+from functools import cache
+
+import msgspec
+
+from config import derive_payload_identity
 from features.tags import TagAssignment, TagId
+
+TAG_ASSIGNMENTS_VERSION = 'tag-assignments-v1'
+
+
+class TagAssignmentRegistry(msgspec.Struct, frozen=True):
+    """Versioned assignment resource consumed by feature assembly."""
+
+    version: str
+    assignments: tuple[TagAssignment, ...]
+
+    def __post_init__(self) -> None:
+        if not self.version.strip():
+            raise ValueError('tag assignment registry version cannot be empty')
+        known_tag_ids = {tag_id.value for tag_id in TagId}
+        unknown_tag_ids = {
+            tag_id for assignment in self.assignments for tag_id in assignment.tag_ids if tag_id not in known_tag_ids
+        }
+        if unknown_tag_ids:
+            raise ValueError(f'unknown tag IDs: {sorted(unknown_tag_ids)}')
+        for assignment in self.assignments:
+            if not assignment.anime_ids:
+                raise ValueError('tag assignments must contain at least one anime ID')
+
+    def identity(self) -> str:
+        """Return the deterministic identity of this curated resource."""
+        return derive_payload_identity(self)
+
 
 MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
     TagAssignment(
@@ -2580,3 +2612,11 @@ MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
         tag_ids=(TagId.MONSTER_HUNTING,),
     ),
 )
+
+TAG_ASSIGNMENT_REGISTRY = TagAssignmentRegistry(TAG_ASSIGNMENTS_VERSION, MANUAL_TAG_ASSIGNMENTS)
+
+
+@cache
+def tag_assignment_registry_identity() -> str:
+    """Return the cached identity of the feature tag assignments."""
+    return TAG_ASSIGNMENT_REGISTRY.identity()

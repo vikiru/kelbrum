@@ -1,11 +1,17 @@
 """Kelbrum-owned catalogue tags and their manual assignments."""
 
 from collections.abc import Iterable, Mapping
+from enum import StrEnum
+from functools import cache
 
 import msgspec
 
+from config import derive_payload_identity
 
-class TagId:
+TAG_VOCABULARY_VERSION = 'tag-vocabulary-v1'
+
+
+class TagId(StrEnum):
     """Stable identifiers for the curated Kelbrum tag vocabulary."""
 
     IMMORTALITY = 'immortality'
@@ -100,6 +106,30 @@ class Tag(msgspec.Struct, frozen=True):
 class TagAssignment(msgspec.Struct, frozen=True):
     anime_ids: tuple[int, ...]
     tag_ids: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not self.anime_ids or any(anime_id <= 0 for anime_id in self.anime_ids):
+            raise ValueError('tag assignment IDs must be positive')
+        if not self.tag_ids or any(not tag_id for tag_id in self.tag_ids):
+            raise ValueError('tag assignments must contain tag IDs')
+
+
+class TagRegistry(msgspec.Struct, frozen=True):
+    """Versioned typed vocabulary resource consumed by feature engineering."""
+
+    version: str
+    definitions: tuple[Tag, ...]
+
+    def __post_init__(self) -> None:
+        if not self.version.strip():
+            raise ValueError('tag vocabulary version cannot be empty')
+        tag_ids = [tag.id for tag in self.definitions]
+        if len(tag_ids) != len(set(tag_ids)) or any(not tag_id for tag_id in tag_ids):
+            raise ValueError('tag vocabulary IDs must be unique and non-empty')
+
+    def identity(self) -> str:
+        """Return the deterministic identity of this curated resource."""
+        return derive_payload_identity(self)
 
 
 TAGS: tuple[Tag, ...] = (
@@ -683,11 +713,19 @@ TAGS: tuple[Tag, ...] = (
     ),
 )
 
+TAG_REGISTRY = TagRegistry(TAG_VOCABULARY_VERSION, TAGS)
+
+
+@cache
+def tag_registry_identity() -> str:
+    """Return the cached identity of the feature tag vocabulary."""
+    return TAG_REGISTRY.identity()
+
 
 def apply_tag_assignments(
     anime_ids: Iterable[int],
     assignments: Iterable[TagAssignment],
-    tags: Iterable[Tag] = TAGS,
+    tags: Iterable[Tag] = TAG_REGISTRY.definitions,
 ) -> dict[int, tuple[str, ...]]:
     """Return deterministic tag assignments for IDs present in the catalogue."""
     available_ids = set(anime_ids)

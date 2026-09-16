@@ -2,6 +2,8 @@
 
 from features.origin_language import OriginLanguage
 
+ORIGIN_LANGUAGE_OVERRIDES_VERSION = 'origin-language-overrides-v1'
+
 MANUAL_ORIGIN_LANGUAGE_ASSIGNMENTS: tuple[tuple[tuple[int, ...], OriginLanguage], ...] = (
     # Wei Miao Rensheng (60591), Li Shiya (64535).
     ((60591, 64535), OriginLanguage.CHINESE),
