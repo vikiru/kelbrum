@@ -1,37 +1,46 @@
 """Kelbrum recommender package."""
 
-from recommender.evaluation import (
-    StrategyComparison,
-    StrategyRun,
-    compare_recommendations,
-    compare_strategies,
-    write_comparison_report,
-)
 from recommender.frozen_pipeline import Recommender
-from recommender.index import SimilarityIndex
-from recommender.paths import SynopsisPathIndex, build_synopsis_path_index, rank_categorical
-from recommender.relationship_graph import add_manual_relationships, build_relationship_index
-from recommender.union import PathEvidence, UnionCandidate, build_union, build_union_from_results
+from recommender.inputs import RecommenderInputs
+from recommender.metrics import Distance, Similarity
+from recommender.paths import SynopsisPathIndex, build_synopsis_path_index
+from recommender.plan import RecommenderPlan
+from recommender.properties import SimilarityProperty
+from recommender.ranking import RankingPolicy, ScoreDescending
+from recommender.rating_policy import RatingClass, RatingPolicy
+from recommender.scoring import PropertyValues, ScoringProperty
+from recommender.union import (
+    EvidenceUnion,
+    NoUnion,
+    PathEvidence,
+    UnionCandidate,
+    build_union,
+    build_union_from_results,
+)
 from recommender.weighted_v2 import WeightedV2Index
-from recommender.weighted_v2 import weighted_distance as v2_weighted_distance
+from recommender.weighted_v2 import weighted_similarity as v2_weighted_similarity
 
 __all__ = [
+    'Distance',
+    'EvidenceUnion',
+    'NoUnion',
     'PathEvidence',
+    'PropertyValues',
+    'RankingPolicy',
+    'RatingClass',
+    'RatingPolicy',
     'Recommender',
-    'SimilarityIndex',
-    'StrategyComparison',
-    'StrategyRun',
+    'RecommenderInputs',
+    'RecommenderPlan',
+    'ScoreDescending',
+    'ScoringProperty',
+    'Similarity',
+    'SimilarityProperty',
     'SynopsisPathIndex',
     'UnionCandidate',
     'WeightedV2Index',
-    'add_manual_relationships',
-    'build_relationship_index',
     'build_synopsis_path_index',
     'build_union',
     'build_union_from_results',
-    'compare_recommendations',
-    'compare_strategies',
-    'rank_categorical',
-    'v2_weighted_distance',
-    'write_comparison_report',
+    'v2_weighted_similarity',
 ]
