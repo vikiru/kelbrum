@@ -2,6 +2,8 @@ from typing import cast
 
 import polars as pl
 
+_HIGH_SCORE_THRESHOLD = 8.0
+
 
 def studio_quality_profile(frame: pl.DataFrame, *, prior_count: int = 10) -> pl.DataFrame:
     """Return shrinkage-adjusted studio quality statistics from scored anime."""
@@ -33,7 +35,7 @@ def studio_quality_profile(frame: pl.DataFrame, *, prior_count: int = 10) -> pl.
             pl.len().alias('anime_count'),
             pl.col('score').mean().alias('mean_score'),
             pl.col('score').std(ddof=0).fill_null(0.0).alias('score_std'),
-            (pl.col('score') >= 8.0).mean().alias('high_score_rate'),
+            (pl.col('score') >= _HIGH_SCORE_THRESHOLD).mean().alias('high_score_rate'),
         )
         .with_columns(
             (
