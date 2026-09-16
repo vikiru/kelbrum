@@ -3,14 +3,14 @@
 from collections.abc import Sequence
 from pathlib import Path
 
-from fetch.client import TenraiClient
+from fetch.contracts import TenraiAnimeEntry
 from fetch.filters import CatalogueFilters
-from models.tenrai import TenraiAnimeEntry
+from pipeline.contracts import CatalogueClient
 from storage.json_io import read_json
 
 
 def load_or_fetch(
-    client: TenraiClient,
+    client: CatalogueClient,
     snapshot: Path,
     checkpoint: Path,
     filters: CatalogueFilters,
@@ -28,7 +28,7 @@ def load_or_fetch(
 
 
 def load_or_enrich(
-    client: TenraiClient,
+    client: CatalogueClient,
     entries: Sequence[TenraiAnimeEntry],
     full_artifact: Path,
     overwrite: bool,

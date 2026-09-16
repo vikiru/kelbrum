@@ -1,11 +1,13 @@
 """Validation and export of completed recommendation chunks."""
 
-from collections.abc import Mapping, Sequence
-from hashlib import sha256
+from collections.abc import Sequence
 from pathlib import Path
 
-from export.frontend import write_catalogue_artifacts
-from models.tenrai import CanonicalAnime, TenraiAnimeEntry
+from export.catalogue import CatalogueProjections, write_catalogue_artifacts
+from export.contracts import FrontendProvenance, RecommendationChunkManifest
+from export.manifest import validate_recommendation_manifest
+from fetch.contracts import TenraiAnimeEntry
+from processing.contracts import CanonicalAnime
 from storage.json_io import read_json
 
 MIN_RECOMMENDATION_BATCH_SIZE = 50
@@ -18,42 +20,27 @@ def export_catalogue_stage(
     *,
     recommendation_path: Path,
     output_dir: Path,
-    provenance: Mapping[str, object] | None = None,
+    provenance: FrontendProvenance,
+    featured_paths: Sequence[Path] = (),
+    projections: CatalogueProjections | None = None,
 ) -> None:
     """Build frontend artifacts from complete, checksummed recommendation chunks."""
-    manifest = read_json(recommendation_path / 'manifest.json', dict[str, object])
-    if manifest.get('schema_version') != 'recommendation-chunks-v4':
+    manifest = read_json(recommendation_path / 'manifest.json', RecommendationChunkManifest)
+    if manifest.schema_version != 'recommendation-chunks-v5':
         raise ValueError('recommendation manifest does not contain production ID chunks')
-    chunk_size = manifest.get('chunk_size')
-    if not isinstance(chunk_size, int) or not (
-        MIN_RECOMMENDATION_BATCH_SIZE <= chunk_size <= MAX_RECOMMENDATION_BATCH_SIZE
-    ):
-        raise ValueError('recommendation manifest has an invalid chunk size')
-    expected_chunks = (len(records) + chunk_size - 1) // chunk_size
-    completed_chunks = manifest.get('completed_chunks')
-    if manifest.get('expected_chunks') != expected_chunks or completed_chunks != list(range(expected_chunks)):
-        raise ValueError('recommendation chunks are incomplete')
-    checksums = manifest.get('checksums')
-    if not isinstance(checksums, dict) or any(
-        not isinstance(checksum, str)
-        or not (recommendation_path / filename).is_file()
-        or _sha256_file(recommendation_path / filename) != checksum
-        for filename, checksum in checksums.items()
-        if isinstance(filename, str)
-    ):
-        raise ValueError('recommendation chunk checksums are invalid')
+    validate_recommendation_manifest(
+        manifest,
+        tuple(record.mal_id for record in records),
+        recommendation_path,
+        min_chunk_size=MIN_RECOMMENDATION_BATCH_SIZE,
+        max_chunk_size=MAX_RECOMMENDATION_BATCH_SIZE,
+    )
     write_catalogue_artifacts(
         records,
         full_entries=full_entries,
         recommendation_chunks=recommendation_path,
         provenance=provenance,
         output_dir=output_dir,
+        featured_paths=featured_paths,
+        projections=projections,
     )
-
-
-def _sha256_file(path: Path) -> str:
-    digest = sha256()
-    with path.open('rb') as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b''):
-            digest.update(block)
-    return digest.hexdigest()
