@@ -41,13 +41,19 @@ export const AnimeCard = memo(function AnimeCard({ item, rank }: AnimeCardProps)
           >
             {displayTitle}
           </h2>
-          <div className="body-sm mt-auto flex items-center justify-between pt-2 text-muted-foreground">
-            <span className="flex items-center gap-1 text-foreground">
-              <Star className="icon-xs fill-current text-primary" aria-hidden="true" />
-              {formatAnimeScore(item.score)}
-            </span>
-            {item.year !== null && <span>{item.year}</span>}
-          </div>
+          {(item.score !== null || item.year !== null) && (
+            <div className="body-sm mt-auto flex items-center justify-between pt-2 text-muted-foreground">
+              {item.score !== null ? (
+                <span className="flex items-center gap-1 text-foreground">
+                  <Star className="icon-xs fill-current text-primary" aria-hidden="true" />
+                  {formatAnimeScore(item.score)}
+                </span>
+              ) : (
+                <span />
+              )}
+              {item.year !== null && <span>{item.year}</span>}
+            </div>
+          )}
         </CardContent>
       </Link>
     </Card>
