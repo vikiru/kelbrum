@@ -11,7 +11,7 @@ import { Button } from '@/shared/components/ui/button';
 import { slugify } from '@/shared/lib/slugify';
 
 const animeEntries = AnimeCardItemsSchema.parse(homepage);
-const highRatedAnime = animeEntries.filter((item) => item.score >= 8);
+const highRatedAnime = animeEntries.filter((item) => item.score !== null && item.score >= 8);
 
 export function HomePage() {
   const featuredRecommendations = highRatedAnime.slice(0, 10);

@@ -52,8 +52,8 @@ export function useSearchResults(options: SearchResultsOptions): SearchResultSet
           (filters.demographic === 'all' || item.demographics.includes(filters.demographic)) &&
           filters.genres.every((value) => item.genres.includes(value)) &&
           filters.themes.every((value) => item.themes.includes(value)) &&
-          item.score >= filters.scoreRange[0] &&
-          item.score <= filters.scoreRange[1] &&
+          (item.score ?? 0) >= filters.scoreRange[0] &&
+          (item.score ?? 0) <= filters.scoreRange[1] &&
           (item.year ?? 0) >= minYear &&
           (item.year ?? 0) <= maxYear &&
           (item.episodes ?? 0) >= minEpisodes &&
@@ -69,5 +69,5 @@ function compareAnime(a: AnimeCardItem, b: AnimeCardItem, sort: SearchSort): num
   const direction = sort.endsWith('asc') ? 1 : -1;
   if (sort.startsWith('title')) return direction * a.title.localeCompare(b.title);
   if (sort.startsWith('year')) return direction * ((a.year ?? 0) - (b.year ?? 0));
-  return direction * (a.score - b.score);
+  return direction * ((a.score ?? 0) - (b.score ?? 0));
 }
