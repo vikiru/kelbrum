@@ -4,8 +4,9 @@ from typing import Literal
 
 import msgspec
 
-from models.tenrai import CanonicalAnime, TenraiAnimeEntry
+from fetch.contracts import TenraiAnimeEntry
 from processing.canonicalize import canonicalize
+from processing.contracts import CanonicalAnime
 
 
 class FieldChange(msgspec.Struct, frozen=True):

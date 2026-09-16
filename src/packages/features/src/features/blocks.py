@@ -1,9 +1,13 @@
 """Deterministic feature blocks with explicit metadata."""
 
+from collections.abc import Callable
+
 import msgspec
 import numpy as np
 from numpy.typing import NDArray
 from scipy.sparse import csr_matrix, hstack
+
+AvailabilityPolicy = Callable[['FeatureBlock'], NDArray[np.bool_]]
 
 
 class FeatureBlock(msgspec.Struct, frozen=True):
@@ -15,8 +19,21 @@ class FeatureBlock(msgspec.Struct, frozen=True):
     row_available: NDArray[np.bool_] | None = None
     dimension_available: NDArray[np.bool_] | None = None
 
-    def availability(self) -> NDArray[np.bool_]:
-        """Return explicit row availability, with legacy value fallback."""
+    def availability(self, policy: AvailabilityPolicy | None = None) -> NDArray[np.bool_]:
+        """Return explicit row availability, deriving it from non-zero values when absent."""
+        available = policy(self) if policy is not None else self._inferred_availability()
+        if available.shape != (self.values.shape[0],):
+            raise ValueError(f'feature availability does not match block rows: {self.name}')
+        return np.asarray(available, dtype=bool)
+
+    def dense_row(self, index: int) -> NDArray[np.float64]:
+        """Return one feature row in the dense numeric form used by scalar metrics."""
+        value = self.values[index]
+        if isinstance(value, csr_matrix):
+            return np.asarray(value.toarray(), dtype=np.float64).ravel()
+        return np.asarray(value, dtype=np.float64).ravel()
+
+    def _inferred_availability(self) -> NDArray[np.bool_]:
         if self.row_available is not None:
             if self.row_available.shape != (self.values.shape[0],):
                 raise ValueError(f'feature availability does not match block rows: {self.name}')

@@ -1,30 +1,23 @@
-"""Deterministic snapshot-to-canonical build orchestration."""
+"""Pure deterministic snapshot-to-canonical transformation."""
 
 from collections.abc import Collection
-from datetime import UTC, datetime
-from hashlib import sha256
-from pathlib import Path
-from typing import cast
+from typing import Annotated
 
 import msgspec
 import polars as pl
 
-from anime_catalogue import order_catalogue_frame
-from config import bind_logger
-from models.labels import normalize_label
-from models.tenrai import CanonicalAnime, Images, Taxonomy, TenraiAnimeEntry
+from fetch.contracts import Taxonomy, TenraiAnimeEntry
 from processing.canonicalize import canonicalize
-from processing.constants import PROCESSING_AUDIT_SCHEMA_VERSION
+from processing.contracts import CanonicalAnime
 from processing.eligibility import (
     EligibilityAudit,
     EligibilityPolicy,
     filter_entries,
     filter_non_recommendable_content,
 )
+from processing.labels import normalize_label
 from processing.ona import cleanup_ona
 from processing.ratings import normalize_rating
-from storage.json_io import read_json, write_json
-from storage.tabular import read_parquet, write_parquet
 
 
 class ProcessingResult(msgspec.Struct, frozen=True):
@@ -34,52 +27,40 @@ class ProcessingResult(msgspec.Struct, frozen=True):
     profile: str = 'tenrai-catalog'
 
 
-log = bind_logger(package='processing', stage='canonicalization')
+CanonicalFrame = Annotated[pl.DataFrame, 'canonical catalogue frame']
 
 
-CANONICAL_SCHEMA = {
-    'mal_id': pl.Int64,
-    'title': pl.String,
-    'title_english': pl.String,
-    'title_japanese': pl.String,
-    'images_json': pl.String,
-    'anime_type': pl.String,
-    'source': pl.String,
-    'year': pl.Int64,
-    'episodes': pl.Int64,
-    'duration_minutes': pl.Int64,
-    'status': pl.String,
-    'rating': pl.String,
-    'rating_class': pl.String,
-    'demographics': pl.List(pl.String),
-    'score': pl.Float64,
-    'synopsis': pl.String,
-    'synopsis_features': pl.String,
-    'genres': pl.List(pl.String),
-    'themes': pl.List(pl.String),
-    'studios': pl.List(pl.String),
-    'studio_ids': pl.List(pl.Int64),
-    'relation_anime_ids': pl.List(pl.Int64),
-}
-
-
-def canonical_frame(records: tuple[CanonicalAnime, ...]) -> pl.DataFrame:
+def canonical_frame(records: tuple[CanonicalAnime, ...]) -> CanonicalFrame:
     """Create the canonical Parquet frame from ordered records."""
     return pl.DataFrame(
         {
             'mal_id': [record.mal_id for record in records],
             'title': [record.title for record in records],
+            'url': [record.url for record in records],
             'title_english': [record.title_english for record in records],
             'title_japanese': [record.title_japanese for record in records],
             'images_json': [
                 msgspec.json.encode(record.images).decode('utf-8') if record.images else None for record in records
             ],
+            'title_synonyms_json': [_encode_json(record.title_synonyms) for record in records],
+            'trailer_json': [_encode_optional_json(record.trailer) for record in records],
+            'external_json': [_encode_json(record.external) for record in records],
+            'studios_json': [_encode_json(record.studios) for record in records],
+            'producers_json': [_encode_json(record.producers) for record in records],
+            'licensors_json': [_encode_json(record.licensors) for record in records],
+            'genres_json': [_encode_json(record.genres) for record in records],
+            'themes_json': [_encode_json(record.themes) for record in records],
+            'demographics_json': [_encode_json(record.demographics) for record in records],
+            'relations_json': [_encode_json(record.relations) for record in records],
             'anime_type': [record.anime_type for record in records],
             'source': [record.source for record in records],
+            'season': [record.season for record in records],
             'year': [record.year for record in records],
             'episodes': [record.episodes for record in records],
             'duration_minutes': [record.duration_minutes for record in records],
             'status': [record.status for record in records],
+            'background': [record.background for record in records],
+            'moreinfo': [record.moreinfo for record in records],
             'rating': [record.rating for record in records],
             'rating_class': [normalize_rating(record.rating).value for record in records],
             'demographics': [[item.name for item in record.demographics] for record in records],
@@ -102,8 +83,53 @@ def canonical_frame(records: tuple[CanonicalAnime, ...]) -> pl.DataFrame:
                 for record in records
             ],
         },
-        schema=CANONICAL_SCHEMA,
+        schema={
+            'mal_id': pl.Int64,
+            'title': pl.String,
+            'url': pl.String,
+            'title_english': pl.String,
+            'title_japanese': pl.String,
+            'images_json': pl.String,
+            'title_synonyms_json': pl.String,
+            'trailer_json': pl.String,
+            'external_json': pl.String,
+            'studios_json': pl.String,
+            'producers_json': pl.String,
+            'licensors_json': pl.String,
+            'genres_json': pl.String,
+            'themes_json': pl.String,
+            'demographics_json': pl.String,
+            'relations_json': pl.String,
+            'anime_type': pl.String,
+            'source': pl.String,
+            'season': pl.String,
+            'year': pl.Int64,
+            'episodes': pl.Int64,
+            'duration_minutes': pl.Int64,
+            'status': pl.String,
+            'background': pl.String,
+            'moreinfo': pl.String,
+            'rating': pl.String,
+            'rating_class': pl.String,
+            'demographics': pl.List(pl.String),
+            'score': pl.Float64,
+            'synopsis': pl.String,
+            'synopsis_features': pl.String,
+            'genres': pl.List(pl.String),
+            'themes': pl.List(pl.String),
+            'studios': pl.List(pl.String),
+            'studio_ids': pl.List(pl.Int64),
+            'relation_anime_ids': pl.List(pl.Int64),
+        },
     )
+
+
+def _encode_json(value: object) -> str:
+    return msgspec.json.encode(value).decode('utf-8')
+
+
+def _encode_optional_json(value: object | None) -> str | None:
+    return None if value is None else _encode_json(value)
 
 
 def build_canonical(
@@ -112,13 +138,21 @@ def build_canonical(
     *,
     tagged_anime_ids: Collection[int] = (),
     theme_additions: dict[int, tuple[str, ...]] | None = None,
+    theme_removals: dict[int, tuple[str, ...]] | None = None,
 ) -> ProcessingResult:
     """Filter, deduplicate, canonicalize, and order a snapshot without I/O."""
     eligible, audit = filter_entries(entries, policy, tagged_anime_ids=tagged_anime_ids)
     eligible, content_rejections = filter_non_recommendable_content(eligible)
     eligible, ona_audit = cleanup_ona(eligible)
-    if theme_additions:
-        eligible = [_add_themes(entry, theme_additions.get(entry.mal_id, ())) for entry in eligible]
+    if theme_additions or theme_removals:
+        eligible = [
+            _apply_theme_corrections(
+                entry,
+                theme_additions.get(entry.mal_id, ()) if theme_additions else (),
+                theme_removals.get(entry.mal_id, ()) if theme_removals else (),
+            )
+            for entry in eligible
+        ]
     removed_ids = set(audit.rejected_ids) | set(ona_audit.removed_ids)
     reason_counts = dict(audit.reasons_by_rule)
     reasons_by_id = dict(audit.reasons_by_id)
@@ -142,7 +176,7 @@ def build_canonical(
         reasons_by_id=tuple(
             sorted((anime_id, tuple(sorted(set(reasons)))) for anime_id, reasons in reasons_by_id.items())
         ),
-        policy_version=audit.policy_version,
+        policy_identity=audit.policy_identity,
     )
     unique: dict[int, TenraiAnimeEntry] = {}
     duplicate_ids: set[int] = set()
@@ -155,155 +189,15 @@ def build_canonical(
     return ProcessingResult(records, audit, tuple(sorted(duplicate_ids)))
 
 
-def _add_themes(entry: TenraiAnimeEntry, additions: tuple[str, ...]) -> TenraiAnimeEntry:
-    """Apply curated theme additions without mutating the source entry."""
-    existing = {normalize_label(theme.name) for theme in entry.themes}
+def _apply_theme_corrections(
+    entry: TenraiAnimeEntry, additions: tuple[str, ...], removals: tuple[str, ...]
+) -> TenraiAnimeEntry:
+    """Apply curated theme additions and removals without mutating source data."""
+    normalized_removals = {normalize_label(theme) for theme in removals}
+    existing_themes = [theme for theme in entry.themes if normalize_label(theme.name) not in normalized_removals]
+    existing = {normalize_label(theme.name) for theme in existing_themes}
     additions_to_apply = (
         Taxonomy(0, normalize_label(name)) for name in additions if normalize_label(name) not in existing
     )
-    themes = [*entry.themes, *additions_to_apply]
+    themes = [*existing_themes, *additions_to_apply]
     return msgspec.structs.replace(entry, themes=themes)
-
-
-def process_snapshot(
-    snapshot_path: Path,
-    parquet_path: Path,
-    audit_path: Path,
-    *,
-    snapshot_id: str,
-    policy: EligibilityPolicy | None = None,
-    theme_additions: dict[int, tuple[str, ...]] | None = None,
-    tagged_anime_ids: Collection[int] = (),
-) -> ProcessingResult:
-    """Run the complete accepted-snapshot processing workflow."""
-    entries = read_json(snapshot_path, list[TenraiAnimeEntry])
-    log.info('Loaded {} entries from the catalogue snapshot.', len(entries))
-    result = build_canonical(
-        entries,
-        policy,
-        tagged_anime_ids=tagged_anime_ids,
-        theme_additions=theme_additions,
-    )
-    write_processing_outputs(
-        result,
-        parquet_path,
-        audit_path,
-        snapshot_id=snapshot_id,
-        source_sha256=sha256(snapshot_path.read_bytes()).hexdigest(),
-        policy_identity=msgspec.json.encode(
-            {
-                'policy': policy or EligibilityPolicy(),
-                'theme_additions': theme_additions or {},
-                'tagged_anime_ids': sorted(tagged_anime_ids),
-            }
-        ).decode('utf-8'),
-    )
-    log.info('Canonicalization completed with {} accepted records.', len(result.records))
-    return result
-
-
-def load_canonical_parquet(path: Path) -> tuple[CanonicalAnime, ...]:
-    """Load the compact canonical handoff without reparsing the enriched JSON."""
-    frame = order_catalogue_frame(read_parquet(path))
-    return tuple(_canonical_from_row(row) for row in frame.iter_rows(named=True))
-
-
-def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
-    def names(field: str) -> tuple[Taxonomy, ...]:
-        values = cast('list[object] | None', row[field]) or []
-        return tuple(Taxonomy(0, str(value)) for value in values)
-
-    def optional_int(field: str) -> int | None:
-        value = row[field]
-        return int(value) if isinstance(value, (int, float, str)) else None
-
-    def optional_float(field: str) -> float | None:
-        value = row[field]
-        return float(value) if isinstance(value, (int, float, str)) else None
-
-    def optional_str(field: str) -> str | None:
-        value = row.get(field)
-        return str(value) if value is not None else None
-
-    mal_id = row['mal_id']
-    if not isinstance(mal_id, (int, float, str)):
-        raise TypeError('canonical Parquet row has an invalid mal_id')
-
-    images_json = optional_str('images_json')
-    return CanonicalAnime(
-        mal_id=int(mal_id),
-        url=None,
-        title=str(row['title']),
-        title_english=optional_str('title_english'),
-        title_japanese=optional_str('title_japanese'),
-        title_synonyms=(),
-        anime_type=optional_str('anime_type'),
-        source=optional_str('source'),
-        rating=optional_str('rating'),
-        season=None,
-        episodes=optional_int('episodes'),
-        duration_minutes=optional_int('duration_minutes'),
-        year=optional_int('year'),
-        status=optional_str('status'),
-        score=optional_float('score'),
-        synopsis=optional_str('synopsis'),
-        synopsis_features=optional_str('synopsis_features'),
-        background=None,
-        moreinfo=None,
-        images=_decode_images(images_json),
-        trailer=None,
-        external=(),
-        streaming=(),
-        theme=None,
-        studios=(),
-        producers=(),
-        licensors=(),
-        genres=names('genres'),
-        themes=names('themes'),
-        demographics=names('demographics'),
-        relations=(),
-    )
-
-
-def _decode_images(images_json: str | None) -> Images | None:
-    if images_json is None:
-        return None
-    return msgspec.json.decode(images_json.encode('utf-8'), type=Images)
-
-
-def write_canonical_parquet(result: ProcessingResult, destination: Path) -> int:
-    """Write the accepted canonical records to Parquet."""
-    frame = canonical_frame(result.records)
-    write_parquet(destination, frame)
-    return frame.height
-
-
-def write_processing_outputs(
-    result: ProcessingResult,
-    parquet_path: Path,
-    audit_path: Path,
-    *,
-    snapshot_id: str,
-    source_sha256: str | None = None,
-    policy_identity: str | None = None,
-) -> None:
-    """Persist canonical Parquet, audit data, and source provenance."""
-    write_canonical_parquet(result, parquet_path)
-    fetched_date = datetime.now(UTC).isoformat()
-    write_json(
-        audit_path,
-        {
-            'schema_version': PROCESSING_AUDIT_SCHEMA_VERSION,
-            'profile': result.profile,
-            'snapshot_id': snapshot_id,
-            'source_sha256': source_sha256,
-            'policy_identity': policy_identity,
-            'fetched_date': fetched_date,
-            'accepted_count': result.audit.accepted_count,
-            'rejected_count': result.audit.rejected_count,
-            'rejected_ids': result.audit.rejected_ids,
-            'reasons_by_rule': result.audit.reasons_by_rule,
-            'reasons_by_id': result.audit.reasons_by_id,
-            'duplicate_ids': result.duplicate_ids,
-        },
-    )

@@ -4,11 +4,12 @@ import msgspec
 import niquests
 
 from config import Settings, bind_logger
+from fetch.contracts import TenraiAnimeEntry, TenraiListResponse, TenraiObjectResponse
+from fetch.decoding import decode_catalogue
 from fetch.filters import CatalogueFilters
 from fetch.rate_limit import RequestPacer
 from fetch.retry import RETRYABLE_STATUSES, pause, retry_delay
-from models.decoding import decode_catalogue
-from models.tenrai import TenraiAnimeEntry, TenraiListResponse, TenraiObjectResponse
+from fetch.routes import CatalogueRoute, TenraiAnimeRoute
 
 HTTP_OK = 200
 
@@ -16,8 +17,9 @@ HTTP_OK = 200
 class TenraiTransport:
     """Perform typed Tenrai requests without checkpoint or file concerns."""
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, route: CatalogueRoute | None = None) -> None:
         self._settings = settings
+        self._route = route or TenraiAnimeRoute()
         self._session = niquests.Session()
         self._pacer = RequestPacer(settings.requests_per_second)
         self._log = bind_logger(package='fetch', stage='catalogue')
@@ -25,9 +27,19 @@ class TenraiTransport:
     def close(self) -> None:
         self._session.close()
 
+    @property
+    def route_name(self) -> str:
+        """Return the stable route identity used for resumable artifacts."""
+        return self._route.name
+
+    @property
+    def catalogue_url(self) -> str:
+        """Return the route's catalogue endpoint for provenance metadata."""
+        return self._route.catalogue_url(self._settings.tenrai_base_url)
+
     def catalogue_page(self, page: int, *, filters: CatalogueFilters) -> TenraiListResponse[TenraiAnimeEntry]:
         """Fetch and decode one filtered catalogue page."""
-        url = f'{self._settings.tenrai_base_url}/anime'
+        url = self._route.catalogue_url(self._settings.tenrai_base_url)
         for attempt in range(self._settings.max_retries + 1):
             response = self._session.get(
                 url,
@@ -51,7 +63,7 @@ class TenraiTransport:
 
     def full_entry(self, anime_id: int) -> TenraiAnimeEntry:
         """Fetch and decode one complete anime record."""
-        url = f'{self._settings.tenrai_base_url}/anime/{anime_id}/full'
+        url = self._route.full_entry_url(self._settings.tenrai_base_url, anime_id)
         for attempt in range(self._settings.max_retries + 1):
             response = self._session.get(url, timeout=self._settings.timeout_seconds)
             status_code = response.status_code

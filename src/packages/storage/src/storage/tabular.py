@@ -1,12 +1,12 @@
 """Atomic CSV and Parquet persistence for aligned tabular artifacts."""
 
-import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
 import polars as pl
 
-from storage.errors import CorruptArtifactError, MissingArtifactError
+from storage.atomic import write_atomic
+from storage.errors import CorruptArtifactError, require_artifact
 
 
 def write_csv(path: Path, frame: pl.DataFrame) -> None:
@@ -16,12 +16,7 @@ def write_csv(path: Path, frame: pl.DataFrame) -> None:
 
 def read_csv(path: Path) -> pl.DataFrame:
     """Read a CSV frame and normalize storage failures."""
-    if not path.is_file():
-        raise MissingArtifactError(f'CSV artifact does not exist: {path}')
-    try:
-        return pl.read_csv(path)
-    except (OSError, pl.exceptions.PolarsError) as error:
-        raise CorruptArtifactError(f'Could not decode CSV artifact: {path}') from error
+    return _read_table(path, 'CSV', pl.read_csv)
 
 
 def write_parquet(path: Path, frame: pl.DataFrame) -> None:
@@ -31,20 +26,21 @@ def write_parquet(path: Path, frame: pl.DataFrame) -> None:
 
 def read_parquet(path: Path) -> pl.DataFrame:
     """Read a Parquet frame and normalize storage failures."""
-    if not path.is_file():
-        raise MissingArtifactError(f'Parquet artifact does not exist: {path}')
+    return _read_table(path, 'Parquet', pl.read_parquet)
+
+
+def _read_table(path: Path, format_name: str, reader: Callable[[Path], pl.DataFrame]) -> pl.DataFrame:
+    """Read one tabular artifact through the shared storage error boundary."""
+    require_artifact(path, format_name)
     try:
-        return pl.read_parquet(path)
+        return reader(path)
     except (OSError, pl.exceptions.PolarsError) as error:
-        raise CorruptArtifactError(f'Could not decode Parquet artifact: {path}') from error
+        raise CorruptArtifactError(f'Could not decode {format_name} artifact: {path}') from error
 
 
 def _write_atomic(path: Path, writer: Callable[[Path], object]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix=f'.{path.name}.', dir=path.parent) as directory:
-        temporary_path = Path(directory) / path.name
-        try:
-            writer(temporary_path)
-            temporary_path.replace(path)
-        except (OSError, pl.exceptions.PolarsError) as error:
-            raise CorruptArtifactError(f'Could not write tabular artifact: {path}') from error
+    """Write a tabular artifact to a temporary sibling before replacement."""
+    try:
+        write_atomic(path, writer)
+    except (OSError, pl.exceptions.PolarsError) as error:
+        raise CorruptArtifactError(f'Could not write tabular artifact: {path}') from error

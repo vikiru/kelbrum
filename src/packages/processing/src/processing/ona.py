@@ -4,8 +4,8 @@ import re
 
 import msgspec
 
-from models.tenrai import TenraiAnimeEntry
-from models.tenrai_types import normalize_media_type
+from fetch.contracts import TenraiAnimeEntry
+from fetch.types import normalize_media_type
 from processing.canonicalize import duration_to_minutes
 
 _PROMOTIONAL_TITLE = re.compile(
