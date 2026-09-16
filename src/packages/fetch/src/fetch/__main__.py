@@ -8,23 +8,24 @@ from config import (
     Settings,
     bind_logger,
     setup_logging,
-    tenrai_checkpoint_path,
+    tenrai_profile_snapshot_path,
     tenrai_r_plus_checkpoint_path,
     tenrai_r_plus_snapshot_path,
-    tenrai_snapshot_path,
 )
-from fetch.client import FetchError, TenraiClient
-from fetch.filters import CatalogueFilters
+from fetch.client import TenraiClient
+from fetch.errors import FetchError
+from fetch.profiles import CatalogueProfile
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for catalogue acquisition modes."""
     parser = argparse.ArgumentParser(description='Fetch Tenrai catalogue pages into a JSON snapshot.')
     parser.add_argument('--last-page', type=int, help='Last catalogue page to fetch (default: discover all pages).')
     parser.add_argument(
         '--mode',
         choices=('sfw', 'r-plus', 'all'),
-        default='sfw',
-        help='Catalogue policy to use (default: sfw).',
+        default='r-plus',
+        help='Catalogue policy to use (default: r-plus).',
     )
     parser.add_argument(
         '--output',
@@ -40,27 +41,30 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Fetch the selected Tenrai profile and return a process exit status."""
     args = build_parser().parse_args(argv)
     if args.mode == 'sfw':
-        filters = CatalogueFilters.sfw_catalogue(limit=50)
-        default_output, default_checkpoint = tenrai_snapshot_path(), tenrai_checkpoint_path()
+        profile = CatalogueProfile.sfw(limit=50)
+        default_output = tenrai_profile_snapshot_path('sfw')
+        default_checkpoint = default_output.with_suffix('.checkpoint.json')
     elif args.mode == 'r-plus':
-        filters = CatalogueFilters.r_plus_catalogue(limit=50)
+        profile = CatalogueProfile.r_plus(limit=50)
         default_output, default_checkpoint = tenrai_r_plus_snapshot_path(), tenrai_r_plus_checkpoint_path()
     else:
-        filters = CatalogueFilters.all_anime(limit=50)
-        default_output, default_checkpoint = tenrai_snapshot_path(), tenrai_checkpoint_path()
+        profile = CatalogueProfile.all_anime(limit=50)
+        default_output = tenrai_profile_snapshot_path('all')
+        default_checkpoint = default_output.with_suffix('.checkpoint.json')
     output = args.output or default_output
     checkpoint_path = args.checkpoint or default_checkpoint
     if args.force and not args.no_checkpoint and checkpoint_path.is_file():
         raise SystemExit('Refusing --force with an existing checkpoint; use --no-checkpoint for a fresh fetch.')
     setup_logging(level=Settings().log_level)
-    log = bind_logger(package='fetch', stage='cli')
+    log = bind_logger(package='fetch', stage='fetch')
+    log.info('Starting fetch [{}].', args.mode.upper())
     try:
-        with TenraiClient() as client:
+        with TenraiClient(profile=profile) as client:
             entries = client.catalogue(
                 args.last_page,
-                filters=filters,
                 entries_path=output,
                 checkpoint_path=None if args.no_checkpoint else checkpoint_path,
                 overwrite=args.force,
@@ -70,9 +74,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         log.log('ERROR', 'Fetch failed: {}', error)
         return 1
     if summary is None:
-        log.info('Fetched {} entries to {}', len(entries), output)
+        log.info('Completed fetch: {} entries written to {}.', len(entries), output)
     else:
-        log.info('Fetched {} entries to {} in {:.2f}s', len(entries), output, summary.total_seconds)
+        log.info('Completed fetch: {} entries written to {} in {:.2f}s.', len(entries), output, summary.total_seconds)
     return 0
 
 
