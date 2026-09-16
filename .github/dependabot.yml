@@ -8,12 +8,14 @@ updates:
 
   # Maintain dependencies for npm
   - package-ecosystem: 'npm'
-    directory: '/'
+    directories:
+      - '/'
+      - '/src/frontend'
     schedule:
       interval: 'weekly'
 
-  # Maintain frontend dependencies
-  - package-ecosystem: 'npm'
-    directory: '/src/frontend'
+  # Maintain Python dependencies managed by uv
+  - package-ecosystem: 'uv'
+    directory: '/src/packages'
     schedule:
       interval: 'weekly'
