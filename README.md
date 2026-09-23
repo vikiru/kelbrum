@@ -6,9 +6,6 @@
   <a href="https://vikiru.github.io/kelbrum/">
     <img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation" />
   </a>
-  <a href="https://kelbrum-v1.web.app">
-    <img src="https://img.shields.io/badge/Web-v1%20live%20site-blue" alt="Kelbrum v1 live site" />
-  </a>
   <a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge" />
   </a>
