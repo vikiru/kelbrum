@@ -16,7 +16,7 @@ _SYNOPSIS_ATTRIBUTION = re.compile(
     r'\s*(?:\((?:source|written by|translated by):[^)]*\)|\[(?:source|written by|translated by):[^]]*\])\s*$',
     re.IGNORECASE,
 )
-_SYNOPSIS_SOURCE = re.compile(r'\s*\(?source:\s*[^)\]]+\)?\s*$', re.IGNORECASE)
+_SYNOPSIS_SOURCE = re.compile(r'\s*\(?(?<![A-Za-z])source\s*:\s*[^)\]]+\)?\s*$', re.IGNORECASE)
 
 
 def clean_synopsis(value: str | None) -> str | None:
