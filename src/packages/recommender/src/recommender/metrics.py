@@ -14,6 +14,7 @@ class Similarity(StrEnum):
     COSINE = 'cosine'
     JACCARD = 'jaccard'
     DICE = 'dice'
+    TVERSKY = 'tversky'
     MANHATTAN = 'manhattan'
 
 
@@ -27,6 +28,8 @@ class Distance(StrEnum):
 
 
 SimilarityName = Similarity | str
+TVERSKY_ALPHA = 0.7
+TVERSKY_BETA = 0.3
 
 
 class SimilarityOperands(msgspec.Struct, frozen=True):
@@ -102,6 +105,29 @@ def _dice_score(left: NDArray[np.floating], right: NDArray[np.floating]) -> floa
     return _binary_score(left, right, Similarity.DICE)
 
 
+def _tversky_score(left: NDArray[np.floating], right: NDArray[np.floating]) -> float:
+    left_valid = left > 0
+    right_valid = right > 0
+    intersection = float(np.count_nonzero(left_valid & right_valid))
+    left_only = float(np.count_nonzero(left_valid & ~right_valid))
+    right_only = float(np.count_nonzero(right_valid & ~left_valid))
+    denominator = intersection + TVERSKY_ALPHA * left_only + TVERSKY_BETA * right_only
+    return intersection / denominator if denominator else 0.0
+
+
+def tversky(
+    source: frozenset[str] | set[str],
+    candidate: frozenset[str] | set[str],
+    *,
+    alpha: float = TVERSKY_ALPHA,
+    beta: float = TVERSKY_BETA,
+) -> float:
+    """Return asymmetric Tversky similarity for two categorical sets."""
+    intersection = len(source & candidate)
+    denominator = intersection + alpha * len(source - candidate) + beta * len(candidate - source)
+    return intersection / denominator if denominator else 0.0
+
+
 def _manhattan_score(left: NDArray[np.floating], right: NDArray[np.floating]) -> float:
     """Return Manhattan distance converted to a higher-is-better score."""
     distance = float(np.abs(left - right).mean())
@@ -129,6 +155,16 @@ def _vectorized_jaccard(operands: SimilarityOperands) -> np.ndarray:
 def _vectorized_dice(operands: SimilarityOperands) -> np.ndarray:
     """Return pairwise Dice scores from prepared set operands."""
     return _vectorized_set_similarity(operands, Similarity.DICE)
+
+
+def _vectorized_tversky(operands: SimilarityOperands) -> np.ndarray:
+    intersections = _required(operands.intersections, 'intersections')
+    left_sizes = _required(operands.left_sizes, 'left_sizes')
+    right_sizes = _required(operands.right_sizes, 'right_sizes')
+    denominator = (
+        intersections + TVERSKY_ALPHA * (left_sizes - intersections) + TVERSKY_BETA * (right_sizes - intersections)
+    )
+    return np.divide(intersections, denominator, out=np.zeros_like(intersections), where=denominator > 0.0)
 
 
 def _vectorized_cosine(operands: SimilarityOperands) -> np.ndarray:
@@ -170,6 +206,12 @@ SIMILARITY_REGISTRY: dict[Similarity, SimilarityMetric] = {
         'row',
         _dice_score,
         _vectorized_dice,
+    ),
+    Similarity.TVERSKY: SimilarityMetric(
+        'tversky-v1',
+        'row',
+        _tversky_score,
+        _vectorized_tversky,
     ),
     Similarity.MANHATTAN: SimilarityMetric(
         'manhattan-v1',
