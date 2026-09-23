@@ -117,6 +117,27 @@ def test_corrupt_embedding_manifest_is_treated_as_a_cache_miss(tmp_path: Path) -
     assert load_embedding_cache(cache_path, expected=expected, row_count=2) is None
 
 
+@pytest.mark.parametrize('invalid_value', [np.nan, np.inf, -np.inf])
+def test_non_finite_embedding_values_are_treated_as_a_cache_miss(tmp_path: Path, invalid_value: float) -> None:
+    cache_path = tmp_path / 'snapshot.npy'
+    values = np.ones((2, 3), dtype=np.float32)
+    values[0, 0] = invalid_value
+    write_array(cache_path, values)
+    expected = EmbeddingCacheManifest(
+        schema_version='embedding-cache-v4',
+        model=EmbeddingModel(source=EmbeddingSource.REMOTE, identifier='test-model'),
+        row_count=2,
+        text_hash='',
+        ordered_ids_hash='',
+        source_snapshot_id=None,
+        source_artifact_sha256=None,
+        row_keys=(),
+    )
+    write_json(cache_path.with_suffix('.npy.manifest.json'), expected)
+
+    assert load_embedding_cache(cache_path, expected=expected, row_count=2) is None
+
+
 def test_embedding_cache_reuses_unchanged_rows_after_catalogue_changes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
