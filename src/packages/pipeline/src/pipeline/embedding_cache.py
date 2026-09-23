@@ -171,6 +171,8 @@ def load_embedding_cache(
         values = np.asarray(read_array(cache_path), dtype=np.float32)
         if values.ndim != _MATRIX_DIMENSIONS or values.shape[0] != row_count:
             return None
+        if not np.isfinite(values).all():
+            return None
     except (StorageError, ValueError):
         return None
     else:
