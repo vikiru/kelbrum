@@ -80,6 +80,30 @@ def test_retrieval_executes_only_explicitly_enabled_paths() -> None:
         )
 
 
+def test_retrieval_identity_includes_retrieval_limit() -> None:
+    first = RetrievalEngine(
+        _UnusedStreamingRanker(),
+        None,
+        {},
+        {},
+        retrieval_limit=100,
+        retrieval_batch_size=512,
+        mode=RetrievalMode.UNION,
+        enabled_paths=('genres',),
+    )
+    second = RetrievalEngine(
+        _UnusedStreamingRanker(),
+        None,
+        {},
+        {},
+        retrieval_limit=200,
+        retrieval_batch_size=512,
+        mode=RetrievalMode.UNION,
+        enabled_paths=('genres',),
+    )
+    assert first.identity != second.identity
+
+
 def test_disabled_embedding_path_does_not_prepare_an_embedding_index(monkeypatch: pytest.MonkeyPatch) -> None:
     frame = pl.DataFrame(
         {
@@ -136,6 +160,34 @@ def test_union_deduplicates_candidates_within_one_path_using_maximum_score() -> 
     assert candidates[0].evidence == (PathEvidence('genres', 2, 0.8),)
     with pytest.raises(ValueError, match='finite'):
         build_union((('genres', ((3, float('nan')),)),))
+
+
+def test_union_exposes_path_and_family_provenance() -> None:
+    candidate = build_union(
+        (
+            ('embedding', ((2, 0.8),)),
+            ('genres', ((2, 0.7),)),
+            ('studio', ((2, 0.6),)),
+        )
+    )[0]
+
+    assert candidate.path_count == 3
+    assert candidate.family_count == 3
+    assert candidate.evidence_families == ('affinity', 'semantic', 'structured')
+
+
+def test_union_does_not_treat_paths_within_one_family_as_independent_families() -> None:
+    candidate = build_union(
+        (
+            ('bm25', ((2, 0.8),)),
+            ('lsa', ((2, 0.7),)),
+            ('embedding', ((2, 0.6),)),
+        )
+    )[0]
+
+    assert candidate.path_count == 3
+    assert candidate.family_count == 1
+    assert candidate.evidence_families == ('semantic',)
 
 
 def test_union_rejects_unknown_paths_in_both_reduction_modes() -> None:
