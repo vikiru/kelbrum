@@ -13,6 +13,7 @@ from config import (
     model_cache_dir,
     results_dir,
     setup_logging,
+    tenrai_full_path,
     tenrai_profile_full_path,
     tenrai_profile_snapshot_path,
     tenrai_r_plus_checkpoint_path,
@@ -33,7 +34,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         '--profile',
-        choices=('r-plus', 'sfw', 'all'),
+        choices=('default', 'r-plus', 'sfw', 'all'),
         default='r-plus',
         help='Pipeline profile to run (default: r-plus).',
     )
@@ -104,12 +105,11 @@ def _profile_paths(profile: str) -> CatalogueProfilePaths:
             full_artifact=tenrai_profile_full_path('sfw'),
             filters=CatalogueFilters.sfw_catalogue(),
         )
-    if profile == 'all':
-        snapshot = tenrai_profile_snapshot_path('all')
+    if profile in {'default', 'all'}:
         return CatalogueProfilePaths(
-            snapshot=snapshot,
-            checkpoint=snapshot.with_suffix('.checkpoint.json'),
-            full_artifact=tenrai_profile_full_path('all'),
+            snapshot=tenrai_full_path(),
+            checkpoint=tenrai_full_path().with_suffix('.checkpoint.json'),
+            full_artifact=tenrai_full_path(),
             filters=CatalogueFilters.all_anime(),
         )
     raise ValueError(f'unsupported catalogue profile: {profile}')
