@@ -33,6 +33,21 @@ class UnionCandidate(msgspec.Struct, frozen=True):
     def best_rank(self) -> int:
         return min(item.rank for item in self.evidence)
 
+    @property
+    def path_count(self) -> int:
+        """Return the number of distinct retrieval paths supporting this candidate."""
+        return len({item.path for item in self.evidence})
+
+    @property
+    def family_count(self) -> int:
+        """Return the number of distinct retrieval families supporting this candidate."""
+        return len({PATH_FAMILIES[item.path] for item in self.evidence})
+
+    @property
+    def evidence_families(self) -> tuple[str, ...]:
+        """Return distinct retrieval families in deterministic order."""
+        return tuple(sorted({PATH_FAMILIES[item.path] for item in self.evidence}))
+
 
 class UnionPolicy(Protocol):
     """Strategy for converting path-ranked candidates into scoring inputs."""

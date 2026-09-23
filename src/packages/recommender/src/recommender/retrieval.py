@@ -103,6 +103,7 @@ class RetrievalEngine:
                 'path_order': RETRIEVAL_PATH_ORDER,
                 'path_families': PATH_FAMILIES,
                 'enabled_paths': self._enabled_paths,
+                'retrieval_limit': self._retrieval_limit,
                 'retrieval_batch_size': self._retrieval_batch_size,
             }
         )
