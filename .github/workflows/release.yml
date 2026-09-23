@@ -34,5 +34,5 @@ jobs:
               run: pnpm install --frozen-lockfile --ignore-scripts
             - name: Release
               env:
-                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm dlx semantic-release
