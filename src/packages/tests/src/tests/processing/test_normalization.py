@@ -21,6 +21,7 @@ def test_clean_synopsis_normalizes_whitespace_and_missing_values() -> None:
     assert clean_synopsis('A mystery story. [Written by MAL Rewrite]') == 'A mystery story.'
     assert clean_synopsis(None) is None
     assert clean_synopsis('   ') is None
+    assert clean_synopsis('A resource: the story continues.') == 'A resource: the story continues.'
 
 
 @pytest.mark.parametrize(
