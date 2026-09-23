@@ -35,6 +35,9 @@ class RecommenderPlan(msgspec.Struct, frozen=True):
     retrieval_batch_size: int = 4096
     retrieval_mode: RetrievalMode = RetrievalMode.FAMILY_REDUCED
     retrieval_family_budget: RetrievalFamilyBudget = DEFAULT_RETRIEVAL_FAMILY_BUDGET
+    normalized_structured_correction: bool = True
+    weak_maturity_demotion: bool = True
+    weak_maturity_demotion_penalty: float = 0.02
 
     def __post_init__(self) -> None:
         """Validate plan values before expensive indexes are constructed."""
@@ -47,6 +50,8 @@ class RecommenderPlan(msgspec.Struct, frozen=True):
             raise ValueError('availability policy identity cannot be empty')
         if not self.relationship_policy_identity.strip():
             raise ValueError('relationship policy identity cannot be empty')
+        if self.weak_maturity_demotion_penalty < 0.0:
+            raise ValueError('weak maturity demotion penalty cannot be negative')
 
     @property
     def identity(self) -> str:
@@ -65,6 +70,9 @@ class RecommenderPlan(msgspec.Struct, frozen=True):
                 'retrieval_batch_size': self.retrieval_batch_size,
                 'retrieval_mode': self.retrieval_mode.value,
                 'retrieval_family_budget': self.retrieval_family_budget,
+                'normalized_structured_correction': self.normalized_structured_correction,
+                'weak_maturity_demotion': self.weak_maturity_demotion,
+                'weak_maturity_demotion_penalty': self.weak_maturity_demotion_penalty,
             }
         )
 
