@@ -1,234 +1,316 @@
 <div align="center" id="logo">
-    <img src="logo.png"/>
+  <img src="logo.png" alt="Kelbrum Logo" />
 </div>
 
-<div align='center' id="badges">
-
-<a href="https://vikiru.github.io/kelbrum/">
-	<img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation"/>
-</a>
-<a href="https://kelbrum-v1.web.app">
-    <img src="https://img.shields.io/badge/Web-live%20site-blue" alt="Kelbrum live site hosted via Firebase"/>
-</a>
-<br/>
-<a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge"/>
- </a>
-<a href="https://biomejs.dev"><img alt="Static Badge" src="https://img.shields.io/badge/Formatted_with-Biome-60a5fa?style=flat&logo=biome">
-</a>
-<br/>
+<div align="center" id="badges">
+  <a href="https://vikiru.github.io/kelbrum/">
+    <img src="https://img.shields.io/badge/documentation-docs-orange" alt="Documentation" />
+  </a>
+  <a href="https://kelbrum-v1.web.app">
+    <img src="https://img.shields.io/badge/Web-v1%20live%20site-blue" alt="Kelbrum v1 live site" />
+  </a>
+  <a href="https://github.com/vikiru/kelbrum/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-aqua" alt="MIT License Badge" />
+  </a>
+  <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">
+    <img src="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml/badge.svg" alt="Lint workflow status" />
+  </a>
+  <br />
   <a href="https://github.com/vikiru/kelbrum/releases">
-  <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release"/>
- </a>
- <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
-  <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues"/>
- </a>
- <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
-  <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs"/>
- </a>
-<br/>
- <a href="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml">
-  <img src="https://github.com/vikiru/kelbrum/actions/workflows/lint.yml/badge.svg" alt="GitHub Lint Action Workflow Status"/>
- </a>
+    <img src="https://img.shields.io/github/v/release/vikiru/kelbrum" alt="Release" />
+  </a>
+  <a href="https://github.com/vikiru/kelbrum/issues?q=is%3Aissue+is%3Aclosed">
+    <img src="https://img.shields.io/github/issues-closed/vikiru/kelbrum" alt="Closed Issues" />
+  </a>
+  <a href="https://github.com/vikiru/kelbrum/pulls?q=is%3Apr+is%3Aclosed">
+    <img src="https://img.shields.io/github/issues-pr-closed/vikiru/kelbrum?label=closed%20prs" alt="Closed PRs" />
+  </a>
 </div>
 
 ---
 
-**Kelbrum** is an anime recommendation system designed to suggest anime titles similar to those chosen by users. It uses **K-means++** clustering with a custom distance function, which is a combination of the **Manhattan** and **Dice** distance. The custom distance function assigns weighted values to each property of an anime such as its `type`, `genres`, `score` to compute the distance between two separate anime.
+**Kelbrum** is an anime recommendation system web application with the sole goal of recommending anime to users based on similarity.
 
-The frontend of the project was initially set up using [Vite.js](https://vitejs.dev/) for development purposes, but has since transitioned to utilize [Create React App](https://create-react-app.dev/), in conjunction with [React](https://react.dev/), [React Router](https://reactrouter.com/), [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/).
+Catalogue metadata is fetched from the [Tenrai API](https://tenrai.org/) using [msgspec](https://github.com/jcrist/msgspec) schemas with checkpointed pagination, normalized into canonical records, and supplemented with version-controlled manual overrides for missing metadata (such as missing relationships and themes) and tags that add another layer of narrative similarity. The relationship engine models these records into a deterministic graph that clusters same-story families (collapsing sequels, prequels, and summaries) while preserving remakes, franchise spin-offs, and side stories.
 
-The backend of this project, aka the 'heart' of the project was built utilizing [Tensorflow.js](https://www.tensorflow.org/js/) in combination with external libraries such as [ml-kmeans](https://github.com/mljs/kmeans), [ml-distance](https://github.com/mljs/distance), and [simple-statistics](https://github.com/simple-statistics/simple-statistics). Additionally, to perform TF-IDF analysis on anime synopses, [natural](https://github.com/NaturalNode/natural) was used alongside [remove-stopwords](https://github.com/WorldBrain/remove-stopwords), [word-list](https://github.com/sindresorhus/word-list), and [lemmatizer](https://github.com/FinNLP/lemmatizer).
+Feature engineering constructs aligned numeric, categorical, and semantic text representations for each anime entry in the catalogue, using [MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) for synopsis embeddings. Recommendations are generated through multi-path retrieval across feature similarity, taxonomy alignment, graph connections, and semantic embeddings. Candidates from each retrieval path are merged into a single pool, filtered for content rating compatibility, scored across matching attributes, and ranked into a deduplicated recommendation list with similarity score breakdowns.
 
-Upon combining these two parts, the project comes together in the form, that is, **Kelbrum**.
+All catalogue entries, search indexes, and recommendation batches are precomputed into static JSON artifacts with cryptographic checksums and loaded directly by the frontend. The original v1 release relied on k-means clustering with a custom weighted Manhattan and Dice similarity function; version 2 replaces this with multi-path retrieval and a relationship-aware recommendation engine.
 
 > [!IMPORTANT]
-> The data used within this project was possible thanks to the following:
 >
-> 1. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset) - The anime dataset was read and processed into a custom JavaScript class known as [AnimeEntry](./src/recommender/models/AnimeEntry.js).
-> 2. [JikanAPI](https://github.com/jikan-me/jikan-rest) - Missing information such as `pageURL`, `imageURL`, `trailerURL` and other existing properties which may have needed updates were updated by making several API requests to JikanAPI, which contains anime information obtained from [MyAnimeList](https://myanimelist.net/).
+> The catalogue and metadata within this project are made possible by the following sources:
 >
-> All external images and text used within this app belong to their respective owners.
+> 1. [Tenrai API](https://tenrai.org/): Primary catalogue and relation source for v2.
+> 2. [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset): Catalogue source used by v1.
+> 3. [Jikan API](https://github.com/jikan-me/jikan-rest): API used by v1 to retrieve information from [MyAnimeList](https://myanimelist.net/).
+>
+> All external anime images, synopsis texts, and trademarks belong to their respective creators, studios, and copyright holders.
 
 ## 📖 Table of Contents
 
--   [📖 Table of Contents](#-table-of-contents)
--   [🌟 Features](#-features)
--   [🛠️ Tech Stack](#️-tech-stack)
--   [📝 Prerequisites](#-prerequisites)
--   [⚡ Setup Instructions](#-setup-instructions)
--   [📜 Available Scripts](#-available-scripts)
--   [✨ Acknowledgments](#-acknowledgments)
--   [©️ License](#️-license)
+- [📖 Table of Contents](#-table-of-contents)
+- [🌟 Features](#-features)
+- [📁 Project Structure](#-project-structure)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📝 Prerequisites](#-prerequisites)
+- [⚡ Setup Instructions](#-setup-instructions)
+- [📜 Available Scripts](#-available-scripts)
+- [✨ Acknowledgments](#-acknowledgments)
+- [©️ License](#️-license)
 
 ## 🌟 Features
 
--   The ability to search for any anime within the existing dataset via a search bar
--   A homepage featuring a hero section that encourages users to search for an anime and displays 10 anime randomly selected that meet a minimum average score, providing users with immediate recommendations
--   The ability to view all anime grouped together based on properties such as `genres`, `studios`, `seasons`, etc
--   The ability to view the top 100 anime within the existing set of anime, based on average score
--   A dedicated anime details page that enables users to view detailed information about an anime and receive recommendations based on similarity
--   The ability to view 10 unique random anime recommendations and view up to 200 recommendations per anime (not all anime will have that many recommendations)
--   The ability to grow and accommodate other content types such as `manga`, `manhwa`, and `manhua`
--   The capability to prioritize anime properties based on assigned weights and adjust the recommendation algorithm at any time using the provided K-means JSON file and feature tensors
+- **Recommendations**: Generates up to 100 recommendations for each anime, avoiding redundant same-story entries, preserving distinct franchise exploration, and remaining demographic-aware - see the [recommender package](./src/packages/recommender).
+- **Top 100**: Browse the highest-rated anime across the catalogue with same-story entries collapsed to representative titles (using the maximum score across TV, movie, and ONA formats) - see the [top-100 page](./src/frontend/src/pages/top).
+- **Search and Filtering**: Search anime by original, English, and Japanese titles with [FlexSearch](https://github.com/nextapps-de/flexsearch), with filtering by media type, content rating, demographic, genres, themes, score range, release year, and episode count - see the [search feature](./src/frontend/src/features/search).
+- **Manual Corrections**: An iteratively growing collection of version-controlled manual overrides and corrections addressing missing metadata such as relationships, themes, and genres - see the [curation resources](./src/packages/pipeline/src/pipeline/curation.py).
+- **Tags**: Introduces a dedicated tag property to enrich recommendation quality by capturing defining characteristics and nuances that cannot be represented by existing genres or themes alone - see the [features package](./src/packages/features).
+- **Relationship Graph**: Graph-driven model that connects anime entries by relationship edges, applies manual corrections, distinguishes same-story families from broader franchise universes, and enables graph-aware retrieval - see the [graph package](./src/packages/graph).
+- **Adaptability**: Modular, extensible architecture designed to accommodate additional media formats in the future (e.g. manga, manhwa, and manhua) alongside anime.
+
+## 📁 Project Structure
+
+```text
+kelbrum/
+└── src/
+    ├── frontend/                       # TanStack Start / React static application
+    │   └── src/
+    │       ├── data/                   # Generated static artifacts, full entries, and search index
+    │       ├── entities/               # Domain entity models, schemas, and UI components
+    │       ├── features/               # Search, recommendation, and filtering feature implementations
+    │       ├── pages/                  # Page-level surfaces (Home, Top Ranked, Anime Details, Recommendations)
+    │       ├── routes/                 # TanStack Router type-safe file routes
+    │       └── shared/                 # Shared UI primitives, shadcn components, hooks, and API helpers
+    │
+    └── packages/                       # Python data & recommendation workspace (uv)
+        ├── catalogue/                  # Immutable indexed catalogue views & Polars query helpers
+        ├── config/                     # Path resolution, environment settings, and deterministic identities
+        ├── export/                     # Frontend artifact generation, projection validation, and checksums
+        ├── features/                   # Feature engineering, tag vocabulary, and Polars assembly plans
+        ├── fetch/                      # Tenrai API client, checkpointing, and source data acquisition
+        ├── graph/                      # Relationship graph traversal, story-family & franchise policy
+        ├── normalization/              # Data normalization, missingness handling, and fitted scalers
+        ├── pipeline/                   # Pipeline orchestration, curation snapshot, and composition root
+        ├── processing/                 # Raw snapshot cleaning, canonicalization, and taxonomy corrections
+        ├── recommender/                # Multi-strategy retrieval, scoring, qualification, and ranking
+        ├── storage/                    # Domain-agnostic persistence (JSON, Parquet, arrays, atomic writes)
+        └── tests/                      # Python package test suite
+```
 
 ## 🛠️ Tech Stack
 
-Backend:
+- **Frontend**: [TypeScript](https://www.typescriptlang.org/), [React](https://react.dev/), [TanStack Start](https://tanstack.com/start), [TanStack Router](https://tanstack.com/router), [TanStack Query](https://tanstack.com/query), [Vite](https://vite.dev/), [Tailwind CSS](https://tailwindcss.com/), [Base UI](https://base-ui.com/), [shadcn/ui](https://ui.shadcn.com/), [FlexSearch](https://github.com/nextapps-de/flexsearch), [Zod](https://zod.dev/), [Lucide React](https://lucide.dev/), [React Icons](https://react-icons.github.io/react-icons/).
 
--   [Node.js](https://nodejs.org/en)
--   [Tensorflow.js](https://github.com/tensorflow/tfjs)
--   [natural](https://github.com/NaturalNode/natural)
--   [simple-statistics](https://github.com/simple-statistics/simple-statistics)
--   [ml-distance](https://github.com/mljs/distance)
--   [ml-kmeans](https://github.com/mljs/kmeans)
+- **Data & Recommendation Pipeline**: [Python](https://www.python.org/), [Polars](https://pola.rs/), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [scikit-learn](https://scikit-learn.org/), [Sentence Transformers](https://www.sbert.net/), [MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), [msgspec](https://github.com/jcrist/msgspec), [Niquests](https://niquests.readthedocs.io/), [Loguru](https://loguru.readthedocs.io/).
 
-Frontend:
+- **Documentation**: [Astro](https://astro.build/), [Starlight](https://starlight.astro.build/), [GitHub Pages](https://pages.github.com/).
 
--   [React](https://react.dev/)
--   [React Router](https://reactrouter.com/)
--   [DaisyUI](https://daisyui.com/)
--   [TailwindCSS](https://tailwindcss.com/)
+- **Development & Code Quality**: [pnpm](https://pnpm.io/), [uv](https://docs.astral.sh/uv/), [poethepoet](https://poethepoet.natn.io/index.html), [Oxlint](https://oxc.rs/docs/guide/usage/linter), [Oxfmt](https://oxc.rs/docs/guide/usage/formatter.html), [Ruff](https://docs.astral.sh/ruff/), [Pyrefly](https://pyrefly.org/), [ty](https://docs.astral.sh/ty/), [Knip](https://github.com/webpro-nl/knip), [Lefthook](https://github.com/evilmartians/lefthook), [Commitlint](https://commitlint.js.org/), [semantic-release](https://github.com/semantic-release/semantic-release).
 
-Hosting:
-
--   [Firebase](https://firebase.google.com/)
-    -   Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/) (Based on recommended Firebase config)
-
-Documentation:
-
--   Docs are built using [Docusaurus](https://docusaurus.io/)
-    -   Search functionality provided by: [docusaurus-lunr-search](https://github.com/praveenn77/docusaurus-lunr-search)
-    -   Analytics using [Google Analytics](https://marketingplatform.google.com/about/analytics/)
--   Documentation site hosted via [GitHub Pages](https://pages.github.com/)
-
+- **AI Tools**: Spec-driven development using [OpenSpec](https://openspec.dev/) (since v2).
 
 ## 📝 Prerequisites
 
-Ensure that the following dependencies are installed onto your machine by following the [Setup Instructions](#-setup-instructions).
+Ensure that the following prerequisites are installed on your system by following the [Setup Instructions](#-setup-instructions):
 
--   [Node.js](https://nodejs.org/en/download)
+- [Node.js](https://nodejs.org/) `>= 22.12`
+- [pnpm](https://pnpm.io/) `>= 11.20`
+- [Python](https://www.python.org/) `>= 3.13`
+- [uv](https://docs.astral.sh/uv/)
 
 ## ⚡ Setup Instructions
 
-1. Clone this repository to your local machine.
+1. Clone this repository to your local machine:
 
 ```bash
 git clone https://github.com/vikiru/kelbrum.git
 cd kelbrum
 ```
 
-2. Download and install all required dependencies.
+2. Install repository and frontend dependencies:
 
 ```bash
 pnpm install
 ```
 
-## 📜 Available Scripts
+3. Set up the Python workspace and install dependencies:
 
-1. Start the app in the development environment.
+```bash
+uv --directory src/packages sync --all-packages --dev
+```
+
+4. Download the [MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) Sentence Transformer model:
+
+```bash
+uv --directory src/packages run poe download-minilm
+```
+
+The model weights will be downloaded from Hugging Face and cached locally within `src/packages/data/models/huggingface/`.
+
+5. Run the data acquisition and pipeline stages:
+
+- Fetch catalogue entries from the Tenrai API:
+
+```bash
+uv --directory src/packages run poe fetch-entries
+```
+
+The fetched catalogue snapshots and checkpoint files are stored in `src/packages/data/source/tenrai/snapshots/` (`tenrai-anime-<profile>.json`, `tenrai-anime-<profile>.checkpoint.json`).
+
+- Execute the end-to-end data processing, graph construction, and export pipeline:
+
+```bash
+uv --directory src/packages run poe run-pipeline
+```
+
+Derived parquet datasets and precomputed synopsis embeddings are saved to `src/packages/data/pipeline/` and `src/packages/data/embeddings/synopsis/`, while final client-ready artifacts are exported directly into `src/frontend/src/data/`.
+
+Please check the `src/packages/logs/` directory if errors occur or if you need to inspect network requests. Specifically:
+- `error.log`: Detailed failure traces and exceptions.
+- `http.log`: Outbound HTTP request logs and rate-limiting diagnostics.
+- `info.log`: Standard pipeline stage and execution milestones.
+- `debug.log`: Verbose diagnostic output across all pipeline modules.
+
+6. Start the frontend development server:
 
 ```bash
 pnpm start
 ```
 
-2. Build the project files and optimize for production.
+The application will be running and available at:
+
+```text
+http://localhost:3000
+```
+
+## 📜 Available Scripts
+
+### Frontend & Workspace Scripts
+
+1. Start the frontend development server:
+
+```bash
+pnpm start
+```
+
+2. Build the search index and frontend production bundle:
 
 ```bash
 pnpm build
 ```
 
-3. Preview the production build locally.
+3. Preview the frontend production build locally:
 
 ```bash
 pnpm preview
 ```
 
-4. Lint files using [Biome](https://biomejs.dev/).
+4. Lint frontend code using [Oxlint](https://oxc.rs/docs/guide/usage/linter):
 
 ```bash
 pnpm lint
 ```
 
-5. Format files using [Biome](https://biomejs.dev/).
+5. Run type-aware linting on frontend files:
 
 ```bash
-pnpm format
+pnpm lint:typecheck
 ```
 
-6. Run TypeScript type checks without emitting files.
+6. Run TypeScript type checks without emitting files:
 
 ```bash
 pnpm typecheck
 ```
 
-7. Check unused dependencies and files with [Knip](https://github.com/webpro-nl/knip).
+7. Format files across the repository using [Oxfmt](https://oxc.rs/docs/guide/usage/formatter.html):
+
+```bash
+pnpm format
+```
+
+8. Detect unused files, exports, and dependencies with [Knip](https://github.com/webpro-nl/knip):
 
 ```bash
 pnpm unused
 ```
 
-8. Prepare Git hooks via [Lefthook](https://github.com/evilmartians/lefthook).
+### Python Data & Pipeline Scripts
+
+1. Fetch catalogue snapshot from the Tenrai API (default profile):
 
 ```bash
-pnpm postinstall
+uv --directory src/packages run poe fetch-entries
+```
+
+2. Fetch catalogue entries with a specific profile:
+
+```bash
+uv --directory src/packages run poe fetch-entries --mode sfw
+uv --directory src/packages run poe fetch-entries --mode r-plus
+uv --directory src/packages run poe fetch-entries --mode all
+```
+
+3. Run the full data and recommendation pipeline (default `r-plus` profile):
+
+```bash
+uv --directory src/packages run poe run-pipeline
+```
+
+4. Run the pipeline with a specific profile:
+
+```bash
+uv --directory src/packages run poe run-pipeline --profile sfw
+uv --directory src/packages run poe run-pipeline --profile r-plus
+uv --directory src/packages run poe run-pipeline --profile all
+```
+
+5. Run the Python automated test suite:
+
+```bash
+uv --directory src/packages run poe test
+```
+
+6. Format Python packages using [Ruff](https://docs.astral.sh/ruff/):
+
+```bash
+uv --directory src/packages run ruff format .
+```
+
+7. Lint Python packages using [Ruff](https://docs.astral.sh/ruff/):
+
+```bash
+uv --directory src/packages run ruff check .
+```
+
+8. Run Python strict type checking with [Pyrefly](https://pyrefly.org/) and [ty](https://docs.astral.sh/ty/):
+
+```bash
+uv --directory src/packages run pyrefly check
+uv --directory src/packages run ty check
 ```
 
 ## ✨ Acknowledgments
 
--   [csv-parse](https://github.com/adaltas/node-csv)
--   [PapaParse](https://www.papaparse.com/)
--   [lodash](https://github.com/lodash/lodash)
--   [lemmatizer](https://github.com/FinNLP/lemmatizer)
--   [MiniSearch](https://github.com/lucaong/minisearch)
--   [React Infinite Scroller](https://github.com/danbovey/react-infinite-scroller)
--   [react-slick](https://github.com/akiran/react-slick)
--   [remove-stopwords](https://github.com/WorldBrain/remove-stopwords)
--   [slick-carousel](https://github.com/kenwheeler/slick/)
--   [tailwind-scrollbar](https://github.com/adoxography/tailwind-scrollbar)
--   [word-list](https://github.com/sindresorhus/word-list)
--   [SimpleIcons](https://simpleicons.org/)
--   [Tensorflow.js](https://www.tensorflow.org/js)
--   [Tensorflow.js Documentation](https://js.tensorflow.org/api/latest/)
--   [Machine Learning Crash Course by Google](https://developers.google.com/machine-learning/crash-course/)
-    -   [Clustering Algorithms](https://developers.google.com/machine-learning/clustering/clustering-algorithms)
-    -   [Normalization](https://developers.google.com/machine-learning/data-prep/transform/normalization)
-    -   [Machine Learning Glossary](https://developers.google.com/machine-learning/glossary)
-    -   [Transforming Categorical Data](https://developers.google.com/machine-learning/data-prep/transform/transform-categorical)
--   [Firebase](https://firebase.google.com/)
--   [Starlight](https://starlight.astro.build/)
--   [Astro](https://astro.build/)
--   [starlight-links-validator](https://github.com/HiDeoo/starlight-links-validator)
--   [starlight-theme-rapide](https://github.com/HiDeoo/starlight-theme-rapide)
--   [Docusaurus](https://docusaurus.io/)
--   [GitHub Pages](https://pages.github.com/)
--   [Shields Badges](https://github.com/badges/shields)
--   [Semantic Release](https://github.com/semantic-release/semantic-release)
--   [Lefthook](https://github.com/evilmartians/lefthook)
--   [Knip](https://github.com/webpro-nl/knip)
--   [regex101](https://regex101.com/)
--   [Favicon Generator](https://favicon.io/favicon-generator/)
-
-Various web articles for research and learning, such as:
-
--   [17 types of similarity and dissimilarity measures used in data science](https://towardsdatascience.com/17-types-of-similarity-and-dissimilarity-measures-used-in-data-science-3eb914d2681)
--   [A Guide to Content-Based Filtering In Recommender Systems](https://www.turing.com/kb/content-based-filtering-in-recommender-systems)
--   [Gower's Distance](https://medium.com/analytics-vidhya/gowers-distance-899f9c4bd553)
--   [Introduction to similarity metrics](https://medium.com/analytics-vidhya/introduction-to-similarity-metrics-a882361c9be4)
--   [Types of recommendation systems & their use cases](https://medium.com/mlearning-ai/what-are-the-types-of-recommendation-systems-3487cbafa7c9)
--   [Supervised vs. Unsupervised Learning: What’s the Difference?](https://www.ibm.com/blog/supervised-vs-unsupervised-learning/)
--   [What is unsupervised learning?](https://www.ibm.com/topics/unsupervised-learning)
+- [Tenrai API](https://tenrai.org/)
+- [Polars documentation](https://docs.pola.rs/)
+- [scikit-learn documentation](https://scikit-learn.org/stable/)
+- [Sentence Transformers documentation](https://sbert.net/)
+- [GitHub Shields](https://github.com/badges/shields)
 
 Additionally, this project would not be possible without the following sources of information:
 
--   [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset)
--   [JikanAPI](https://github.com/jikan-me/jikan-rest)
--   [MyAnimeList](https://myanimelist.net/)
+- [Original Kaggle Dataset](https://www.kaggle.com/datasets/dbdmobile/myanimelist-dataset)
+- [Jikan API](https://github.com/jikan-me/jikan-rest)
+- [MyAnimeList](https://myanimelist.net/)
 
-All external images and text used within this app belong to their respective owners.
+The documentation site is built using [Starlight](https://starlight.astro.build/) by [Astro](https://astro.build/) and hosted via [GitHub Pages](https://pages.github.com/).
+
+All external images and text used within this application belong to their respective owners and sources.
 
 ## ©️ License
 
-The contents of this repository are licensed under the terms and conditions of the [MIT](https://choosealicense.com/licenses/mit/) license.
+The contents of this repository are licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
 
-[MIT](./LICENSE) © 2024-present Visakan Kirubakaran.
+[MIT](LICENSE) &copy; 2024-present Visakan Kirubakaran.
