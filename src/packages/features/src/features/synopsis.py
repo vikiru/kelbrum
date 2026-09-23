@@ -66,7 +66,11 @@ def tfidf(texts: Sequence[str | None], config: TfidfConfig | None = None) -> Syn
     try:
         matrix = vectorizer.fit_transform(cleaned)
     except ValueError as error:
-        if 'no terms remain' not in str(error).lower() and 'empty vocabulary' not in str(error).lower():
+        message = str(error).lower()
+        if not any(
+            fragment in message
+            for fragment in ('no terms remain', 'empty vocabulary', 'max_df corresponds to < documents')
+        ):
             raise
         return SynopsisFeatures(csr_matrix((len(cleaned), 0), dtype=np.float32), ())
     return SynopsisFeatures(csr_matrix(matrix, dtype=np.float32), tuple(vectorizer.get_feature_names_out()))

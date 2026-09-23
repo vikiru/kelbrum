@@ -703,8 +703,9 @@ MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
     ),
     TagAssignment(
         # D.N.Angel (61); Akazukin Chacha (103); Viewtiful Joe (278);
-        # Mahou no Princess Minky Momo (518); Bishoujo Senshi Sailor Moon (530); Digimon Frontier (1132).
-        anime_ids=(61, 103, 278, 518, 530, 1132),
+        # Mahou no Princess Minky Momo (518); Bishoujo Senshi Sailor Moon (530);
+        # Futari wa Precure (603); Digimon Frontier (1132).
+        anime_ids=(61, 103, 278, 518, 530, 603, 1132),
         tag_ids=(TagId.TRANSFORMATION,),
     ),
     TagAssignment(
@@ -2610,6 +2611,113 @@ MANUAL_TAG_ASSIGNMENTS: tuple[TagAssignment, ...] = (
         # Busou Renkin: homunculus hunting is a central recurring activity.
         anime_ids=(1536,),
         tag_ids=(TagId.MONSTER_HUNTING,),
+    ),
+    TagAssignment(
+        # Pandora Hearts (5530).
+        anime_ids=(5530,),
+        tag_ids=(TagId.CONSPIRACY,),
+    ),
+    TagAssignment(
+        # Tensei Kenja no Isekai Life (47163).
+        anime_ids=(47163,),
+        tag_ids=(TagId.CREATURE_TAMING,),
+    ),
+    TagAssignment(
+        # Ple Ple Pleiades x Kagejitsu! (57034).
+        anime_ids=(57034,),
+        tag_ids=(TagId.BODY_SWAP,),
+    ),
+    TagAssignment(
+        # Outlaw Star (400).
+        anime_ids=(400,),
+        tag_ids=(TagId.FOUND_FAMILY,),
+    ),
+    TagAssignment(
+        # Shukufuku no Campanella (6979), Himekishi-sama no Himo (61015).
+        anime_ids=(6979, 61015),
+        tag_ids=(TagId.ADVENTURING_PARTY,),
+    ),
+    TagAssignment(
+        # Harmony (28211), ARP Backstage Pass (40137).
+        anime_ids=(28211, 40137),
+        tag_ids=(TagId.AUGMENTED_REALITY,),
+    ),
+    TagAssignment(
+        # Bokutachi no American Football (53749).
+        anime_ids=(53749,),
+        tag_ids=(TagId.AMERICAN_FOOTBALL,),
+    ),
+    TagAssignment(
+        # Kore wa Zombie desu ka? (8841, 10790), Yuusha ga Shinda! (51706).
+        anime_ids=(8841, 10790, 51706),
+        tag_ids=(TagId.NECROMANCY,),
+    ),
+    TagAssignment(
+        # MonHun Nikki Girigiri Airou Mura (8960, 10802).
+        anime_ids=(8960, 10802),
+        tag_ids=(TagId.MONSTER_HUNTING,),
+    ),
+    TagAssignment(
+        # Divergence Eve (294, 295).
+        anime_ids=(294, 295),
+        tag_ids=(TagId.MONSTERIZATION,),
+    ),
+    TagAssignment(
+        # RE:Map (34113).
+        anime_ids=(34113,),
+        tag_ids=(TagId.TIME_LEAP,),
+    ),
+    TagAssignment(
+        # Anime Document: München e no Michi (20237).
+        anime_ids=(20237,),
+        tag_ids=(TagId.VOLLEYBALL,),
+    ),
+    TagAssignment(
+        # Juushin Liger (4119), Houkago no Pleiades (9911), Happiness Charge Precure! (21407),
+        # Tropical-Rouge! Precure Petit (46650).
+        anime_ids=(4119, 9911, 21407, 46650),
+        tag_ids=(TagId.TRANSFORMATION,),
+    ),
+    TagAssignment(
+        # Zui Qiang Shengji (61090), Shen Zai Jiong Tu (62544), Val x Love (39799).
+        anime_ids=(61090, 62544, 39799),
+        tag_ids=(TagId.LEVELING,),
+    ),
+    TagAssignment(
+        # Pon no Michi (55397).
+        anime_ids=(55397,),
+        tag_ids=(TagId.MAHJONG,),
+    ),
+    TagAssignment(
+        # Dragon Ball (223, 892), Ueki no Housoku (479), Kizuna Ichigeki (10016).
+        anime_ids=(223, 892, 479, 10016),
+        tag_ids=(TagId.TOURNAMENT,),
+    ),
+    TagAssignment(
+        # Life of the Dead (30089), Wo Zai Feitu Shijie Sao Laji (62953).
+        anime_ids=(30089, 62953),
+        tag_ids=(TagId.ZOMBIE,),
+    ),
+    TagAssignment(
+        # Fantasista Doll (15883), Rebirth (40129), Zenonzard Episode 0 (40394), Weiß Survive (6425).
+        anime_ids=(15883, 40129, 40394, 6425),
+        tag_ids=(TagId.CARD_BATTLING,),
+    ),
+    TagAssignment(
+        # Zoids Wild (37395), Mo You Ji (51361), Xiuluo Wushen 2 (62280).
+        anime_ids=(37395, 51361, 62280),
+        tag_ids=(TagId.TREASURE_HUNTING,),
+    ),
+    TagAssignment(
+        # Zaizen Joutarou (1740), Hanasakeru Seishounen (5835), Gate Part 2 (31637), Shoukoku no Altair (34547),
+        # Wangu Zhizun (62954).
+        anime_ids=(1740, 5835, 31637, 34547, 62954),
+        tag_ids=(TagId.POLITICS,),
+    ),
+    TagAssignment(
+        # Shin Tennis no Oujisama World Cup (62534), Softenni (10109).
+        anime_ids=(62534, 10109),
+        tag_ids=(TagId.TENNIS,),
     ),
 )
 

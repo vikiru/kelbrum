@@ -150,6 +150,115 @@ _THEME_CORRECTION_DATA: tuple[tuple[tuple[int, ...], tuple[str, ...]], ...] = (
     # Detective: Layton Mystery Tanteisha (37023), Cuticle Detective Inaba (15109),
     # Sakon the Ventriloquist (2204).
     ((37023, 15109, 2204), ('Detective',)),
+    # Mythology: Princess Mononoke (164), A Letter to Momo (10389).
+    ((164, 10389), ('Mythology',)),
+    # Urban Fantasy and Super Power: Dandadan (57334).
+    ((57334,), ('Urban Fantasy', 'Super Power')),
+    # Time Travel: Steins;Gate Movie (11577), Zipang (29), The Girl Who Leapt Through Time (2236).
+    ((11577, 29, 2236), ('Time Travel',)),
+    # Detective: Kindaichi Case Files (2076), Gosick (8425).
+    ((2076, 8425), ('Detective',)),
+    # Historical and Samurai: Rurouni Kenshin: Trust & Betrayal (44).
+    ((44,), ('Historical', 'Samurai')),
+    # Military: Attack on Titan Season 3 Part 2 (38524).
+    ((38524,), ('Military',)),
+    # Team Sports: Slam Dunk (170).
+    ((170,), ('Team Sports',)),
+    # Detective: Poirot & Marple (244), Cinderella Boy (301), Loki Ragnarok (335), Spiral (341).
+    ((244, 301, 335, 341), ('Detective',)),
+    # Martial Arts: Bamboo Blade (649).
+    ((649,), ('Martial Arts',)),
+    # Medical: Ray The Animation (2396).
+    ((2396,), ('Medical',)),
+    # Racing: IGPX: Immortal Grand Prix (1409).
+    ((1409,), ('Racing',)),
+    # Space: Galaxy Angel (383), Galaxy Angel 4 (655).
+    ((383, 655), ('Space',)),
+    # Time Travel: Doraemon Movie 25 (2656), Dorami-chan (2639), Yattodetaman (4154), Time Travel Tondekeman! (2820).
+    ((2656, 2639, 4154, 2820), ('Time Travel',)),
+    # Detective: City Hunter 2 (1471), City Hunter '91 (1473), Kindaichi Returns (22817),
+    # Kamisama no Memochou (10568), Strange+ (21067), Hamatora (20689).
+    ((1471, 1473, 22817, 10568, 21067, 20689), ('Detective',)),
+    # Music: Kaikan Phrase (861).
+    ((861,), ('Music',)),
+    # Martial Arts: Taekwon Dongja Maruchi Arachi (14821).
+    ((14821,), ('Martial Arts',)),
+    # Workplace: Wala! Pyeon-uijeom The Animation (17106).
+    ((17106,), ('Workplace',)),
+    # Racing: Initial D Second Stage (21).
+    ((21,), ('Racing',)),
+    # Historical: Meiji Tokyo Renka Movie 1 (29855).
+    ((29855,), ('Historical',)),
+    # Super Power: Busou Renkin (1536), Yozakura Quartet (4548), Black Bullet (20787), Saint October (1724).
+    ((1536, 4548, 20787, 1724), ('Super Power',)),
+    # Detective: Henjin no Salad Bowl (55877), Arne no Jikenbo (60255),
+    # Toumei Otoko to Ningen Onna (60395), Mata Korosarete... Tantei-sama (62964).
+    ((55877, 60255, 60395, 62964), ('Detective',)),
+    # Music: Tari Tari (19840).
+    ((19840,), ('Music',)),
+    # Martial Arts: Mutsu Enmei Ryuu Gaiden (1381).
+    ((1381,), ('Martial Arts',)),
+    # Workplace: Kindan Joshi (45596).
+    ((45596,), ('Workplace',)),
+    # Time Travel: Stand By Me Doraemon (21469), Gan Gan Ganko-chan (34488), Li Xianji (44531), MIRU (55727).
+    ((21469, 34488, 44531, 55727), ('Time Travel',)),
+    # Super Power: Gakuen Senki Muryou (1179), Closers (32152), High Card (49154).
+    ((1179, 32152, 49154), ('Super Power',)),
+    # High Stakes Game: Eden of the East (5630).
+    ((5630,), ('High Stakes Game',)),
+    # Otaku Culture: Choukadou Girl 1/6 (38226).
+    ((38226,), ('Otaku Culture',)),
+    # School: Boys Be... (105), Wind: A Breath of Heart (623), Goldfish Warning! (727).
+    ((105, 623, 727), ('School',)),
+    # Workplace: Patrol-kun (3458), Kakuriyo no Yadomeshi (36754), Okko's Inn (37433).
+    ((3458, 36754, 37433), ('Workplace',)),
+    # Time Travel: El Cantare no Rekishikan (3496), Junod (9525), Dasshutsu Gasshapon (15971),
+    # Gongnyong (16780), Million Arthur (37555), Uchuu no Hou (37915).
+    ((3496, 9525, 15971, 16780, 37555, 37915), ('Time Travel',)),
+    # Music: Love Live! (14807).
+    ((14807,), ('Music',)),
+    # Super Power: Mondaiji (15315).
+    ((15315,), ('Super Power',)),
+    # Performing Arts: Glass no Kamen desu ga (17707).
+    ((17707,), ('Performing Arts',)),
+    # Mythology: DanMachi (28121).
+    ((28121,), ('Mythology',)),
+    # Historical: Cike Nie Yinniang (45781), Fengyu Lang Qiao (48023), Akai Inei (59279),
+    # Fengyu Lang Qiao: Kunlun Mo Lei (59367), Fengyu Lang Qiao: Bishamonten (59368), Imomushi (59704).
+    ((45781, 48023, 59279, 59367, 59368, 59704), ('Historical',)),
+    # Time Travel: Kaiketsu Zorori Movie: ZZ no Himitsu (35074).
+    ((35074,), ('Time Travel',)),
+    # Time Travel: Doraemon Movie 05 (2662), Crayon Shin-chan Movie 18 (8369),
+    # Nekketsu Uchuujin (8935), Tsuyoshi no Time Machine (10943), Tonari no Tamageta-kun (20233).
+    ((2662, 8369, 8935, 10943, 20233), ('Time Travel',)),
+    # Detective: Nanako SOS (3619), Norakuro-kun (16393).
+    ((3619, 16393), ('Detective',)),
+    # Martial Arts: Robot Taekwon V (10763).
+    ((10763,), ('Martial Arts',)),
+    # Detective: Futakoi Alternative (126).
+    ((126,), ('Detective',)),
+    # School: High School Mystery: Gakuen Nanafushigi (9882), Ore Monogatari!! (28297).
+    ((9882, 28297), ('School',)),
+    # Historical: Ashita Genki ni Nare!: Hanbun no Satsumaimo (17493).
+    ((17493,), ('Historical',)),
+    # Pets: Kanojo to Kanojo no Neko (1004).
+    ((1004,), ('Pets',)),
+    # Childcare: Chocotto Sister (1258), Amaama to Inazuma (32901).
+    ((1258, 32901), ('Childcare',)),
+    # Visual Arts: Bakuman. (7674), Bakuman. 2nd Season (10030), Bakuman. 3rd Season (12365),
+    # Eizouken ni wa Te wo Dasu na! (39792).
+    ((7674, 10030, 12365, 39792), ('Visual Arts',)),
+    # Mythology: Natsume Yuujinchou San (9843), Natsume Yuujinchou Roku (34534).
+    ((9843, 34534), ('Mythology',)),
+    # Music: Kono Oto Tomare! 2nd Season (38839).
+    ((38839,), ('Music',)),
+    # Workplace: Servant x Service (15689), Nami yo Kiitekure (40510).
+    ((15689, 40510), ('Workplace',)),
+    # Gourmet: Toriko (10033), Kakuriyo no Yadomeshi (36754), Isekai Izakaya: Koto Aitheria no Nobu (34420),
+    # Emiya-san Chi no Kyou no Gohan (37033), Rokuhoudou Yotsuiro Biyori (36508).
+    ((10033, 36754, 34420, 37033, 36508), ('Gourmet',)),
+    # Racing: Uma Musume: Pretty Derby Season 3 (53524).
+    ((53524,), ('Racing',)),
 )
 
 THEME_CORRECTION_REGISTRY = ThemeCorrectionRegistry(
