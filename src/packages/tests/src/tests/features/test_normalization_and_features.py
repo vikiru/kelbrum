@@ -480,6 +480,19 @@ def test_weighted_similarity_ties_are_canonical_across_batch_and_streaming_retri
     )
 
 
+def test_weighted_streaming_ties_use_anime_id_order_for_unsorted_rows() -> None:
+    bundle = FeatureBundle(
+        np.asarray([20, 30, 10], dtype=np.int64),
+        (FeatureBlock('genres', 'multi-hot', csr_matrix([[1.0], [1.0], [1.0]]), ('Drama',), ('genres',)),),
+    )
+    index = WeightedV2Index(bundle, weights={'genres': 1.0}, metrics={'genres': 'jaccard'})
+
+    expected = index.rank(0, limit=2)
+
+    assert expected == ((10, 1.0), (30, 1.0))
+    assert index.rank_many_streaming((0,), limit=2, candidate_batch_size=3)[0] == expected
+
+
 def test_weighted_similarity_omits_numeric_weight_without_shared_dimensions() -> None:
     bundle = FeatureBundle(
         np.asarray([10, 20], dtype=np.int64),
@@ -601,6 +614,15 @@ def test_uninformative_synopsis_corpus_returns_aligned_empty_features() -> None:
     assert bm25_features.matrix.shape == (3, 0)
 
 
+@pytest.mark.parametrize('texts', [['single synopsis'], [''], ['the and or']])
+def test_tfidf_returns_aligned_empty_features_for_tiny_or_uninformative_corpora(
+    texts: list[str],
+) -> None:
+    features = tfidf(texts)
+
+    assert features.matrix.shape == (len(texts), 0)
+
+
 def test_synopsis_ties_are_canonical_across_batch_and_streaming_retrieval() -> None:
     index = SynopsisPathIndex([30, 10, 20], ['same text'] * 3)
     index.fit_tfidf(TfidfConfig(min_df=1, max_df=1.0))
@@ -608,3 +630,13 @@ def test_synopsis_ties_are_canonical_across_batch_and_streaming_retrieval() -> N
     expected = ((10, 1.0), (20, 1.0))
     assert index.rank('tfidf', 0, limit=2) == expected
     assert index.rank_many_streaming('tfidf', (0,), limit=2, candidate_batch_size=1)[0] == expected
+
+
+def test_synopsis_streaming_ties_use_anime_id_order_for_unsorted_rows() -> None:
+    index = SynopsisPathIndex([20, 30, 10], ['same words', 'same words', 'same words'])
+    index.fit_embedding_matrix(np.ones((3, 2), dtype=np.float32))
+
+    expected = index.rank('embedding', 0, limit=2)
+
+    assert expected == ((10, pytest.approx(1.0)), (30, pytest.approx(1.0)))
+    assert index.rank_many_streaming('embedding', (0,), limit=2, candidate_batch_size=3)[0] == expected
