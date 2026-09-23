@@ -5,6 +5,7 @@ from collections.abc import Callable, Mapping, Sequence
 import msgspec
 
 from recommender.contracts import RecommendationItem
+from recommender.metrics import tversky
 from recommender.ranking import RankingPolicy, ScoredCandidate, ScoreDescending
 from recommender.union import SEMANTIC_EVIDENCE_PATHS, UnionCandidate
 
@@ -13,6 +14,7 @@ TAG_WEIGHT = 0.24
 THEME_WEIGHT = 0.18
 GENRE_WEIGHT = 0.10
 DEMOGRAPHIC_WEIGHT = 0.06
+STRUCTURED_CORRECTION_WEIGHT = 0.15
 
 ScoringMetric = Callable[[frozenset[str], Sequence[str] | frozenset[str]], float]
 PropertyValues = Mapping[int, Sequence[str] | frozenset[str]]
@@ -66,6 +68,7 @@ def score_candidates(
     ranking_policy: RankingPolicy | None = None,
     properties: Sequence[ScoringProperty] | None = None,
     property_values: Mapping[str, PropertyValues] | None = None,
+    normalized_structured_correction: bool = False,
 ) -> tuple[ScoredCandidate, ...]:
     """Score qualified candidates without eligibility or presentation policy."""
     default_values: dict[str, PropertyValues] = {
@@ -83,10 +86,11 @@ def score_candidates(
     if unknown_properties:
         raise ValueError(f'unsupported scoring properties: {", ".join(sorted(unknown_properties))}')
     source_values = {name: frozenset(values.get(source_anime_id, ())) for name, values in candidate_values.items()}
+    canonical_id_map = canonical_ids or {}
     scored: list[ScoredCandidate] = []
     for candidate in candidates:
         candidate_id = candidate.anime_id
-        canonical_id = (canonical_ids or {}).get(candidate_id, candidate_id)
+        canonical_id = canonical_id_map.get(candidate_id, candidate_id)
         synopsis_score = max(
             (item.score for item in candidate.evidence if item.path in SEMANTIC_EVIDENCE_PATHS),
             default=0.0,
@@ -116,7 +120,44 @@ def score_candidates(
         (candidate_id, alias_id, score, tuple(sorted(paths)))
         for candidate_id, (alias_id, score, paths) in deduplicated.items()
     )
+    if normalized_structured_correction:
+        deduplicated_candidates = _apply_normalized_structured_correction(
+            source_values['genres'], source_values['themes'], deduplicated_candidates, genres_by_id, themes_by_id
+        )
     return (ranking_policy or ScoreDescending()).rank(deduplicated_candidates)
+
+
+def _apply_normalized_structured_correction(
+    source_genres: frozenset[str],
+    source_themes: frozenset[str],
+    candidates: Sequence[tuple[int, int, float, tuple[str, ...]]],
+    genres_by_id: PropertyValues,
+    themes_by_id: PropertyValues,
+) -> tuple[tuple[int, int, float, tuple[str, ...]], ...]:
+    structured_scores = {
+        candidate_id: (
+            tversky(source_genres, frozenset(genres_by_id.get(candidate_id, ())))
+            + tversky(source_themes, frozenset(themes_by_id.get(candidate_id, ())))
+        )
+        / 2.0
+        for candidate_id, _, _, _ in candidates
+    }
+    percentiles = _descending_percentiles(structured_scores)
+    return tuple(
+        (
+            candidate_id,
+            alias_id,
+            (1.0 - STRUCTURED_CORRECTION_WEIGHT) * score + STRUCTURED_CORRECTION_WEIGHT * percentiles[candidate_id],
+            paths,
+        )
+        for candidate_id, alias_id, score, paths in candidates
+    )
+
+
+def _descending_percentiles(scores: Mapping[int, float]) -> dict[int, float]:
+    ordered = sorted(scores, key=lambda candidate_id: (-scores[candidate_id], candidate_id))
+    last_index = max(1, len(ordered) - 1)
+    return {candidate_id: 1.0 - index / last_index for index, candidate_id in enumerate(ordered)}
 
 
 def dice(source: frozenset[str] | set[str], candidate: Sequence[str] | frozenset[str] | set[str] | None) -> float:
