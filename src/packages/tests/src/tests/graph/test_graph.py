@@ -88,6 +88,25 @@ def test_primary_media_type_beats_origin_status_for_representative_selection() -
     assert index.canonical_id(1) == 1
 
 
+def test_representative_selection_is_invariant_to_node_and_relation_order() -> None:
+    nodes = (GraphNode(1, 'TV'), GraphNode(2, 'Movie'), GraphNode(3, 'ONA'), GraphNode(4, 'TV'))
+    relations = {
+        1: (GraphRelation(2, RelationType.SEQUEL), GraphRelation(4, RelationType.SPIN_OFF)),
+        2: (GraphRelation(1, RelationType.PREQUEL), GraphRelation(3, RelationType.SEQUEL)),
+        3: (GraphRelation(2, RelationType.PREQUEL),),
+        4: (GraphRelation(1, RelationType.SPIN_OFF),),
+    }
+    expected = build_relationship_index(nodes, relations)
+
+    for node_order in (tuple(reversed(nodes)), tuple(nodes[index] for index in (2, 0, 3, 1))):
+        shuffled_relations = {
+            source: tuple(reversed(targets)) for source, targets in reversed(tuple(relations.items()))
+        }
+        actual = build_relationship_index(node_order, shuffled_relations)
+        assert actual.canonical_by_id == expected.canonical_by_id
+        assert actual.fingerprint() == expected.fingerprint()
+
+
 def test_invalid_graph_inputs_fail_before_construction() -> None:
     with pytest.raises(ValueError, match='duplicate graph node'):
         build_relationship_index((GraphNode(1), GraphNode(1)), {})
