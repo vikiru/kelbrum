@@ -12,7 +12,14 @@
   "ignorePatterns": [
     "src/frontend/src/routeTree.gen.ts",
     ".github/",
-    "src/packages/"
+    "src/packages/",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "bun.lock",
+    "bun.lockb",
+    "uv.lock",
+    "**/uv.lock"
   ],
   "sortImports": {
     "groups": [
