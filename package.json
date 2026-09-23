@@ -1,7 +1,7 @@
 {
   "name": "kelbrum",
   "description": "An anime recommendation system designed to recommend anime that is similar to user-selected anime.",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "license": "MIT",
   "author": "Visakan Kirubakaran",
