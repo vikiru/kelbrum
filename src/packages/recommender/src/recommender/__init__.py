@@ -2,7 +2,7 @@
 
 from recommender.frozen_pipeline import Recommender
 from recommender.inputs import RecommenderInputs
-from recommender.metrics import Distance, Similarity
+from recommender.metrics import Distance, Similarity, tversky
 from recommender.paths import SynopsisPathIndex, build_synopsis_path_index
 from recommender.plan import RecommenderPlan
 from recommender.properties import SimilarityProperty
@@ -42,5 +42,6 @@ __all__ = [
     'build_synopsis_path_index',
     'build_union',
     'build_union_from_results',
+    'tversky',
     'v2_weighted_similarity',
 ]
