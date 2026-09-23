@@ -174,7 +174,7 @@ class SynopsisPathIndex:
             valid = np.isfinite(top_scores[row_number])
             indices = top_indices[row_number, valid]
             scores = top_scores[row_number, valid]
-            order = np.lexsort((indices, -scores))
+            order = np.lexsort((self.anime_ids[indices], -scores))
             output.append(
                 tuple(
                     (int(self.anime_ids[index]), float(scores[position]))
