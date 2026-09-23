@@ -17,11 +17,12 @@ from features.tag_assignment import TAG_ASSIGNMENT_REGISTRY, tag_assignment_regi
 from features.tags import apply_tag_assignments, tag_registry_identity
 from recommender.contracts import RawRecommendation, RecommendationItem
 from recommender.inputs import RecommenderInputs
+from recommender.maturity_adjustment import is_weak_special_maturity_mismatch
 from recommender.paths import AffinityPathIndex, CategoricalPathIndex, SynopsisPathIndex, build_synopsis_path_index
 from recommender.plan import RecommenderPlan
 from recommender.properties import SimilarityProperty
 from recommender.qualification import canonical_candidate_ids, qualify_candidates
-from recommender.rating_policy import RatingPolicy
+from recommender.rating_policy import RatingClass, RatingPolicy
 from recommender.retrieval import RetrievalEngine
 from recommender.scoring import (
     ScoringMetric,
@@ -43,6 +44,15 @@ RECOMMENDER_POLICY_DESCRIPTOR = {
     'retrieval': 'deterministic-path-reduction',
     'ranking': 'score-descending-candidate-id-ascending',
 }
+
+
+def _rating_class(value: str) -> RatingClass:
+    try:
+        return RatingClass(value)
+    except ValueError:
+        return RatingClass.UNKNOWN
+
+
 DEMOGRAPHIC_COMPATIBILITY = {
     'shoujo': {'shoujo': 1.0, 'josei': 0.7},
     'josei': {'josei': 1.0, 'shoujo': 0.7},
@@ -69,6 +79,10 @@ class _CatalogueState(msgspec.Struct, frozen=True):
     themes_by_id: Mapping[int, frozenset[str]]
     demographics_by_id: Mapping[int, frozenset[str]]
     tags_by_id: Mapping[int, frozenset[str]]
+    anime_type_by_id: Mapping[int, str | None]
+    episodes_by_id: Mapping[int, int | None]
+    source_by_id: Mapping[int, str | None]
+    score_by_id: Mapping[int, float | None]
 
 
 class _RetrievalState(msgspec.Struct, frozen=True):
@@ -117,6 +131,10 @@ def _prepare_catalogue(
         themes_by_id=themes_by_id,
         demographics_by_id=demographics_by_id,
         tags_by_id=tags_by_id,
+        anime_type_by_id={int(row['mal_id']): row.get('anime_type') for row in ordered_frame.to_dicts()},
+        episodes_by_id={int(row['mal_id']): row.get('episodes') for row in ordered_frame.to_dicts()},
+        source_by_id={int(row['mal_id']): row.get('source') for row in ordered_frame.to_dicts()},
+        score_by_id={int(row['mal_id']): row.get('score') for row in ordered_frame.to_dicts()},
     )
 
 
@@ -322,6 +340,9 @@ class Recommender:
         self._scoring_property_values = dict(inputs.scoring_property_values or {})
         self._availability_policy_identity = plan.availability_policy_identity
         self._feature_configuration_identity = inputs.feature_configuration_identity
+        self._normalized_structured_correction = plan.normalized_structured_correction
+        self._weak_maturity_demotion = plan.weak_maturity_demotion
+        self._weak_maturity_demotion_penalty = plan.weak_maturity_demotion_penalty
         self._synopsis_tfidf_config = inputs.synopsis_tfidf_config
         self._synopsis_latent_config = inputs.synopsis_latent_config
         self._surfacing_policy = inputs.surfacing_policy or SurfacingPolicy()
@@ -502,6 +523,7 @@ class Recommender:
                 ranking_policy=self._ranking_policy,
                 properties=self._scoring_properties,
                 property_values=self._scoring_property_values,
+                normalized_structured_correction=self._normalized_structured_correction,
             )
         return results
 
@@ -513,18 +535,43 @@ class Recommender:
         raw_results = self.raw_similarity_many(source_anime_ids)
         return {
             source_id: tuple(
-                RawRecommendation(
-                    anime_id=candidate_id,
-                    winning_alias_id=winning_alias_id,
-                    score=score,
-                    retrieval_paths=paths,
-                    semantic_available=any(path in SEMANTIC_EVIDENCE_PATHS for path in paths),
-                    categorical_available=any(path in CATEGORICAL_EVIDENCE_PATHS for path in paths),
+                sorted(
+                    [
+                        RawRecommendation(
+                            anime_id=candidate_id,
+                            winning_alias_id=winning_alias_id,
+                            score=self._maturity_adjusted_score(source_id, candidate_id, score),
+                            retrieval_paths=paths,
+                            semantic_available=any(path in SEMANTIC_EVIDENCE_PATHS for path in paths),
+                            categorical_available=any(path in CATEGORICAL_EVIDENCE_PATHS for path in paths),
+                        )
+                        for candidate_id, winning_alias_id, score, paths in candidates
+                    ],
+                    key=lambda item: (-item.score, item.anime_id),
                 )
-                for candidate_id, winning_alias_id, score, paths in candidates
             )
             for source_id, candidates in raw_results.items()
         }
+
+    def _maturity_adjusted_score(self, source_id: int, candidate_id: int, score: float) -> float:
+        if not self._weak_maturity_demotion:
+            return score
+        source_rating = _rating_class(self._catalogue_state.ratings[self._catalogue_state.index_by_id[source_id]])
+        candidate_rating = _rating_class(self._catalogue_state.ratings[self._catalogue_state.index_by_id[candidate_id]])
+        shared_genres = self._catalogue_state.genres_by_id[source_id] & self._catalogue_state.genres_by_id[candidate_id]
+        shared_themes = self._catalogue_state.themes_by_id[source_id] & self._catalogue_state.themes_by_id[candidate_id]
+        if is_weak_special_maturity_mismatch(
+            source_rating,
+            candidate_rating,
+            self._catalogue_state.anime_type_by_id.get(candidate_id),
+            self._catalogue_state.episodes_by_id.get(candidate_id),
+            self._catalogue_state.source_by_id.get(candidate_id),
+            self._catalogue_state.score_by_id.get(candidate_id),
+            shared_genres,
+            shared_themes,
+        ):
+            return score - self._weak_maturity_demotion_penalty
+        return score
 
     def search_recommendations(
         self,
