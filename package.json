@@ -64,7 +64,7 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/npm": "^13.1.5",
     "knip": "^5.88.1",
-    "lefthook": "^2.1.12",
+    "lefthook": "^2.1.14",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.82.0",
     "oxlint-tailwindcss": "^1.11.0",
