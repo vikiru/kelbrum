@@ -1,15 +1,32 @@
-from pipeline.curation import CurationSnapshot, audit_curation, load_curation_snapshot
+from features.tags import TagAssignment
+from pipeline.curation import CurationSnapshot, _tagged_anime_ids, audit_curation, load_curation_snapshot
 
 
 def test_curation_snapshot_materializes_all_registry_identities() -> None:
     snapshot = load_curation_snapshot()
 
     assert snapshot.theme_additions
-    assert snapshot.tagged_anime_ids
+    assert isinstance(snapshot.tagged_anime_ids, frozenset)
     assert snapshot.theme_identity
     assert snapshot.tag_identity
     assert snapshot.relation_identity
     assert snapshot.identity
+
+
+def test_curation_snapshot_materializes_tagged_ids_from_assignments() -> None:
+    assignments = (
+        TagAssignment(anime_ids=(101, 102), tag_ids=('fixture-tag',)),
+        TagAssignment(anime_ids=(203,), tag_ids=('another-fixture-tag',)),
+    )
+    snapshot = CurationSnapshot(
+        theme_additions={},
+        tagged_anime_ids=_tagged_anime_ids(assignments),
+        theme_identity='theme-fixture',
+        tag_identity='tag-fixture',
+        relation_identity='relation-fixture',
+    )
+
+    assert snapshot.tagged_anime_ids == frozenset({101, 102, 203})
 
 
 def test_curation_snapshot_identity_changes_when_materialized_facts_change() -> None:

@@ -6,13 +6,13 @@ from graph import (
     IdentityEquivalenceAssertion,
     IdentityIntent,
     ManualEdgePolicy,
+    ManualRelationshipRow,
     RelationType,
     SameStoryIntent,
     build_relationship_index,
-    get_manual_relationships,
-    get_typed_manual_edge_policies,
 )
 from graph.contracts import TraversalMode
+from graph.registry import manual_relationships_to_dict, manual_relationships_to_policies
 
 
 def _graph(
@@ -101,20 +101,32 @@ def test_reviewed_real_manual_continuations_are_typed(source: int, target: int) 
     assert index.same_story_exclusions(source) == frozenset({source, target})
 
 
-def test_production_manual_policy_promotes_only_reviewed_steins_gate_and_aria_edges() -> None:
-    manual_edge_policies = get_typed_manual_edge_policies()
-    ids = tuple(
-        sorted({anime_id for policy in manual_edge_policies for anime_id in (policy.source_id, policy.target_id)})
+def test_reviewed_manual_continuation_chains_promote_only_their_storylines() -> None:
+    relationship_rows = tuple(
+        ManualRelationshipRow(
+            source_id=source_id,
+            source_title='',
+            target_id=target_id,
+            target_title='',
+            relation_type='Manual',
+            same_story_intent=SameStoryIntent.CONTINUATION,
+            traversal_mode=TraversalMode.TRANSITIVE,
+            identity_intent=IdentityIntent.DISTINCT,
+            provenance='regression-fixture',
+        )
+        for source_id, target_id in ((9253, 11577), (11577, 30484), (477, 962), (962, 3297))
     )
+    manual_edge_policies = manual_relationships_to_policies(relationship_rows)
     index = build_relationship_index(
-        tuple(GraphNode(anime_id) for anime_id in ids),
+        tuple(GraphNode(anime_id) for anime_id in (9253, 11577, 30484, 477, 962, 3297, 9999)),
         {},
-        manual_relationships=get_manual_relationships(),
+        manual_relationships=manual_relationships_to_dict(relationship_rows),
         manual_edge_policies=manual_edge_policies,
     )
 
     assert index.same_story_exclusions(9253) == frozenset({9253, 11577, 30484})
     assert index.same_story_exclusions(477) == frozenset({477, 962, 3297})
+    assert index.same_story_exclusions(9999) == frozenset({9999})
 
 
 def test_franchise_only_relationship_keeps_candidate_eligible() -> None:
