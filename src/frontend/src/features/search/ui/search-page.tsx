@@ -1,16 +1,15 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Filter } from 'lucide-react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { useSearchResults } from '@/features/search/hooks/use-search-results';
 import { useSearchScreenState } from '@/features/search/hooks/use-search-screen-state';
 import { useSearchSuggestions } from '@/features/search/hooks/use-search-suggestions';
 import { formatFilterValue } from '@/features/search/lib/search-filter-formatting';
 import { SearchFilterPanel } from '@/features/search/ui/search-filter-panel';
-import { SortSelect } from '@/features/search/ui/search-filters';
 import { SearchHeader } from '@/features/search/ui/search-header';
 import { SearchResults } from '@/features/search/ui/search-results';
-import { Navbar } from '@/shared/components/navbar';
+import { SortSelect } from '@/features/search/ui/sort-select';
 import { PageContainer } from '@/shared/components/page-container';
 import { Button } from '@/shared/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
@@ -63,26 +62,66 @@ export function SearchScreen() {
     episodeRange,
   } = filters;
   const resetFilters = resetSearch;
-  const filterPanelProps = {
-    options: searchFilterOptions,
-    onReset: resetFilters,
-    typeFilter,
-    onTypeChange: (value: string) => updateFilter('type', value),
-    ratingFilter,
-    onRatingChange: (value: string) => updateFilter('rating', value),
-    demographicFilter,
-    onDemographicChange: (value: string) => updateFilter('demographic', value),
-    genreFilters,
-    onGenresChange: (values: string[]) => updateFilter('genres', values),
-    themeFilters,
-    onThemesChange: (values: string[]) => updateFilter('themes', values),
-    scoreRange,
-    onScoreChange: (values: [number, number]) => updateFilter('scoreRange', values),
-    yearRange,
-    onYearChange: (values: [string, string]) => updateFilter('yearRange', values),
-    episodeRange,
-    onEpisodesChange: (values: [string, string]) => updateFilter('episodeRange', values),
-  };
+  const updateType = useCallback((value: string) => updateFilter('type', value), [updateFilter]);
+  const updateRating = useCallback((value: string) => updateFilter('rating', value), [updateFilter]);
+  const updateDemographic = useCallback((value: string) => updateFilter('demographic', value), [updateFilter]);
+  const updateGenres = useCallback((values: string[]) => updateFilter('genres', values), [updateFilter]);
+  const updateThemes = useCallback((values: string[]) => updateFilter('themes', values), [updateFilter]);
+  const updateScore = useCallback((values: [number, number]) => updateFilter('scoreRange', values), [updateFilter]);
+  const updateYear = useCallback((values: [string, string]) => updateFilter('yearRange', values), [updateFilter]);
+  const updateEpisodes = useCallback(
+    (values: [string, string]) => updateFilter('episodeRange', values),
+    [updateFilter],
+  );
+  const updatePageSize = useCallback(
+    (value: string | null) => {
+      if (value === '25') setPageSize(25);
+      if (value === '50') setPageSize(50);
+    },
+    [setPageSize],
+  );
+  const filterPanelProps = useMemo(
+    () => ({
+      options: searchFilterOptions,
+      onReset: resetFilters,
+      typeFilter,
+      onTypeChange: updateType,
+      ratingFilter,
+      onRatingChange: updateRating,
+      demographicFilter,
+      onDemographicChange: updateDemographic,
+      genreFilters,
+      onGenresChange: updateGenres,
+      themeFilters,
+      onThemesChange: updateThemes,
+      scoreRange,
+      onScoreChange: updateScore,
+      yearRange,
+      onYearChange: updateYear,
+      episodeRange,
+      onEpisodesChange: updateEpisodes,
+    }),
+    [
+      searchFilterOptions,
+      resetFilters,
+      typeFilter,
+      updateType,
+      ratingFilter,
+      updateRating,
+      demographicFilter,
+      updateDemographic,
+      genreFilters,
+      updateGenres,
+      themeFilters,
+      updateThemes,
+      scoreRange,
+      updateScore,
+      yearRange,
+      updateYear,
+      episodeRange,
+      updateEpisodes,
+    ],
+  );
 
   const resultSet = useSearchResults({
     catalogue: searchCatalogue,
@@ -150,7 +189,6 @@ export function SearchScreen() {
 
   return (
     <main id="main-content" className="min-h-screen bg-muted/20 text-foreground">
-      <Navbar />
       <PageContainer className="py-10 lg:py-14">
         <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
           <SearchHeader
@@ -186,14 +224,8 @@ export function SearchScreen() {
                 <p className="body-sm mb-2 font-medium text-foreground">Sort results</p>
                 <SortSelect value={sort} onChange={setSort} />
                 <p className="body-sm mt-4 mb-2 font-medium text-foreground">Titles per page</p>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(value) => {
-                    if (value === '25') setPageSize(25);
-                    if (value === '50') setPageSize(50);
-                  }}
-                >
-                  <SelectTrigger className="h-11 w-full">
+                <Select value={String(pageSize)} onValueChange={updatePageSize}>
+                  <SelectTrigger className="h-11 w-full" aria-label="Titles per page">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -224,7 +256,7 @@ export function SearchScreen() {
             results={results}
             isSearching={isSearching}
             isUpdating={isQueryStale}
-            isCatalogueLoading={isCatalogueLoading || (searchCatalogue.length === 0 && !catalogueError)}
+            isCatalogueLoading={!searchError && (isCatalogueLoading || searchCatalogue.length === 0)}
             catalogueError={searchError}
             activeFilters={activeFilters}
             totalResults={allResults.length}
@@ -235,9 +267,7 @@ export function SearchScreen() {
             pageSize={pageSize}
             sort={sort}
             onSortChange={setSort}
-            onPageSizeChange={(nextPageSize) => {
-              setPageSize(nextPageSize);
-            }}
+            onPageSizeChange={setPageSize}
             onReset={resetFilters}
             onPageChange={changePage}
           />

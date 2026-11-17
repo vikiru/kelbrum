@@ -1,19 +1,11 @@
-import {
-  ArrowDown01,
-  ArrowDownAZ,
-  ArrowDownWideNarrow,
-  ArrowUp01,
-  ArrowUpAZ,
-  ArrowUpWideNarrow,
-  LoaderCircle,
-  X,
-} from 'lucide-react';
+import { LoaderCircle, X } from 'lucide-react';
 
 import type { AnimeCardItem } from '@/entities/anime/model/anime-schema';
 import type { SearchSort } from '@/features/search/model/search-types';
 
 import { AnimeCard } from '@/entities/anime/ui/anime-card';
 import { SearchPagination } from '@/features/search/ui/search-pagination';
+import { SortSelect } from '@/features/search/ui/sort-select';
 import { Button } from '@/shared/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/shared/components/ui/empty';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
@@ -99,16 +91,23 @@ export function SearchResults({
             <EmptyDescription>Refresh the page and try again.</EmptyDescription>
           </EmptyHeader>
         </Empty>
+      ) : results.length > 0 ? (
+        <div className="relative">
+          <div className="anime-card-grid below-fold-content gap-6" aria-busy={isUpdating || isSearching}>
+            {results.map((item) => (
+              <AnimeCard key={item.malId} item={item} />
+            ))}
+          </div>
+          {(isUpdating || isSearching) && (
+            <output className="absolute top-2 right-2 rounded-full border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm">
+              {isUpdating ? 'Updating results…' : 'Searching titles…'}
+            </output>
+          )}
+        </div>
       ) : isUpdating || isSearching ? (
         <output className="flex min-h-80 items-center justify-center rounded-lg border bg-background text-muted-foreground">
           {isUpdating ? 'Updating results…' : 'Searching titles…'}
         </output>
-      ) : results.length > 0 ? (
-        <div className="anime-card-grid gap-6">
-          {results.map((item) => (
-            <AnimeCard key={item.malId} item={item} />
-          ))}
-        </div>
       ) : (
         <Empty className="min-h-80 bg-background">
           <EmptyHeader>
@@ -157,7 +156,7 @@ function SearchToolbar({
       </p>
       <div className="hidden items-center gap-4 lg:flex">
         <div className="relative z-20">
-          <SortSelect value={sort} onChange={onSortChange} />
+          <SortSelect value={sort} onChange={onSortChange} showLabel />
         </div>
         <div className="relative z-10">
           <Select
@@ -167,7 +166,7 @@ function SearchToolbar({
               if (value === '50') onPageSizeChange(50);
             }}
           >
-            <SelectTrigger className="h-11 w-28">
+            <SelectTrigger className="h-11 w-28" aria-label="Titles per page">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -200,58 +199,6 @@ function SearchActiveFilters({ filters }: { filters: readonly SearchFilterChip[]
           <X className="icon-xs" aria-hidden="true" />
         </button>
       ))}
-    </div>
-  );
-}
-
-function SortSelect({
-  value,
-  onChange,
-}: {
-  value: SearchResultsProps['sort'];
-  onChange: SearchResultsProps['onSortChange'];
-}) {
-  return (
-    <div className="body-sm flex items-center gap-2 text-muted-foreground">
-      <span id="search-sort-label">Sort</span>
-      <Select
-        value={value}
-        onValueChange={(nextValue) => {
-          if (
-            nextValue === 'title-asc' ||
-            nextValue === 'title-desc' ||
-            nextValue === 'score-asc' ||
-            nextValue === 'score-desc' ||
-            nextValue === 'year-asc' ||
-            nextValue === 'year-desc'
-          )
-            onChange(nextValue);
-        }}
-      >
-        <SelectTrigger className="h-11 min-w-44" aria-labelledby="search-sort-label">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="z-[60]">
-          <SelectItem value="title-asc">
-            <ArrowDownAZ data-icon="inline-start" /> Title A–Z
-          </SelectItem>
-          <SelectItem value="title-desc">
-            <ArrowUpAZ data-icon="inline-start" /> Title Z–A
-          </SelectItem>
-          <SelectItem value="score-desc">
-            <ArrowDownWideNarrow data-icon="inline-start" /> Score high to low
-          </SelectItem>
-          <SelectItem value="score-asc">
-            <ArrowUpWideNarrow data-icon="inline-start" /> Score low to high
-          </SelectItem>
-          <SelectItem value="year-desc">
-            <ArrowDown01 data-icon="inline-start" /> Year newest first
-          </SelectItem>
-          <SelectItem value="year-asc">
-            <ArrowUp01 data-icon="inline-start" /> Year oldest first
-          </SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   );
 }

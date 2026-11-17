@@ -44,7 +44,7 @@ export interface SearchFilterOptions {
 export function loadSearchCatalogue(): Promise<SearchCatalogueItem[]> {
   searchCataloguePromise ??= fetchSearchMetadata().then((metadata) =>
     Object.values(metadata).map((rawItem) => {
-      const item = AnimeCardItemSchema.parse({ ...rawItem, score: rawItem.score ?? 0 });
+      const item = AnimeCardItemSchema.parse(rawItem);
       return {
         ...item,
         type: rawItem.type,
