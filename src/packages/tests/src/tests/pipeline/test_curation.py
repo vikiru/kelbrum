@@ -32,11 +32,12 @@ def test_curation_audit_reports_ids_outside_active_catalogue() -> None:
         theme_identity='theme',
         tag_identity='tag',
         relation_identity='relation',
+        relation_ids=frozenset({12}),
     )
 
     audit = audit_curation(snapshot, {1})
 
     assert audit.missing_theme_ids == (10,)
     assert audit.missing_tag_ids == (11,)
-    assert audit.missing_relation_ids
+    assert audit.missing_relation_ids == (12,)
     assert audit.missing_count == 2 + len(audit.missing_relation_ids)
