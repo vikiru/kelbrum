@@ -1,15 +1,16 @@
 import pytest
 
 from features.tag_assignment import (
-    TAG_ASSIGNMENT_REGISTRY,
     TagAssignmentRegistry,
+    get_tag_assignment_registry,
     tag_assignment_registry_identity,
 )
-from features.tags import Tag, TagAssignment, TagRegistry, tag_registry_identity
+from features.tags import TagAssignment, TagDefinition, TagRegistry, tag_registry_identity
 
 
 def test_tag_assignment_registry_has_a_stable_identity() -> None:
-    assert TAG_ASSIGNMENT_REGISTRY.identity() == TAG_ASSIGNMENT_REGISTRY.identity()
+    registry = get_tag_assignment_registry()
+    assert registry.identity() == registry.identity()
     assert tag_assignment_registry_identity() == tag_assignment_registry_identity()
     assert tag_assignment_registry_identity.cache_info().hits >= 1
 
@@ -31,12 +32,12 @@ def test_tag_assignment_registry_rejects_unknown_vocabulary_ids() -> None:
 
 def test_tag_registry_rejects_duplicate_definitions() -> None:
     with pytest.raises(ValueError, match='unique'):
-        TagRegistry('v1', (Tag('duplicate', 'One'), Tag('duplicate', 'Two')))
+        TagRegistry('v1', (TagDefinition('duplicate', 'One'), TagDefinition('duplicate', 'Two')))
 
 
 def test_tag_registry_identity_changes_with_definitions() -> None:
-    first = TagRegistry('v1', (Tag('one', 'One'),))
-    second = TagRegistry('v1', (Tag('two', 'Two'),))
+    first = TagRegistry('v1', (TagDefinition('one', 'One'),))
+    second = TagRegistry('v1', (TagDefinition('two', 'Two'),))
 
     assert first.identity() != second.identity()
     assert tag_registry_identity() == tag_registry_identity()

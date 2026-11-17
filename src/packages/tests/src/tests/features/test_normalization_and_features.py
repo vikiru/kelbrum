@@ -22,6 +22,7 @@ from features.text_blocks import build_text_blocks
 from normalization.encoders import bucketize, clean_labels, multi_hot, one_hot
 from normalization.policy import MissingPolicy
 from normalization.scalers import (
+    BaseScaler,
     FittedState,
     MaxAbsScaler,
     MinMaxScaler,
@@ -94,6 +95,26 @@ def test_numeric_transforms_define_constant_columns_and_input_shape() -> None:
         transform(np.zeros((1, 1, 1)), ('minmax',))
 
 
+@pytest.mark.parametrize('scaler_type', [MinMaxScaler, RobustScaler, StandardScaler, MaxAbsScaler])
+def test_fitted_scalers_reject_a_different_feature_width(scaler_type: type[BaseScaler]) -> None:
+    scaler = scaler_type().fit(np.asarray([[1.0, 2.0], [3.0, 4.0]]))
+
+    with pytest.raises(ValueError, match='expected 2 features, got 1'):
+        scaler.transform(np.asarray([[1.0]]))
+
+
+def test_binary_set_metrics_reject_nonbinary_feature_matrices() -> None:
+    block = FeatureBlock('genres', 'multi-hot', np.asarray([[1.0, 0.5], [0.0, 1.0]]), ('A', 'B'), ('genres',))
+    index = WeightedV2Index(
+        FeatureBundle(np.asarray([10, 20], dtype=np.int64), (block,)),
+        weights={'genres': 1.0},
+        metrics={'genres': Similarity.DICE},
+    )
+
+    with pytest.raises(ValueError, match='finite binary'):
+        index.blocks['genres'].similarities(0, Similarity.DICE)
+
+
 def test_feature_bundle_requires_unique_aligned_rows_and_reports_availability() -> None:
     values = csr_matrix([[1.0, 0.0], [0.0, 0.0]])
     block = FeatureBlock('genres', 'multi-hot', values, ('Drama', 'Sports'), ('genres',))
@@ -160,6 +181,7 @@ def test_categorical_builder_allows_curated_tags_to_be_replaced_or_disabled() ->
             'anime_type': ['TV', 'Movie'],
             'source': ['Manga', 'Original'],
             'rating': ['PG-13', 'G'],
+            'origin_language': ['ja', 'ja'],
             'genres': [['Action'], ['Drama']],
             'themes': [['Mecha'], []],
             'demographics': [[], ['Shounen']],
@@ -174,9 +196,10 @@ def test_categorical_builder_allows_curated_tags_to_be_replaced_or_disabled() ->
         'anime_type',
         'source',
         'rating',
+        'origin_language',
+        'demographics',
         'genres',
         'themes',
-        'demographics',
         'tags',
     )
     assert blocks[-1].values.shape[0] == anime_ids.size
@@ -339,7 +362,7 @@ def test_embedding_cache_miss_reports_optional_model_failure(monkeypatch: pytest
         embeddings.encode_synopsis_embeddings(['text'], model_name='missing-model')
 
 
-def test_weighted_similarity_omits_missing_bucket_from_available_weight() -> None:
+def test_weighted_similarity_zero_pads_missing_bucket_weight() -> None:
     genre_values = csr_matrix([[1.0], [1.0]])
     year_values = csr_matrix([[1.0, 0.0], [0.0, 1.0]])
     bundle = FeatureBundle(
@@ -363,7 +386,7 @@ def test_weighted_similarity_omits_missing_bucket_from_available_weight() -> Non
         metrics={'genres': 'jaccard', 'year-bucket': 'dice'},
     ).rank(0, limit=1)
 
-    assert results == ((20, 1.0),)
+    assert results == ((20, 0.5),)
 
 
 def test_similarity_score_is_higher_is_better_and_handles_empty_rows() -> None:
@@ -493,7 +516,7 @@ def test_weighted_streaming_ties_use_anime_id_order_for_unsorted_rows() -> None:
     assert index.rank_many_streaming((0,), limit=2, candidate_batch_size=3)[0] == expected
 
 
-def test_weighted_similarity_omits_numeric_weight_without_shared_dimensions() -> None:
+def test_weighted_similarity_zero_pads_numeric_weight_without_shared_dimensions() -> None:
     bundle = FeatureBundle(
         np.asarray([10, 20], dtype=np.int64),
         (
@@ -509,10 +532,10 @@ def test_weighted_similarity_omits_numeric_weight_without_shared_dimensions() ->
         ),
     )
 
-    assert weighted_similarity(bundle, 0, 1, weights={'genres': 0.5, 'numeric': 0.5}) == 1.0
+    assert weighted_similarity(bundle, 0, 1, weights={'genres': 0.5, 'numeric': 0.5}) == 0.5
 
 
-def test_weighted_similarity_omits_matching_missing_bucket_weight() -> None:
+def test_weighted_similarity_zero_pads_matching_missing_bucket_weight() -> None:
     bundle = FeatureBundle(
         np.asarray([10, 20], dtype=np.int64),
         (
@@ -528,7 +551,7 @@ def test_weighted_similarity_omits_matching_missing_bucket_weight() -> None:
         ),
     )
 
-    assert weighted_similarity(bundle, 0, 1, weights={'genres': 0.5, 'year-bucket': 0.5}) == 1.0
+    assert weighted_similarity(bundle, 0, 1, weights={'genres': 0.5, 'year-bucket': 0.5}) == 0.5
 
 
 def test_similarity_properties_can_be_selected_and_reordered_independently() -> None:
@@ -640,3 +663,31 @@ def test_synopsis_streaming_ties_use_anime_id_order_for_unsorted_rows() -> None:
 
     assert expected == ((10, pytest.approx(1.0)), (30, pytest.approx(1.0)))
     assert index.rank_many_streaming('embedding', (0,), limit=2, candidate_batch_size=3)[0] == expected
+
+
+def test_adaptive_synopsis_ranking_matches_streaming_and_falls_back_over_budget() -> None:
+    index = SynopsisPathIndex([30, 10, 20], ['same text', 'same text', 'same text'])
+    index.fit_tfidf(TfidfConfig(min_df=1, max_df=1.0))
+    exclusions = (frozenset({10}),)
+    expected = index.rank_many_streaming(
+        'tfidf', (0,), limit=2, candidate_batch_size=1, excluded_ids_by_source=exclusions
+    )
+
+    full_matrix = index.rank_many_adaptive(
+        'tfidf',
+        (0,),
+        limit=2,
+        candidate_batch_size=1,
+        excluded_ids_by_source=exclusions,
+        max_score_bytes=1_000,
+    )
+    streaming_fallback = index.rank_many_adaptive(
+        'tfidf',
+        (0,),
+        limit=2,
+        candidate_batch_size=1,
+        excluded_ids_by_source=exclusions,
+        max_score_bytes=0,
+    )
+
+    assert full_matrix == streaming_fallback == expected
