@@ -1,5 +1,6 @@
 """Configurable synopsis-only feature builders used by catalogue pipelines."""
 
+import re
 from collections.abc import Sequence
 
 import msgspec
@@ -11,6 +12,44 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.preprocessing import normalize
 
 _MIN_PROJECTION_INPUT_SIZE = 2
+
+NON_NARRATIVE_SENTENCE_PATTERNS: tuple[str, ...] = (
+    r'(?i)\b(?:based\s+on|adapted\s+from|serialized\s+in)\s+(?:the\s+)?(?:hit\s+|popular\s+|award[- ]winning\s+)?'
+    r'(?:light\s+novel|manga|web\s+novel|visual\s+novel|novel|game|4-koma|webtoon|eroge|mobile\s+game|'
+    r'media\s+franchise|card\s+game|toy\s+line|playstation\s+game|novel\s+series)\b',
+    r'(?i)\b(?:won|received|awarded|recipient of|nominated for)\b.*?\b(?:award|prize|festival|excellence)\b',
+    r'(?i)\b(?:season\s+[0-9]+|part\s+[0-9]+|cour\s+[0-9]+)\s+(?:focuses|continues|follows|picks up|takes place)\b',
+    r'(?i)\b(?:at the end of|where it left off at|prior to the events of)\s+season\s+[0-9]+\b',
+    r'(?i)\b(?:included\s+in|bundled\s+with)\s+the\s+(?:[0-9]+(?:st|nd|rd|th)\s+)?(?:blu-ray|dvd|manga|volume)\b',
+    r'(?i)\bthe\s+japan\s+blu-ray/dvd\s+release\s+date\s+is\b',
+    r'(?i)\bno\s+synopsis\s+has\s+been\s+added\s+for\s+this\s+series\s+yet\b',
+    r'(?i)\bclick\s+here\s+to\s+update\s+this\s+information\b',
+    r'(?i)\[written\s+by\s+mal\s+rewrite\]',
+    r'(?i)\(source:\s*[^)]+\)',
+    r'(?i)\bsource:\s*[^.!?]+[.!?]?',
+    r'(?i)^\s*(?:broadcast|airing|aired on|premiere[sd]? on|licensed by|streamed on)\b.*',
+)
+
+_NON_NARRATIVE_DISCARD_REGEX: tuple[re.Pattern[str], ...] = tuple(
+    re.compile(pattern) for pattern in NON_NARRATIVE_SENTENCE_PATTERNS
+)
+
+SEQUEL_SPARSE_CONTINUATION_PATTERN: str = (
+    r'(?i)^\s*(?:'
+    r'(?:the\s+)?(?:second|2nd|third|3rd|fourth|4th|fifth|5th|final|next)\s+(?:season|series|part|cour)\b'
+    r'|sequel\s+to\b'
+    r'|continuation\s+of\b'
+    r'|direct\s+continuation\b'
+    r'|second\s+half\s+of\b'
+    r'|remake\s+of\b'
+    r'|season\s+[0-9]+\b'
+    r'|part\s+[0-9]+\b'
+    r')'
+)
+
+_SEQUEL_SPARSE_REGEX: re.Pattern[str] = re.compile(SEQUEL_SPARSE_CONTINUATION_PATTERN)
+_SENTENCE_SPLIT_REGEX: re.Pattern[str] = re.compile(r'(?<=[.!?])\s+|\n+')
+_TOKEN_BOUNDS_REGEX: re.Pattern[str] = re.compile(r'^[^\w]+|[^\w]+$')
 
 
 class TfidfConfig(msgspec.Struct, frozen=True):
@@ -39,9 +78,52 @@ class SynopsisFeatures(msgspec.Struct, frozen=True):
     vocabulary: tuple[str, ...]
 
 
-def clean_synopses(texts: Sequence[str | None]) -> list[str]:
-    """Normalize missing and whitespace-only synopsis values consistently."""
-    return [' '.join((text or '').split()) for text in texts]
+def is_sparse_sequel_synopsis(text: str | None, *, max_length: int = 200) -> bool:
+    """Detect whether a synopsis is a sparse sequel placeholder lacking narrative context."""
+    if not text:
+        return True
+    stripped = text.strip()
+    if len(stripped) < 60:
+        return True
+    return len(stripped) < max_length and bool(_SEQUEL_SPARSE_REGEX.search(stripped))
+
+
+def clean_single_synopsis(text: str | None, *, strip_mid_sentence_nouns: bool = True) -> str:
+    """Normalize whitespace, purge non-narrative metadata, and optionally strip proper nouns."""
+    if not text:
+        return ''
+    cleaned = re.sub(r'(?i)\[written\s+by\s+mal\s+rewrite\]', '', text)
+    cleaned = re.sub(r'(?i)\(source:\s*[^)]+\)', '', cleaned)
+
+    raw_sentences = _SENTENCE_SPLIT_REGEX.split(cleaned)
+    kept_sentences: list[str] = []
+    for sentence in raw_sentences:
+        candidate_sentence = sentence.strip()
+        if not candidate_sentence:
+            continue
+        if any(regex.search(candidate_sentence) for regex in _NON_NARRATIVE_DISCARD_REGEX):
+            continue
+
+        if strip_mid_sentence_nouns:
+            tokens = candidate_sentence.split()
+            if not tokens:
+                continue
+            preserved_tokens = [tokens[0]]
+            for token in tokens[1:]:
+                bare_token = _TOKEN_BOUNDS_REGEX.sub('', token)
+                if bare_token and bare_token[0].isupper() and bare_token != 'I' and not bare_token.isdigit():  # noqa: S105
+                    continue
+                preserved_tokens.append(token)
+            kept_sentences.append(' '.join(preserved_tokens))
+        else:
+            kept_sentences.append(candidate_sentence)
+
+    return ' '.join(kept_sentences).strip()
+
+
+def clean_synopses(texts: Sequence[str | None], *, strip_mid_sentence_nouns: bool = True) -> list[str]:
+    """Normalize missing values, strip non-narrative metadata sentences, and remove proper nouns."""
+    return [clean_single_synopsis(text, strip_mid_sentence_nouns=strip_mid_sentence_nouns) for text in texts]
 
 
 def tfidf(texts: Sequence[str | None], config: TfidfConfig | None = None) -> SynopsisFeatures:
@@ -76,18 +158,36 @@ def tfidf(texts: Sequence[str | None], config: TfidfConfig | None = None) -> Syn
     return SynopsisFeatures(csr_matrix(matrix, dtype=np.float32), tuple(vectorizer.get_feature_names_out()))
 
 
-def bm25(texts: Sequence[str | None], *, k1: float = 1.5, b: float = 0.75) -> SynopsisFeatures:
+def bm25(
+    texts: Sequence[str | None],
+    *,
+    k1: float = 1.5,
+    b: float = 0.75,
+    min_df: int = 1,
+    max_features: int = 25_000,
+) -> SynopsisFeatures:
     """Build a sparse BM25-weighted term matrix for exact cosine retrieval."""
     if k1 < 0.0 or b < 0.0 or b > 1.0:
         raise ValueError('BM25 requires k1 >= 0 and b in [0, 1]')
-    base = CountVectorizer(ngram_range=(1, 2), stop_words='english', min_df=1)
+    if min_df < 1 or max_features < 1:
+        raise ValueError('min_df and max_features must be positive')
     cleaned = clean_synopses(texts)
     if not any(cleaned):
         return SynopsisFeatures(csr_matrix((len(cleaned), 0), dtype=np.float32), ())
+    base = CountVectorizer(
+        ngram_range=(1, 2),
+        stop_words='english',
+        min_df=min_df,
+        max_features=max_features,
+    )
     try:
         counts = csr_matrix(base.fit_transform(cleaned), dtype=np.float32)
     except ValueError as error:
-        if 'empty vocabulary' not in str(error).lower():
+        message = str(error).lower()
+        if not any(
+            fragment in message
+            for fragment in ('no terms remain', 'empty vocabulary', 'max_df corresponds to < documents')
+        ):
             raise
         return SynopsisFeatures(csr_matrix((len(cleaned), 0), dtype=np.float32), ())
     lengths = np.asarray(counts.sum(axis=1)).ravel()
@@ -102,7 +202,7 @@ def bm25(texts: Sequence[str | None], *, k1: float = 1.5, b: float = 0.75) -> Sy
     inverse_document_frequency = np.log1p((counts.shape[0] - document_frequency + 0.5) / (document_frequency + 0.5))
     data *= inverse_document_frequency[counts.indices]
     weighted = csr_matrix((data, counts.indices, counts.indptr), shape=counts.shape)
-    normalized = normalize(weighted, norm='l2', axis=1, copy=False).tocsr()
+    normalized = normalize(weighted, norm='l2', axis=1, copy=False)
     return SynopsisFeatures(normalized, tuple(base.get_feature_names_out()))
 
 
