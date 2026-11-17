@@ -5,17 +5,25 @@ from collections.abc import Mapping, Sequence
 import msgspec
 import polars as pl
 
+from anime_catalogue.taxonomy import Genre, Theme, parse_genre, parse_theme
+
 
 class AnimeEntry(msgspec.Struct, frozen=True):
     """Immutable local view of one catalogue entry with entry-level semantics."""
 
     anime_id: int
     title: str
-    genres: tuple[str, ...]
-    themes: tuple[str, ...]
+    genres: tuple[Genre, ...]
+    themes: tuple[Theme, ...]
     demographics: tuple[str, ...]
     rating: str
     synopsis_features: str
+
+    def __post_init__(self) -> None:
+        if any(not isinstance(label, Genre) for label in self.genres):
+            raise TypeError('entry genres must contain Genre members')
+        if any(not isinstance(label, Theme) for label in self.themes):
+            raise TypeError('entry themes must contain Theme members')
 
     def preferred_title(self) -> str:
         """Return the display title selected for this entry."""
@@ -23,11 +31,11 @@ class AnimeEntry(msgspec.Struct, frozen=True):
 
     def genre_names(self) -> tuple[str, ...]:
         """Return the normalized genre labels for this entry."""
-        return self.genres
+        return tuple(genre.value for genre in self.genres)
 
     def theme_names(self) -> tuple[str, ...]:
         """Return the normalized theme labels for this entry."""
-        return self.themes
+        return tuple(theme.value for theme in self.themes)
 
     def has_synopsis(self) -> bool:
         """Return whether this entry has usable synopsis text."""
@@ -39,8 +47,8 @@ class AnimeCatalogue(msgspec.Struct, frozen=True):
 
     anime_ids: tuple[int, ...]
     titles: tuple[str, ...]
-    genres: tuple[tuple[str, ...], ...]
-    themes: tuple[tuple[str, ...], ...]
+    genres: tuple[tuple[Genre, ...], ...]
+    themes: tuple[tuple[Theme, ...], ...]
     demographics: tuple[tuple[str, ...], ...]
     ratings: tuple[str, ...]
     synopsis_features: tuple[str, ...]
@@ -58,6 +66,10 @@ class AnimeCatalogue(msgspec.Struct, frozen=True):
         expected_index = {anime_id: row for row, anime_id in enumerate(self.anime_ids)}
         if dict(self.index_by_id) != expected_index:
             raise ValueError('catalogue ID index does not match row order')
+        if any(not isinstance(label, Genre) for row in self.genres for label in row):
+            raise TypeError('catalogue genres must contain Genre members')
+        if any(not isinstance(label, Theme) for row in self.themes for label in row):
+            raise TypeError('catalogue themes must contain Theme members')
 
     @classmethod
     def from_frame(cls, frame: pl.DataFrame) -> 'AnimeCatalogue':
@@ -73,8 +85,12 @@ class AnimeCatalogue(msgspec.Struct, frozen=True):
         return cls(
             anime_ids=anime_ids,
             titles=tuple(str(value) for value in frame['title'].to_list()),
-            genres=_tuple_columns(frame['genres'].to_list()),
-            themes=_tuple_columns(frame['themes'].to_list()),
+            genres=tuple(
+                tuple(parse_genre(label) for label in row) for row in _tuple_columns(frame['genres'].to_list())
+            ),
+            themes=tuple(
+                tuple(parse_theme(label) for label in row) for row in _tuple_columns(frame['themes'].to_list())
+            ),
             demographics=_tuple_columns(frame['demographics'].to_list()),
             ratings=tuple(str(value or '') for value in frame[rating_column].to_list()),
             synopsis_features=tuple(str(value or '') for value in frame['synopsis_features'].to_list()),
