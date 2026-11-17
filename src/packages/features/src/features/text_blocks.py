@@ -39,7 +39,7 @@ def build_text_blocks(
     ]
     latent_config = LatentConfig(dimensions=config.latent_dimensions, max_iter=config.latent_max_iter)
     if config.include_bm25:
-        bm25_features = bm25(texts)
+        bm25_features = bm25(texts, min_df=config.synopsis_min_df)
         blocks.append(
             FeatureBlock(
                 'synopsis-bm25', 'bm25', bm25_features.matrix, bm25_features.vocabulary, ('synopsis_features',)

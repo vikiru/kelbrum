@@ -82,8 +82,10 @@ def studio_quality_features(
         raise ValueError('studios, scores, and ranks must have the same length')
     score_by_studio: dict[str, list[float]] = {}
     rank_by_studio: dict[str, list[float]] = {}
+    title_count_by_studio: dict[str, int] = {}
     for row, score, rank in zip(rows, scores, ranks, strict=True):
         for studio in row:
+            title_count_by_studio[studio] = title_count_by_studio.get(studio, 0) + 1
             if score is not None:
                 score_by_studio.setdefault(studio, []).append(score)
             if rank is not None:
@@ -96,5 +98,5 @@ def studio_quality_features(
             output[index, 0] = np.median(score_values)
         if rank_values:
             output[index, 1] = np.median(rank_values)
-        output[index, 2] = sum(len(score_by_studio.get(studio, [])) for studio in row)
+        output[index, 2] = sum(title_count_by_studio.get(studio, 0) for studio in row)
     return output
