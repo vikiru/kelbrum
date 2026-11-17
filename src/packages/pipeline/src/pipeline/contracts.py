@@ -26,6 +26,9 @@ class CatalogueProfilePaths(msgspec.Struct, frozen=True):
 class CatalogueClient(Protocol):
     """Minimal fetch port required by pipeline input orchestration."""
 
+    @property
+    def route_name(self) -> str: ...
+
     def catalogue(
         self,
         *,
@@ -58,6 +61,7 @@ class PipelineRunRequest(msgspec.Struct, frozen=True):
     embedding_cache: Path | None
     relationship_graph_path: Path | None
     recommendation_path: Path
+    embedding_model_path: Path | None = None
     processing_policy: EligibilityPolicy | None = None
     overwrite_fetch: bool = False
     recommendation_batch_size: int = 1_000
