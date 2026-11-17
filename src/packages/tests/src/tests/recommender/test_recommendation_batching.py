@@ -7,7 +7,9 @@ from recommender.pipeline import Recommender
 from recommender.surfacing import SurfacingPolicy
 
 
-def test_recommend_ids_many_processes_bounded_batches_and_releases_pairwise_cache(monkeypatch) -> None:
+def test_recommend_ids_many_processes_bounded_batches_and_releases_pairwise_cache(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     recommender = object.__new__(Recommender)
     recommender._relationship_index = None
     recommender._surfacing_policy = SurfacingPolicy()

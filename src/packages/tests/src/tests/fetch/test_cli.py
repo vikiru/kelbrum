@@ -4,6 +4,11 @@ from typing import Self
 import pytest
 
 import fetch.__main__ as fetch_cli
+from fetch.catalogue import FetchSummary
+
+
+def _ignore_logging_setup(**_options: object) -> int:
+    return 0
 
 
 @pytest.mark.parametrize(
@@ -52,7 +57,7 @@ def test_fetch_cli_passes_derived_checkpoint_when_output_is_provided(
     recorded_checkpoints: list[Path | None] = []
 
     class _FakeClient:
-        last_summary = None
+        last_summary: FetchSummary | None = None
 
         def __init__(self, *, profile: object = None) -> None:
             del profile
@@ -75,7 +80,7 @@ def test_fetch_cli_passes_derived_checkpoint_when_output_is_provided(
             recorded_checkpoints.append(checkpoint_path)
             return []
 
-    monkeypatch.setattr(fetch_cli, 'setup_logging', lambda **_kwargs: 0)
+    monkeypatch.setattr(fetch_cli, 'setup_logging', _ignore_logging_setup)
     monkeypatch.setattr(fetch_cli, 'TenraiClient', _FakeClient)
 
     exit_code = fetch_cli.main(['--output', str(output_path)])

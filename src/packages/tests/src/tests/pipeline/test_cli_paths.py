@@ -12,6 +12,10 @@ from pipeline.contracts import PipelineRunRequest
 from storage.errors import StorageError
 
 
+def _ignore_logging_setup(**_options: object) -> int:
+    return 0
+
+
 def test_default_profile_uses_generic_local_snapshot_pair() -> None:
     paths = _profile_paths('default')
 
@@ -59,7 +63,7 @@ def test_pipeline_cli_update_passes_profile_and_returns_one_on_failed_ids(
         nonlocal ran_pipeline
         ran_pipeline = True
 
-    monkeypatch.setattr(pipeline_cli, 'setup_logging', lambda **_kwargs: 0)
+    monkeypatch.setattr(pipeline_cli, 'setup_logging', _ignore_logging_setup)
     monkeypatch.setattr(pipeline_cli, 'TenraiClient', _FakeClient)
     monkeypatch.setattr(pipeline_cli, 'run_catalogue_pipeline', _run_pipeline)
 
@@ -78,6 +82,9 @@ def test_pipeline_cli_keeps_canonical_embedding_identifier_and_passes_local_path
     local_dir.mkdir()
     captured_requests: list[PipelineRunRequest] = []
 
+    def _resolve_local_model_path(_model_id: str) -> Path:
+        return local_dir
+
     class _FakeClient:
         def __init__(self, *, profile: object = None) -> None:
             del profile
@@ -88,9 +95,9 @@ def test_pipeline_cli_keeps_canonical_embedding_identifier_and_passes_local_path
         def __exit__(self, *_args: object) -> None:
             pass
 
-    monkeypatch.setattr(pipeline_cli, 'setup_logging', lambda **_kwargs: 0)
+    monkeypatch.setattr(pipeline_cli, 'setup_logging', _ignore_logging_setup)
     monkeypatch.setattr(pipeline_cli, 'TenraiClient', _FakeClient)
-    monkeypatch.setattr(pipeline_cli, 'huggingface_model_path', lambda _model_id: local_dir)
+    monkeypatch.setattr(pipeline_cli, 'huggingface_model_path', _resolve_local_model_path)
     monkeypatch.setattr(pipeline_cli, 'run_catalogue_pipeline', captured_requests.append)
 
     exit_code = pipeline_cli.main(
@@ -128,7 +135,7 @@ def test_pipeline_cli_catches_known_errors_and_returns_one(
     def _raise(_request: PipelineRunRequest) -> None:
         raise error
 
-    monkeypatch.setattr(pipeline_cli, 'setup_logging', lambda **_kwargs: 0)
+    monkeypatch.setattr(pipeline_cli, 'setup_logging', _ignore_logging_setup)
     monkeypatch.setattr(pipeline_cli, 'TenraiClient', _FakeClient)
     monkeypatch.setattr(pipeline_cli, 'run_catalogue_pipeline', _raise)
 
