@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Home } from 'lucide-react';
 
-import { Navbar } from '@/shared/components/navbar';
 import { PageContainer } from '@/shared/components/page-container';
 import { Button } from '@/shared/components/ui/button';
 
@@ -11,7 +10,6 @@ export function NotFoundScreen() {
       <title>Page Not Found | Kelbrum</title>
       <meta name="description" content="The page you requested could not be found on Kelbrum." />
       <meta name="robots" content="noindex, nofollow" />
-      <Navbar />
       <PageContainer className="flex min-h-[70vh] items-center justify-center py-20">
         <section className="max-w-xl text-center" aria-labelledby="not-found-title">
           <p className="font-mono text-sm font-semibold tracking-[0.24em] text-muted-foreground uppercase">404</p>

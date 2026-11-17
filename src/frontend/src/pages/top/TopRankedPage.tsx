@@ -1,7 +1,6 @@
 import topRankedAnimeData from '@/data/top-100.json';
 import { AnimeCardItemsSchema } from '@/entities/anime/model/anime-schema';
 import { AnimeCard } from '@/entities/anime/ui/anime-card';
-import { Navbar } from '@/shared/components/navbar';
 import { PageContainer } from '@/shared/components/page-container';
 
 const topAnime = AnimeCardItemsSchema.parse(topRankedAnimeData).slice(0, 100);
@@ -9,7 +8,6 @@ const topAnime = AnimeCardItemsSchema.parse(topRankedAnimeData).slice(0, 100);
 export function TopRankedPage() {
   return (
     <main id="main-content" className="min-h-screen bg-background text-foreground">
-      <Navbar />
       <PageContainer className="py-12 lg:py-20">
         <header className="w-full">
           <h1 className="heading-h1 text-balance">Top 100 Anime</h1>

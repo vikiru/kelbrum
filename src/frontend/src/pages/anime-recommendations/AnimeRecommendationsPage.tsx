@@ -7,7 +7,6 @@ import { getPreferredAnimeTitle } from '@/entities/anime/model/anime-details-mod
 import { AnimeCard } from '@/entities/anime/ui/anime-card';
 import { useRecommendations } from '@/features/recommendations/hooks/use-recommendations';
 import { LoadingScreen } from '@/shared/components/loading-screen';
-import { Navbar } from '@/shared/components/navbar';
 import { PageContainer } from '@/shared/components/page-container';
 import { Button } from '@/shared/components/ui/button';
 import { updateDocumentMetaTags } from '@/shared/lib/document-meta-tags';
@@ -69,7 +68,6 @@ export function AnimeRecommendationsPage() {
 
   return (
     <main id="main-content" className="min-h-screen bg-background text-foreground">
-      <Navbar />
       <PageContainer className="py-6 sm:py-8 lg:py-12">
         <Link
           to="/anime/$id/$slug"

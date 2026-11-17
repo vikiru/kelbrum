@@ -4,6 +4,7 @@ import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/reac
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import { Footer } from '@/shared/components/footer';
+import { Navbar } from '@/shared/components/navbar';
 import { NotFoundScreen } from '@/shared/components/not-found-screen';
 import appCss from '@/styles.css?url';
 
@@ -103,6 +104,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         >
           Skip to main content
         </a>
+        <Navbar />
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         <Footer />
         {import.meta.env.DEV && (
