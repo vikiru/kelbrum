@@ -26,7 +26,13 @@ def read_array(path: Path) -> NDArray[np.generic]:
 
 def write_sparse(path: Path, values: sparse.spmatrix) -> None:
     """Atomically write a SciPy sparse matrix."""
-    write_atomic(path, lambda temporary_path: sparse.save_npz(temporary_path, values))
+
+    def write_values(temporary_path: Path) -> None:
+        # Pass an open binary handle so scipy.sparse.save_npz does not append '.npz' to temporary_path.
+        with temporary_path.open('wb') as stream:
+            sparse.save_npz(stream, values)
+
+    write_atomic(path, write_values)
 
 
 def read_sparse(path: Path) -> sparse.csr_matrix:

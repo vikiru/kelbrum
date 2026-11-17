@@ -1,6 +1,6 @@
 """Runtime data required to construct a prepared recommender."""
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 import msgspec
 import numpy as np
@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 
 from features.blocks import FeatureBundle
 from features.synopsis import LatentConfig, TfidfConfig
-from graph import RelationshipIndex
+from graph import ManualRelationshipRow, RelationshipIndex
 from recommender.scoring import PropertyValues
 from recommender.surfacing import SurfacingPolicy
 
@@ -20,6 +20,7 @@ class RecommenderInputs(msgspec.Struct, frozen=True):
     frame: pl.DataFrame
     bundle: FeatureBundle
     relationship_index: RelationshipIndex | None = None
+    manual_relationships: Sequence[ManualRelationshipRow] = ()
     synopsis_embedding_matrix: NDArray[np.floating] | None = None
     synopsis_tfidf_config: TfidfConfig | None = None
     synopsis_latent_config: LatentConfig | None = None

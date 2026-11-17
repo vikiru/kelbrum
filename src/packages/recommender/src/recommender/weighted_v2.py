@@ -19,36 +19,26 @@ from recommender.metrics import (
 from recommender.properties import SimilarityProperty, default_similarity_properties
 
 V2_WEIGHTS: Mapping[str, float] = {
-    'synopsis-tfidf': 0.25,
-    'genres': 0.18,
-    'themes': 0.12,
+    'synopsis-semantic': 0.35,
+    'genres': 0.30,
+    'themes': 0.20,
     'demographics': 0.05,
-    'studios': 0.07,
-    'anime_type': 0.06,
-    'rating': 0.06,
-    'source': 0.03,
-    'year-bucket': 0.04,
-    'episodes-bucket': 0.04,
-    'duration-bucket': 0.04,
-    'numeric': 0.06,
+    'anime_type': 0.05,
+    'rating': 0.05,
 }
 V2_METRICS: Mapping[str, Similarity] = {
-    'synopsis-tfidf': Similarity.COSINE,
+    'synopsis-semantic': Similarity.COSINE,
     'synopsis-embedding': Similarity.COSINE,
-    'genres': Similarity.JACCARD,
-    'themes': Similarity.JACCARD,
-    'demographics': Similarity.JACCARD,
-    'studios': Similarity.JACCARD,
+    'genres': Similarity.DICE,
+    'themes': Similarity.DICE,
+    'demographics': Similarity.DICE,
     'anime_type': Similarity.DICE,
     'rating': Similarity.DICE,
-    'source': Similarity.DICE,
-    'year-bucket': Similarity.DICE,
-    'episodes-bucket': Similarity.DICE,
-    'duration-bucket': Similarity.DICE,
-    'numeric': Similarity.MANHATTAN,
 }
-CONTENT_BLOCKS = frozenset({'synopsis-tfidf', 'synopsis-embedding', 'genres', 'themes', 'studios'})
-MIN_CONTENT_WEIGHT = 0.30
+SEMANTIC_SYNOPSIS_BLOCKS = ('synopsis-bm25', 'synopsis-lsa', 'synopsis-embedding')
+SYNOPSIS_V2_PROPERTY = 'synopsis-semantic'
+CONTENT_BLOCKS = frozenset({SYNOPSIS_V2_PROPERTY, 'genres', 'themes'})
+MIN_CONTENT_WEIGHT = 0.15
 
 
 class WeightedV2Index:
@@ -73,10 +63,11 @@ class WeightedV2Index:
         self.weights = {property_spec.name: property_spec.weight for property_spec in self.properties}
         self.metrics = {property_spec.name: property_spec.metric for property_spec in self.properties}
         property_names = frozenset(self.weights)
+        block_names = property_names | frozenset(SEMANTIC_SYNOPSIS_BLOCKS)
         self.blocks = {
             block.name: _PreparedBlock(block, availability_policy)
             for block in bundle.blocks
-            if block.name in property_names
+            if block.name in block_names
         }
 
     def rank(
@@ -87,7 +78,7 @@ class WeightedV2Index:
         candidate_mask: np.ndarray | None = None,
         require_semantic: bool = False,
         require_content: bool = True,
-        renormalize_available: bool = True,
+        renormalize_available: bool = False,
     ) -> tuple[tuple[int, float], ...]:
         """Return top candidates for one source row using vectorized block scoring."""
         _validate_limit(limit)
@@ -96,16 +87,20 @@ class WeightedV2Index:
         scores = np.zeros(self.anime_ids.size, dtype=np.float64)
         weight_totals = np.zeros(self.anime_ids.size, dtype=np.float64)
         content_weights = np.zeros(self.anime_ids.size, dtype=np.float64)
-        source_weight_total = 0.0
+        source_weight_total = sum(property_spec.weight for property_spec in self.properties)
         for property_spec in self.properties:
             name = property_spec.name
             weight = property_spec.weight
-            block = self.blocks.get(name)
-            if block is None or weight <= 0.0 or not block.row_available[source_index]:
+            if weight <= 0.0:
                 continue
-            source_weight_total += weight
-            usable = block.pair_available(source_index)
-            values = block.similarities(source_index, property_spec.metric)
+            if name == SYNOPSIS_V2_PROPERTY:
+                values, usable = self._semantic_synopsis_similarities(source_index)
+            else:
+                block = self.blocks.get(name)
+                if block is None or not block.row_available[source_index]:
+                    continue
+                usable = block.pair_available(source_index)
+                values = block.similarities(source_index, property_spec.metric)
             scores[usable] += weight * values[usable]
             weight_totals[usable] += weight
             if property_spec.contributes_to_content:
@@ -144,18 +139,56 @@ class WeightedV2Index:
         if require_content:
             valid &= content_weights >= MIN_CONTENT_WEIGHT
         if require_semantic:
-            semantic_blocks = [
-                self.blocks[name].row_available
-                for name in ('synopsis-embedding', 'synopsis-tfidf')
-                if name in self.blocks
-            ]
-            if not semantic_blocks or not any(block[source_index] for block in semantic_blocks):
+            _, semantic_available = self._semantic_synopsis_similarities(source_index)
+            if not np.any(semantic_available):
                 return None
-            valid &= np.logical_or.reduce(semantic_blocks)
+            valid &= semantic_available
         if candidate_mask is not None:
             valid &= candidate_mask
         valid[source_index] = False
         return valid
+
+    def _semantic_synopsis_similarities(self, source_index: int) -> tuple[np.ndarray, np.ndarray]:
+        path_scores: list[np.ndarray] = []
+        path_available: list[np.ndarray] = []
+        for name in SEMANTIC_SYNOPSIS_BLOCKS:
+            block = self.blocks.get(name)
+            if block is None:
+                path_scores.append(np.zeros(self.anime_ids.size, dtype=np.float64))
+                continue
+            available = block.pair_available(source_index) & block.row_available[source_index]
+            scores = np.maximum(block.similarities(source_index, Similarity.COSINE), 0.0)
+            path_scores.append(np.where(available, scores, 0.0))
+            path_available.append(available)
+        available = (
+            np.logical_or.reduce(path_available) if path_available else np.zeros(self.anime_ids.size, dtype=bool)
+        )
+        usable_count = np.maximum(np.sum(path_available, axis=0), 1) if path_available else 1
+        return np.vstack(path_scores).sum(axis=0) / usable_count, available
+
+    def _semantic_synopsis_similarities_many(
+        self, source_indices: Sequence[int], start: int, stop: int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        candidate_count = stop - start
+        path_scores: list[np.ndarray] = []
+        path_available: list[np.ndarray] = []
+        for name in SEMANTIC_SYNOPSIS_BLOCKS:
+            block = self.blocks.get(name)
+            if block is None:
+                path_scores.append(np.zeros((len(source_indices), candidate_count), dtype=np.float64))
+                continue
+            available = block.pair_available_many(source_indices, start, stop).copy()
+            available &= block.row_available[list(source_indices), None]
+            scores = np.maximum(block.similarities_many(source_indices, Similarity.COSINE, start, stop), 0.0)
+            path_scores.append(np.where(available, scores, 0.0))
+            path_available.append(available)
+        available = (
+            np.logical_or.reduce(path_available)
+            if path_available
+            else np.zeros((len(source_indices), candidate_count), dtype=bool)
+        )
+        usable_count = np.maximum(np.sum(path_available, axis=0), 1) if path_available else 1
+        return np.stack(path_scores).sum(axis=0) / usable_count, available
 
     def rank_many_streaming(
         self,
@@ -164,9 +197,10 @@ class WeightedV2Index:
         limit: int = 300,
         candidate_batch_size: int = 512,
         candidate_mask: np.ndarray | None = None,
+        excluded_ids_by_source: Sequence[frozenset[int]] | None = None,
         require_semantic: bool = False,
         require_content: bool = True,
-        renormalize_available: bool = True,
+        renormalize_available: bool = False,
     ) -> tuple[tuple[tuple[int, float], ...], ...]:
         """Score source batches against bounded candidate blocks."""
         _validate_limit(limit)
@@ -175,8 +209,11 @@ class WeightedV2Index:
         sources = tuple(source_indices)
         _validate_source_indices(sources, self.anime_ids.size)
         _validate_candidate_mask(candidate_mask, self.anime_ids.shape)
+        if excluded_ids_by_source is not None and len(excluded_ids_by_source) != len(sources):
+            raise ValueError('exclusion sets must align with source rows')
         source_weights = self._source_weight_totals(sources)
         semantic_candidates = self._semantic_candidates(sources, require_semantic)
+        source_available_by_block = {name: block.row_available[list(sources)] for name, block in self.blocks.items()}
         top_scores = np.full((len(sources), limit), -np.inf, dtype=np.float32)
         top_indices = np.full((len(sources), limit), -1, dtype=np.int32)
         for start in range(0, self.anime_ids.size, candidate_batch_size):
@@ -190,15 +227,19 @@ class WeightedV2Index:
                 require_content,
                 renormalize_available,
                 source_weights,
+                source_available_by_block,
             )
             block_indices = np.arange(start, stop, dtype=np.int32)
             for row_number, source_index in enumerate(sources):
                 source_offset = source_index - start
                 if 0 <= source_offset < block_scores.shape[1]:
                     block_scores[row_number, source_offset] = -np.inf
+                if excluded_ids_by_source is not None and excluded_ids_by_source[row_number]:
+                    excluded_mask = np.isin(self.anime_ids[start:stop], tuple(excluded_ids_by_source[row_number]))
+                    block_scores[row_number, excluded_mask] = -np.inf
             for row_number in range(len(sources)):
                 block_selection = _select_top_indices(
-                    np.arange(start, stop, dtype=np.int32),
+                    block_indices,
                     block_scores[row_number],
                     limit,
                     self.anime_ids,
@@ -226,20 +267,16 @@ class WeightedV2Index:
         return tuple(output)
 
     def _source_weight_totals(self, source_indices: Sequence[int]) -> np.ndarray:
-        source_rows = list(source_indices)
-        totals = np.zeros(len(source_rows), dtype=np.float64)
-        for property_spec in self.properties:
-            block = self.blocks.get(property_spec.name)
-            if block is not None:
-                totals += property_spec.weight * block.row_available[source_rows]
-        return totals
+        return np.full(
+            len(source_indices),
+            sum(property_spec.weight for property_spec in self.properties),
+            dtype=np.float64,
+        )
 
     def _semantic_candidates(self, source_indices: Sequence[int], required: bool) -> np.ndarray | None:
         if not required:
             return None
-        semantic_blocks = [
-            self.blocks[name].row_available for name in ('synopsis-embedding', 'synopsis-tfidf') if name in self.blocks
-        ]
+        semantic_blocks = [self.blocks[name].row_available for name in SEMANTIC_SYNOPSIS_BLOCKS if name in self.blocks]
         if not semantic_blocks:
             return np.zeros(len(source_indices), dtype=bool)
         available = np.logical_or.reduce(semantic_blocks)
@@ -255,17 +292,33 @@ class WeightedV2Index:
         require_content: bool,
         renormalize_available: bool,
         source_weights: np.ndarray,
+        source_available_by_block: dict[str, np.ndarray] | None = None,
     ) -> np.ndarray:
         scores = np.zeros((len(source_indices), stop - start), dtype=np.float64)
         totals = np.zeros_like(scores)
         content = np.zeros_like(scores)
+        semantic_pair_available: np.ndarray | None = None
         for property_spec in self.properties:
             name = property_spec.name
             weight = property_spec.weight
-            block = self.blocks.get(name)
-            if block is None or weight <= 0.0:
+            if weight <= 0.0:
                 continue
-            source_available = block.row_available[list(source_indices)]
+            if name == SYNOPSIS_V2_PROPERTY:
+                values, usable_values = self._semantic_synopsis_similarities_many(source_indices, start, stop)
+                semantic_pair_available = usable_values
+                scores[usable_values] += weight * values[usable_values]
+                totals[usable_values] += weight
+                if property_spec.contributes_to_content:
+                    content[usable_values] += weight
+                continue
+            block = self.blocks.get(name)
+            if block is None:
+                continue
+            source_available = (
+                source_available_by_block[name]
+                if source_available_by_block is not None
+                else block.row_available[list(source_indices)]
+            )
             if not np.any(source_available):
                 continue
             values = block.similarities_many(source_indices, property_spec.metric, start, stop)
@@ -280,13 +333,9 @@ class WeightedV2Index:
             valid &= content >= MIN_CONTENT_WEIGHT
         if semantic_candidates is not None:
             valid &= semantic_candidates[:, None]
-            semantic_blocks = [
-                self.blocks[name].row_available[start:stop]
-                for name in ('synopsis-embedding', 'synopsis-tfidf')
-                if name in self.blocks
-            ]
-            if semantic_blocks:
-                valid &= np.logical_or.reduce(semantic_blocks)[None, :]
+            if semantic_pair_available is None:
+                _, semantic_pair_available = self._semantic_synopsis_similarities_many(source_indices, start, stop)
+            valid &= semantic_pair_available
         if candidate_mask is not None:
             valid &= candidate_mask[start:stop][None, :]
         valid &= np.isfinite(scores) & (scores > 0.0)
@@ -338,6 +387,8 @@ class _PreparedBlock:
         self.values: csr_matrix | np.ndarray = (
             block.values if isinstance(block.values, csr_matrix) else np.asarray(block.values, dtype=np.float32)
         )
+        stored_values = self.values.data if isinstance(self.values, csr_matrix) else self.values
+        self._is_binary = bool(np.isfinite(stored_values).all() and np.isin(stored_values, (0.0, 1.0)).all())
         self.row_available = np.asarray(block.availability(availability_policy), dtype=bool).ravel()
         self.dimension_available = (
             np.asarray(block.dimension_available, dtype=bool) if block.dimension_available is not None else None
@@ -371,6 +422,8 @@ class _PreparedBlock:
         self, source_index: int, metric: SimilarityName, start: int = 0, stop: int | None = None
     ) -> np.ndarray:
         metric = _coerce_similarity(metric)
+        if metric in {Similarity.JACCARD, Similarity.DICE, Similarity.TVERSKY} and not self._is_binary:
+            raise ValueError(f'{metric.value} requires finite binary feature values')
         stop = self.values.shape[0] if stop is None else stop
         candidate_values = self.values[start:stop]
         candidate_sizes = self.row_sizes[start:stop]
@@ -382,21 +435,12 @@ class _PreparedBlock:
                 return vectorized_similarity(metric, SimilarityOperands(differences=differences, shared=shared))
             return vectorized_similarity(metric, SimilarityOperands(differences=differences))
         if isinstance(self.values, csr_matrix):
-            c_mat = cast('csr_matrix', candidate_values)
-            s_mat = cast('csr_matrix', source)
-            intersections = np.asarray((c_mat @ s_mat.T).toarray()).ravel()
+            candidate_matrix = cast('csr_matrix', candidate_values)
+            source_matrix = cast('csr_matrix', source)
+            intersections = np.asarray((candidate_matrix @ source_matrix.T).toarray()).ravel()
         else:
             intersections = candidate_values @ source
-        if metric is Similarity.JACCARD:
-            return vectorized_similarity(
-                metric,
-                SimilarityOperands(
-                    intersections=intersections,
-                    left_sizes=candidate_sizes,
-                    right_sizes=self.row_sizes[source_index],
-                ),
-            )
-        if metric is Similarity.DICE:
+        if metric in {Similarity.JACCARD, Similarity.DICE, Similarity.TVERSKY}:
             return vectorized_similarity(
                 metric,
                 SimilarityOperands(
@@ -431,23 +475,32 @@ class _PreparedBlock:
         candidates = self.values[start:stop]
         if metric is Similarity.MANHATTAN:
             if isinstance(self.values, csr_matrix):
-                dense_sources = cast('csr_matrix', self.values[list(source_indices)]).toarray()
-                dense_candidates = cast('csr_matrix', self.values[start:stop]).toarray()
+                dense_sources = cast('csr_matrix', sources).toarray()
+                dense_candidates = cast('csr_matrix', candidates).toarray()
             else:
                 dense_sources = np.asarray(sources)
                 dense_candidates = np.asarray(candidates)
-            differences = np.abs(dense_sources[:, None, :] - dense_candidates[None, :, :])
+            num_sources = dense_sources.shape[0]
+            num_candidates = dense_candidates.shape[0]
+            out = np.zeros((num_sources, num_candidates), dtype=np.float32)
             if self.dimension_available is not None:
-                shared = (
-                    self.dimension_available[list(source_indices)][:, None, :]
-                    & self.dimension_available[start:stop][None, :, :]
-                )
-                return vectorized_similarity(metric, SimilarityOperands(differences=differences, shared=shared))
-            return vectorized_similarity(metric, SimilarityOperands(differences=differences))
+                src_avail = self.dimension_available[list(source_indices)]
+                cand_avail = self.dimension_available[start:stop]
+                for row_idx in range(num_sources):
+                    diffs = np.abs(dense_candidates - dense_sources[row_idx])
+                    shared_row = cand_avail & src_avail[row_idx]
+                    out[row_idx] = vectorized_similarity(
+                        metric, SimilarityOperands(differences=diffs, shared=shared_row)
+                    )
+            else:
+                for row_idx in range(num_sources):
+                    diffs = np.abs(dense_candidates - dense_sources[row_idx])
+                    out[row_idx] = vectorized_similarity(metric, SimilarityOperands(differences=diffs))
+            return out
         if isinstance(self.values, csr_matrix):
-            c_mat = cast('csr_matrix', candidates)
-            s_mat = cast('csr_matrix', sources)
-            intersections = np.asarray((s_mat @ c_mat.T).toarray())
+            candidate_matrix = cast('csr_matrix', candidates)
+            source_matrix = cast('csr_matrix', sources)
+            intersections = np.asarray((source_matrix @ candidate_matrix.T).toarray())
         else:
             dense_src = cast('np.ndarray', sources)
             dense_cand = cast('np.ndarray', candidates)
@@ -517,7 +570,7 @@ def weighted_similarity(
     properties: Sequence[SimilarityProperty] | None = None,
     availability_policy: AvailabilityPolicy | None = None,
 ) -> float:
-    """Return pairwise weighted similarity with availability renormalization."""
+    """Return pairwise weighted similarity with missing properties scored as zero."""
     if left_index < 0 or right_index < 0 or left_index >= bundle.anime_ids.size or right_index >= bundle.anime_ids.size:
         raise IndexError('feature row is outside the bundle')
     active_properties = (
@@ -532,15 +585,20 @@ def weighted_similarity(
     for property_spec in active_properties:
         weight = property_spec.weight
         block = blocks.get(property_spec.name)
-        if block is None or weight == 0.0:
+        if weight == 0.0:
             continue
-        similarity = _property_similarity(block, left_index, right_index, property_spec, availability_policy)
+        if property_spec.name == SYNOPSIS_V2_PROPERTY:
+            similarity = _semantic_synopsis_pair_similarity(blocks, left_index, right_index, availability_policy)
+        elif block is not None:
+            similarity = _property_similarity(block, left_index, right_index, property_spec, availability_policy)
+        else:
+            similarity = None
         if similarity is None:
             continue
         if property_spec.contributes_to_content:
             content_weight += weight
         available.append((weight, similarity))
-    total_weight = sum(weight for weight, _ in available)
+    total_weight = sum(property_spec.weight for property_spec in active_properties)
     if total_weight == 0.0 or content_weight < MIN_CONTENT_WEIGHT:
         raise ValueError('anime pair has no comparable feature families')
     return sum(weight * similarity for weight, similarity in available) / total_weight
@@ -567,6 +625,33 @@ def _property_similarity(
     if _is_unavailable(left) or _is_unavailable(right):
         return None
     return similarity_score(left, right, property_spec.metric)
+
+
+def _semantic_synopsis_pair_similarity(
+    blocks: Mapping[str, FeatureBlock],
+    left_index: int,
+    right_index: int,
+    availability_policy: AvailabilityPolicy | None,
+) -> float | None:
+    scores: list[float] = []
+    usable_count = 0
+    for name in SEMANTIC_SYNOPSIS_BLOCKS:
+        block = blocks.get(name)
+        if block is None:
+            scores.append(0.0)
+            continue
+        row_available = block.availability(availability_policy)
+        if not row_available[left_index] or not row_available[right_index]:
+            scores.append(0.0)
+            continue
+        usable_count += 1
+        scores.append(
+            max(
+                similarity_score(block.dense_row(left_index), block.dense_row(right_index), Similarity.COSINE),
+                0.0,
+            )
+        )
+    return sum(scores) / usable_count if usable_count > 0 else None
 
 
 def _validate_similarity_properties(properties: Sequence[SimilarityProperty]) -> None:

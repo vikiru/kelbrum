@@ -1,11 +1,12 @@
 """Typed metric names shared by recommendation calculations."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from enum import StrEnum
 
 import msgspec
 import numpy as np
 from numpy.typing import NDArray
+from scipy.sparse import csr_matrix
 
 
 class Similarity(StrEnum):
@@ -128,9 +129,74 @@ def tversky(
     return intersection / denominator if denominator else 0.0
 
 
+def idf_tversky(
+    source: frozenset[str] | set[str],
+    candidate: Sequence[str] | frozenset[str] | set[str] | None,
+    *,
+    alpha: float = 0.8,
+    beta: float = 0.2,
+    idf_map: Mapping[str, float] | None = None,
+) -> float:
+    """Return IDF-weighted asymmetric Tversky similarity for categorical labels."""
+    if not source or not candidate:
+        return 0.0
+    c_set = candidate if isinstance(candidate, (frozenset, set)) else frozenset(candidate)
+    s_set = source if isinstance(source, (frozenset, set)) else frozenset(source)
+
+    inter = s_set & c_set
+    if not inter:
+        return 0.0
+    if idf_map is None:
+        inter_w = float(len(inter))
+        source_only_w = float(len(s_set) - len(inter))
+        cand_only_w = float(len(c_set) - len(inter))
+    else:
+        get_w = idf_map.get
+        inter_w = sum(get_w(term, 1.0) for term in inter)
+        source_only_w = sum(get_w(term, 1.0) for term in (s_set - inter))
+        cand_only_w = sum(get_w(term, 1.0) for term in (c_set - inter))
+    denominator = inter_w + alpha * source_only_w + beta * cand_only_w
+    return inter_w / denominator if denominator else 0.0
+
+
+def build_idf_csr(
+    label_lists: Sequence[Iterable[str]],
+    idf_map: Mapping[str, float] | None = None,
+) -> tuple['csr_matrix', dict[str, int], NDArray[np.float64]]:
+    """Build a row-aligned CSR matrix of IDF weights and per-row total weights."""
+    vocab: dict[str, int] = {}
+    indptr = [0]
+    indices: list[int] = []
+    data: list[float] = []
+    row_totals = np.zeros(len(label_lists), dtype=np.float64)
+    get_w = idf_map.get if idf_map is not None else None
+    for row_idx, labels in enumerate(label_lists):
+        seen: set[int] = set()
+        total = 0.0
+        for label in labels:
+            col = vocab.get(label)
+            if col is None:
+                col = len(vocab)
+                vocab[label] = col
+            if col not in seen:
+                seen.add(col)
+                w = float(get_w(label, 1.0)) if get_w is not None else 1.0
+                indices.append(col)
+                data.append(w)
+                total += w
+        row_totals[row_idx] = total
+        indptr.append(len(indices))
+    mat = csr_matrix(
+        (np.array(data, dtype=np.float64), np.array(indices, dtype=np.int32), np.array(indptr, dtype=np.int32)),
+        shape=(len(label_lists), len(vocab)),
+    )
+    return mat, vocab, row_totals
+
+
 def _manhattan_score(left: NDArray[np.floating], right: NDArray[np.floating]) -> float:
     """Return Manhattan distance converted to a higher-is-better score."""
-    distance = float(np.abs(left - right).mean())
+    diffs = np.abs(left - right)
+    distance = float(diffs.mean()) if diffs.size else 0.0
     return distance_to_similarity(distance, Similarity.MANHATTAN)
 
 

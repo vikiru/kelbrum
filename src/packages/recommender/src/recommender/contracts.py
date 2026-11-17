@@ -15,7 +15,7 @@ class RecommendationExplanation(msgspec.Struct, frozen=True):
     genre_score: float
     demographic_score: float
     qualification_reason: Literal['evidence-consensus', 'standalone-tag']
-    canonical_id: int
+    recommendation_entity_id: int
 
 
 class RecommendationItem(msgspec.Struct, frozen=True):
@@ -29,7 +29,7 @@ class RawRecommendation(msgspec.Struct, frozen=True):
     """Ranked candidate evidence before display or qualification policy."""
 
     anime_id: int
-    winning_alias_id: int
+    witness_member_id: int
     score: float
     retrieval_paths: tuple[str, ...]
     semantic_available: bool
@@ -48,3 +48,23 @@ class RecommendationConfig(msgspec.Struct, frozen=True):
     def __post_init__(self) -> None:
         if not 1 <= self.limit <= MAX_RECOMMENDATIONS:
             raise ValueError('recommendation limit must be between 1 and 100')
+
+
+class CanonicalStorylineEntry(msgspec.Struct, frozen=True):
+    """Canonical storyline representative preserving the strongest constituent witness evidence."""
+
+    canonical_anime_id: int
+    best_witness_anime_id: int
+    similarity_score: float
+    retrieval_paths: tuple[str, ...]
+    semantic_available: bool
+    categorical_available: bool
+
+
+class FranchiseRecommendationSlot(msgspec.Struct, frozen=True):
+    """A surfaced slot representing an overarching franchise with an array of distinct canonical storylines."""
+
+    franchise_id: int
+    primary_anime_id: int
+    maximum_similarity_score: float
+    storyline_entries: tuple[CanonicalStorylineEntry, ...]

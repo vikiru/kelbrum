@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from normalization.metadata import AnimeSource, AnimeType
 from recommender.rating_policy import RatingClass
 
 if TYPE_CHECKING:
@@ -57,9 +58,9 @@ def is_weak_special_maturity_mismatch(
     return (
         source_rating is RatingClass.PG_13
         and _is_lower_rating(source_rating, candidate_rating)
-        and candidate_type in {'MOVIE', 'OVA', 'ONA', 'Movie', 'Ova', 'Ona'}
+        and (candidate_type or '').strip().upper() in {AnimeType.MOVIE, AnimeType.ONA, 'OVA'}
         and candidate_episodes == 1
-        and candidate_source in {None, '', 'Unknown'}
+        and candidate_source in {None, '', AnimeSource.UNKNOWN}
         and candidate_score is not None
         and candidate_score <= 6.5
         and not shared_genres
