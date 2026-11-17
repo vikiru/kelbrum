@@ -27,6 +27,10 @@ class CatalogueFilters(msgspec.Struct, frozen=True):
     producers: str | None = None
     start_date: str | None = None
     end_date: str | None = None
+    min_year: int | None = None
+    max_year: int | None = None
+    added_after: str | None = None
+    added_before: str | None = None
 
     @classmethod
     def sfw_catalogue(cls, *, limit: int = MAX_PAGE_SIZE) -> 'CatalogueFilters':
@@ -44,7 +48,7 @@ class CatalogueFilters(msgspec.Struct, frozen=True):
         return cls(
             limit=limit,
             anime_types=('tv', 'ona', 'movie'),
-            ratings=('r',),
+            ratings=('g', 'pg', 'pg13', 'r17', 'r'),
             genres_exclude='9,12,49',
             sfw_strict=False,
         )
@@ -84,6 +88,10 @@ class CatalogueFilters(msgspec.Struct, frozen=True):
             'producers': self.producers,
             'start_date': self.start_date,
             'end_date': self.end_date,
+            'min_year': str(self.min_year) if self.min_year is not None else None,
+            'max_year': str(self.max_year) if self.max_year is not None else None,
+            'added_after': self.added_after,
+            'added_before': self.added_before,
         }
         params.update({key: value for key, value in optional.items() if value is not None})
         return params

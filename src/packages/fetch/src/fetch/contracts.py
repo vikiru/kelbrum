@@ -143,10 +143,10 @@ class TenraiAnimeEntry(msgspec.Struct, frozen=True, forbid_unknown_fields=False)
     producers: list[NamedResource] = msgspec.field(default_factory=list)
     licensors: list[NamedResource] = msgspec.field(default_factory=list)
     studios: list[NamedResource] = msgspec.field(default_factory=list)
-    genres: list[Taxonomy] = msgspec.field(default_factory=list)
-    explicit_genres: list[Taxonomy] = msgspec.field(default_factory=list)
-    themes: list[Taxonomy] = msgspec.field(default_factory=list)
-    demographics: list[Taxonomy] = msgspec.field(default_factory=list)
+    genres: list[Taxonomy] | None = None
+    explicit_genres: list[Taxonomy] | None = None
+    themes: list[Taxonomy] | None = None
+    demographics: list[Taxonomy] | None = None
     relations: list[AnimeRelation] = msgspec.field(default_factory=list)
 
 

@@ -6,7 +6,7 @@ from collections.abc import Sequence
 import msgspec
 
 from fetch.contracts import TenraiAnimeEntry
-from fetch.types import normalize_media_type
+from fetch.types import MediaType, normalize_media_type
 
 _PROMOTIONAL_MARKERS = re.compile(
     r'\b(?:promo(?:tional)? video|pv|trailer|commercial|game trailer|music video|recap|preview|teaser|short)\b',
@@ -66,9 +66,9 @@ def _rejection_reasons(entry: TenraiAnimeEntry, policy: CatalogueAcceptancePolic
         reasons.append('missing_synopsis')
     if policy.allowed_ratings is not None and (entry.rating or '').lower() not in policy.allowed_ratings:
         reasons.append('rating_not_allowed')
-    if {genre.mal_id for genre in entry.genres} & policy.excluded_genre_ids:
+    if {genre.mal_id for genre in entry.genres or ()} & policy.excluded_genre_ids:
         reasons.append('excluded_genre')
-    if policy.reject_promotional_ona and entry_type == 'ONA' and _is_promotional(entry):
+    if policy.reject_promotional_ona and entry_type is MediaType.ONA and _is_promotional(entry):
         reasons.append('ona_non_substantive')
     return reasons
 
