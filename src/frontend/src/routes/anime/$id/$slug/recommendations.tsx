@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 
 import { getAnimeDetailsQueryOptions } from '@/entities/anime/api/anime-queries';
 import { AnimeRecommendationsPage } from '@/pages/anime-recommendations/AnimeRecommendationsPage';
@@ -9,7 +9,14 @@ export const Route = createFileRoute('/anime/$id/$slug/recommendations')({
   pendingComponent: () => <LoadingScreen label="Loading recommendations" />,
   loader: async ({ context, params }) => {
     const animeId = Number(params.id);
-    return context.queryClient.ensureQueryData(getAnimeDetailsQueryOptions(animeId));
+    if (!Number.isInteger(animeId) || animeId <= 0) {
+      throw notFound();
+    }
+    const entry = await context.queryClient.ensureQueryData(getAnimeDetailsQueryOptions(animeId));
+    if (!entry) {
+      throw notFound();
+    }
+    return entry;
   },
   component: AnimeRecommendationsPage,
   head: ({ params }) => ({

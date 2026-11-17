@@ -1,9 +1,24 @@
 import { z } from 'zod';
 
+export const httpUrlSchema = z
+  .string()
+  .url()
+  .refine(
+    (value) => {
+      try {
+        const { protocol } = new URL(value);
+        return protocol === 'http:' || protocol === 'https:';
+      } catch {
+        return false;
+      }
+    },
+    { message: 'URL must use http or https protocol' },
+  );
+
 export const AnimeImageVariantSchema = z.object({
-  image_url: z.string().url().nullable(),
-  small_image_url: z.string().url().nullable(),
-  large_image_url: z.string().url().nullable(),
+  image_url: httpUrlSchema.nullable(),
+  small_image_url: httpUrlSchema.nullable(),
+  large_image_url: httpUrlSchema.nullable(),
 });
 
 export const AnimeImagesSchema = z.object({
@@ -28,14 +43,14 @@ const AnimeResourceSchema = z.object({
   mal_id: z.number().int().positive(),
   name: z.string(),
   type: z.string().nullable().optional(),
-  url: z.string().url().nullable().optional(),
+  url: httpUrlSchema.nullable().optional(),
 });
 
 export const AnimeEntrySchema = z
   .object({
     mal_id: z.number().int().positive(),
     title: z.string().min(1),
-    url: z.string().url().nullable(),
+    url: httpUrlSchema.nullable(),
     title_english: z.string().nullable(),
     title_japanese: z.string().nullable(),
     type: z.string().nullable(),
@@ -50,7 +65,7 @@ export const AnimeEntrySchema = z
     score: z.number().min(0).max(10).nullable(),
     synopsis: z.string().nullable(),
     images: AnimeImagesSchema.nullable(),
-    trailer: z.object({ url: z.string().url().nullable() }).nullable(),
+    trailer: z.object({ url: httpUrlSchema.nullable() }).nullable(),
     genres: z.array(AnimeResourceSchema),
     themes: z.array(AnimeResourceSchema),
     demographics: z.array(AnimeResourceSchema),
