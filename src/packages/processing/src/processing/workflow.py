@@ -24,6 +24,7 @@ def process_snapshot(
     policy: EligibilityPolicy | None = None,
     theme_additions: dict[int, tuple[str, ...]] | None = None,
     theme_removals: dict[int, tuple[str, ...]] | None = None,
+    genre_additions: dict[int, tuple[str, ...]] | None = None,
     tagged_anime_ids: Collection[int] = (),
     curation_identity: str | None = None,
     run_id: str = '-',
@@ -48,6 +49,7 @@ def process_snapshot(
             tagged_anime_ids=tagged_anime_ids,
             theme_additions=active_theme_additions,
             theme_removals=active_theme_removals,
+            genre_additions=genre_additions or {},
         )
     source_sha256 = sha256_file(snapshot_path)
     write_processing_outputs(
@@ -61,6 +63,7 @@ def process_snapshot(
             policy=active_policy,
             theme_additions=active_theme_additions,
             theme_removals=active_theme_removals,
+            genre_additions=genre_additions or {},
             tagged_anime_ids=tagged_anime_ids,
             policy_identity=derive_payload_identity(active_policy),
             curation_identity=curation_identity,

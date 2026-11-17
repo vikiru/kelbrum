@@ -1,11 +1,12 @@
 """Deterministic cleanup rules for non-narrative ONA entries."""
 
 import re
+from collections.abc import Collection
 
 import msgspec
 
 from fetch.contracts import TenraiAnimeEntry
-from fetch.types import normalize_media_type
+from fetch.types import MediaType, normalize_media_type
 from processing.canonicalize import duration_to_minutes
 
 _PROMOTIONAL_TITLE = re.compile(
@@ -23,7 +24,10 @@ class OnaCleanupAudit(msgspec.Struct, frozen=True):
 
 
 def cleanup_ona(
-    entries: list[TenraiAnimeEntry], *, min_duration_minutes: int = 20
+    entries: list[TenraiAnimeEntry],
+    *,
+    min_duration_minutes: int = 20,
+    tagged_anime_ids: Collection[int] = (),
 ) -> tuple[list[TenraiAnimeEntry], OnaCleanupAudit]:
     """Remove obvious promotional ONA and known entries shorter than the duration threshold."""
     if min_duration_minutes < 1:
@@ -36,14 +40,14 @@ def cleanup_ona(
     promotional_ids: list[int] = []
     short_form_ids: list[int] = []
     for entry in entries:
-        if normalize_media_type(entry.type) != 'ONA':
+        if normalize_media_type(entry.type) is not MediaType.ONA:
             cleaned.append(entry)
             continue
 
         title = f'{entry.title} {entry.title_english or ""}'
         duration_minutes = duration_to_minutes(entry.duration)
         is_too_short = _is_short_form(entry, duration_minutes, min_duration_minutes)
-        has_metadata = bool(entry.synopsis or entry.genres or entry.themes)
+        has_metadata = bool(entry.synopsis or entry.genres or entry.themes or entry.mal_id in tagged_anime_ids)
         missing_metadata = not has_metadata
         is_promotional = bool(_PROMOTIONAL_TITLE.search(title))
         if is_promotional or is_too_short or missing_metadata:
@@ -69,9 +73,12 @@ def cleanup_ona(
 
 
 def _is_short_form(entry: TenraiAnimeEntry, duration_minutes: int | None, threshold: int) -> bool:
-    """Compare total runtime when the source duration is expressed per episode."""
+    """Exclude an ONA only when its total runtime can be determined."""
     if duration_minutes is None:
         return False
-    if entry.episodes is not None and 'per ep' in (entry.duration or '').casefold():
+    duration_is_per_episode = 'per ep' in (entry.duration or '').casefold()
+    if duration_is_per_episode:
+        if entry.episodes is None or entry.episodes < 1:
+            return False
         return duration_minutes * entry.episodes <= threshold
-    return duration_minutes <= threshold
+    return entry.episodes == 1 and duration_minutes <= threshold

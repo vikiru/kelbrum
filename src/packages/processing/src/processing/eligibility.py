@@ -9,15 +9,17 @@ import msgspec
 
 from config import derive_payload_identity
 from fetch.contracts import TenraiAnimeEntry
-from fetch.types import AiringStatus, normalize_airing_status, normalize_media_type
+from fetch.types import AiringStatus, MediaType, normalize_airing_status, normalize_media_type
 from processing.canonicalize import duration_to_minutes
 from processing.constants import (
     DEFAULT_ALLOWED_TYPES,
     DEFAULT_EXCLUDED_GENRE_IDS,
     DEFAULT_MAX_YEAR,
+    DEFAULT_MIN_DURATION_MINUTES,
     DEFAULT_MIN_MOVIE_DURATION_MINUTES,
     PLACEHOLDER_IMAGE_URL,
 )
+from processing.excluded_ids import EXCLUDED_IDS
 
 
 class EligibilityPolicy(msgspec.Struct, frozen=True):
@@ -28,6 +30,7 @@ class EligibilityPolicy(msgspec.Struct, frozen=True):
     require_trailer: bool = False
     allowed_types: frozenset[str] = DEFAULT_ALLOWED_TYPES
     excluded_genre_ids: frozenset[int] = DEFAULT_EXCLUDED_GENRE_IDS
+    min_duration_minutes: int = DEFAULT_MIN_DURATION_MINUTES
     min_movie_duration_minutes: int = DEFAULT_MIN_MOVIE_DURATION_MINUTES
     bypass_catalogue_filters: bool = False
     require_semantic_evidence: bool = True
@@ -42,11 +45,13 @@ class ExclusionReason(StrEnum):
     YEAR_AFTER_CUTOFF = 'year_after_cutoff'
     NOT_YET_AIRED = 'not_yet_aired'
     SHORT_MOVIE = 'short_movie'
+    SHORT_DURATION = 'short_duration'
     MISSING_PRIMARY_IMAGE = 'missing_primary_image'
     MISSING_TRAILER = 'missing_trailer'
     RECAP_OR_COMPILATION = 'recap_or_compilation'
     TRAILER_OR_PV = 'trailer_or_pv'
     PROMOTIONAL_CONTENT = 'promotional_content'
+    CURATED_EXCLUSION = 'curated_exclusion'
 
 
 class EligibilityAudit(msgspec.Struct, frozen=True):
@@ -56,6 +61,7 @@ class EligibilityAudit(msgspec.Struct, frozen=True):
     reasons_by_rule: tuple[tuple[str, int], ...]
     reasons_by_id: tuple[tuple[int, tuple[str, ...]], ...]
     policy_identity: str = ''
+    missing_duration_ids: tuple[int, ...] = ()
 
 
 def is_valid_url(value: str | None) -> bool:
@@ -105,6 +111,8 @@ _PROMOTIONAL_CONTEXT = re.compile(
 
 def non_recommendable_reason(entry: TenraiAnimeEntry) -> ExclusionReason | None:
     """Classify clearly non-substantive entries without rejecting ambiguous titles alone."""
+    if entry.mal_id in EXCLUDED_IDS:
+        return ExclusionReason.CURATED_EXCLUSION
     title = f'{entry.title} {entry.title_english or ""}'
     for marker, reason in _HIGH_CONFIDENCE_CONTENT:
         if marker.search(title):
@@ -188,13 +196,19 @@ def _catalogue_filter_reasons(
     if policy.bypass_catalogue_filters:
         return []
 
+    if policy.min_duration_minutes < 0:
+        raise ValueError('min_duration_minutes must not be negative')
+
     reasons: list[ExclusionReason] = []
     media_type = normalize_media_type(entry.type)
-    if media_type == 'MOVIE' and _is_short_movie(entry, policy):
+    duration_minutes = duration_to_minutes(entry.duration)
+    if duration_minutes is not None and duration_minutes < policy.min_duration_minutes:
+        reasons.append(ExclusionReason.SHORT_DURATION)
+    if media_type is MediaType.MOVIE and _is_short_movie(entry, policy):
         reasons.append(ExclusionReason.SHORT_MOVIE)
     if media_type not in policy.allowed_types:
         reasons.append(ExclusionReason.TYPE_NOT_ALLOWED)
-    genre_ids = {genre.mal_id for genre in entry.genres}
+    genre_ids = {genre.mal_id for genre in entry.genres or ()}
     if genre_ids & policy.excluded_genre_ids:
         reasons.append(ExclusionReason.EXCLUDED_GENRE)
     if policy.require_semantic_evidence and not has_recommendation_evidence(entry, tagged_anime_ids):

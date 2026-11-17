@@ -10,6 +10,7 @@ from fetch.contracts import (
     Taxonomy,
     Trailer,
 )
+from normalization.metadata import MetadataState
 
 
 class CanonicalAnime(msgspec.Struct, frozen=True):
@@ -44,6 +45,15 @@ class CanonicalAnime(msgspec.Struct, frozen=True):
     themes: tuple[Taxonomy, ...]
     demographics: tuple[Taxonomy, ...]
     relations: tuple[AnimeRelation, ...]
+    manual_tags: tuple[str, ...] = ()
+    origin_language: str | None = None
+    synopsis_state: MetadataState = MetadataState.UNKNOWN
+    genres_state: MetadataState = MetadataState.UNKNOWN
+    themes_state: MetadataState = MetadataState.UNKNOWN
+    tags_state: MetadataState = MetadataState.UNKNOWN
+    demographics_state: MetadataState = MetadataState.UNKNOWN
+    type_state: MetadataState = MetadataState.UNKNOWN
+    rating_state: MetadataState = MetadataState.UNKNOWN
 
 
 class NumericRange(msgspec.Struct, frozen=True):
