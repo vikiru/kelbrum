@@ -24,7 +24,7 @@ export function AnimeDetailsInfo({ details }: AnimeDetailsInfoProps) {
 function DetailRow({ label, value }: AnimeDetailField) {
   return (
     <div className="grid gap-1">
-      <dt className="text-sm font-semibold tracking-wide text-muted-foreground">{label}</dt>
+      <dt className="heading-h6 tracking-wide text-muted-foreground">{label}</dt>
       <dd className="body-copy text-foreground/90">{value}</dd>
     </div>
   );

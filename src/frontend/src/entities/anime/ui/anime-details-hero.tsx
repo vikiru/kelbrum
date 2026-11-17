@@ -43,11 +43,15 @@ export function AnimeDetailsHero({ anime, images, trailerUrl, malUrl, animeId }:
             <span className="font-medium text-foreground">{anime.type}</span>
             <span aria-hidden="true">·</span>
             <span>{anime.status}</span>
-            <span aria-hidden="true">·</span>
-            <span className="flex items-center gap-1.5 font-medium text-foreground">
-              <Star className="icon-sm fill-current text-primary" aria-hidden="true" />
-              {anime.score}
-            </span>
+            {anime.score !== null && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                  <Star className="icon-sm fill-current text-primary" aria-hidden="true" />
+                  {anime.score}
+                </span>
+              </>
+            )}
           </div>
           <h1 id="anime-title" className="heading-h2 mt-4 max-w-full">
             {anime.englishTitle}
@@ -80,7 +84,7 @@ export function AnimeDetailsHero({ anime, images, trailerUrl, malUrl, animeId }:
               <a
                 href={trailerUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex h-11 w-36 items-center justify-center gap-2 rounded-md bg-foreground px-4 text-sm font-medium text-background transition-[background-color,color] duration-200 hover:bg-foreground/85 motion-reduce:transition-none"
               >
                 <SiYoutube className="icon-sm shrink-0" aria-hidden="true" /> Trailer{' '}
@@ -90,7 +94,7 @@ export function AnimeDetailsHero({ anime, images, trailerUrl, malUrl, animeId }:
             <a
               href={malUrl ?? `https://myanimelist.net/anime/${animeId}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex h-11 w-44 items-center justify-center gap-2 rounded-md border border-border px-4 text-sm font-medium text-foreground transition-[background-color,border-color,color] duration-200 hover:border-foreground/20 hover:bg-muted/40 motion-reduce:transition-none"
             >
               <SiMyanimelist className="size-5 shrink-0" aria-hidden="true" /> MyAnimeList{' '}
