@@ -48,6 +48,7 @@ class FrontendProvenance(msgspec.Struct, frozen=True, forbid_unknown_fields=True
     recommender_policy_identity: str
     catalogue_fingerprint: str = ''
     relationship_graph_fingerprint: str = ''
+    implementation_identity: str = ''
 
 
 class FrontendArtifactManifest(msgspec.Struct, frozen=True):
