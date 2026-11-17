@@ -10,7 +10,7 @@ def test_franchise_membership_can_span_separate_story_families() -> None:
 
     index = build_relationship_index(nodes, relations)
 
-    assert index.family_for(1) == frozenset({1})
-    assert index.family_for(2) == frozenset({2, 3})
+    assert index.same_story_exclusions(1) == frozenset({1})
+    assert index.same_story_exclusions(2) == frozenset({2, 3})
     assert index.franchise_for(1) == frozenset({1, 2, 3})
     assert index.franchise_for(3) == frozenset({1, 2, 3})
