@@ -8,8 +8,8 @@ import numpy as np
 import polars as pl
 
 from features.blocks import FeatureBlock
-from features.tag_assignment import TAG_ASSIGNMENT_REGISTRY
-from features.tags import TagAssignment, apply_tag_assignments
+from features.tag_assignment import get_tag_assignment_registry
+from features.tags import TagAssignment, apply_tag_assignments, similarity_tag_ids
 from normalization.encoders import multi_hot, one_hot
 
 
@@ -42,6 +42,8 @@ def default_categorical_properties(*, include_studios: bool) -> tuple[Categorica
                 'anime_type',
                 'source',
                 'rating',
+                'origin_language',
+                'demographics',
             )
         ),
         *(
@@ -49,7 +51,6 @@ def default_categorical_properties(*, include_studios: bool) -> tuple[Categorica
             for column in (
                 'genres',
                 'themes',
-                'demographics',
             )
         ),
         CategoricalProperty('tags', CategoricalEncoding.MULTI_HOT, manual_tags=True),
@@ -95,9 +96,11 @@ def build_categorical_blocks(
             )
             continue
         if property_spec.manual_tags:
-            active_assignments = TAG_ASSIGNMENT_REGISTRY.assignments if tag_assignments is None else tag_assignments
+            active_assignments = (
+                get_tag_assignment_registry().assignments if tag_assignments is None else tag_assignments
+            )
             assigned_tags = apply_tag_assignments(anime_ids, active_assignments)
-            raw_values = [assigned_tags.get(int(anime_id), ()) for anime_id in anime_ids]
+            raw_values = [similarity_tag_ids(assigned_tags.get(int(anime_id), ())) for anime_id in anime_ids]
         else:
             raw_values = _label_values(frame, property_spec)
         values, names = multi_hot(raw_values)
@@ -107,19 +110,27 @@ def build_categorical_blocks(
     return tuple(blocks)
 
 
+def _scalar_value(value: object) -> str | None:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (list, tuple)):
+        return next((item for item in value if isinstance(item, str) and item.strip()), None)
+    return None
+
+
 def _scalar_values(frame: pl.DataFrame, property_spec: CategoricalProperty) -> tuple[str | None, ...]:
     if property_spec.source_column is None:
         raise ValueError(f'one-hot property has no source column: {property_spec.name}')
-    return tuple(value if isinstance(value, str) else None for value in frame[property_spec.source_column].to_list())
+    return tuple(_scalar_value(value) for value in frame[property_spec.source_column].to_list())
 
 
 def _label_values(frame: pl.DataFrame, property_spec: CategoricalProperty) -> tuple[tuple[str, ...], ...]:
     if property_spec.source_column is None:
         raise ValueError(f'multi-hot property has no source column: {property_spec.name}')
-    return tuple(_label_row(value) for value in frame[property_spec.source_column].to_list())
+    return tuple(_coerce_label_tuple(value) for value in frame[property_spec.source_column].to_list())
 
 
-def _label_row(value: object) -> tuple[str, ...]:
+def _coerce_label_tuple(value: object) -> tuple[str, ...]:
     if value is None:
         return ()
     if not isinstance(value, (list, tuple)):

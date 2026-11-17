@@ -12,7 +12,6 @@ from features.blocks import FeatureBlock, FeatureBundle
 from features.categorical_blocks import CategoricalProperty
 from features.composition import FeatureAssemblyPlan, FeatureStage, FeatureStageObserver
 from features.config import FeatureConfig
-from features.numeric import NumericNormalizer
 from features.tags import TagAssignment
 
 log = bind_logger(package='features', stage='assembly')
@@ -25,7 +24,6 @@ class FeatureAssemblyRequest(msgspec.Struct, frozen=True):
     synopsis_embedding_matrix: np.ndarray | None = None
     tag_assignments: Iterable[TagAssignment] | None = None
     plan: FeatureAssemblyPlan | None = None
-    numeric_normalizer: NumericNormalizer | None = None
     stage_observer: FeatureStageObserver | None = None
     categorical_properties: Sequence[CategoricalProperty] | None = None
     run_id: str = '-'
@@ -39,7 +37,6 @@ def assemble_features(
     active_plan = request.plan or FeatureAssemblyPlan.defaults(
         tag_assignments=request.tag_assignments,
         synopsis_embedding_matrix=request.synopsis_embedding_matrix,
-        numeric_normalizer=request.numeric_normalizer,
         categorical_properties=request.categorical_properties,
     )
     _validate_required_columns(frame, active_plan.stages)

@@ -13,8 +13,9 @@ def studio_quality_profile(frame: pl.DataFrame, *, prior_count: int = 10) -> pl.
     missing = sorted(required - set(frame.columns))
     if missing:
         raise ValueError(f'studio quality requires columns: {", ".join(missing)}')
-    scored = frame.select('studio_ids', 'score').explode('studio_ids').drop_nulls(subset=['studio_ids', 'score'])
-    if scored.is_empty():
+    scored = frame.lazy().select('studio_ids', 'score').explode('studio_ids').drop_nulls(subset=['studio_ids', 'score'])
+    summary = scored.select(pl.len().alias('row_count'), pl.col('score').mean().alias('global_mean')).collect()
+    if summary['row_count'][0] == 0:
         return pl.DataFrame(
             schema={
                 'studio_id': pl.Int64,
@@ -25,7 +26,7 @@ def studio_quality_profile(frame: pl.DataFrame, *, prior_count: int = 10) -> pl.
                 'high_score_rate': pl.Float64,
             }
         )
-    global_mean_value = scored['score'].mean()
+    global_mean_value = summary['global_mean'][0]
     if global_mean_value is None:
         raise ValueError('studio quality requires at least one scored anime')
     global_mean = cast('float', global_mean_value)
@@ -46,4 +47,5 @@ def studio_quality_profile(frame: pl.DataFrame, *, prior_count: int = 10) -> pl.
         .rename({'studio_ids': 'studio_id'})
         .select('studio_id', 'anime_count', 'mean_score', 'adjusted_score', 'score_std', 'high_score_rate')
         .sort('adjusted_score', descending=True)
+        .collect()
     )
