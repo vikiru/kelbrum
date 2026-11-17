@@ -1,14 +1,15 @@
 """Featured catalogue selection policies."""
 
 from collections.abc import Iterable, Sequence
-from operator import attrgetter, itemgetter
+from operator import itemgetter
 
 from export.constants import DEFAULT_FEATURED_LIMIT, MINIMUM_HOMEPAGE_SCORE
 from export.contracts import AnimeCardMetadata
+from fetch.types import MediaType
 from graph import RelationshipIndex
 from processing.contracts import CanonicalAnime
 
-SUPPORTED_FRANCHISE_TYPES = frozenset({'tv', 'movie', 'ona'})
+SUPPORTED_FRANCHISE_TYPES = frozenset({MediaType.TV, MediaType.MOVIE, MediaType.ONA})
 
 
 def to_card_metadata(record: CanonicalAnime) -> AnimeCardMetadata:
@@ -55,27 +56,27 @@ def _rank_franchise_groups(
     """Group eligible records, retain each group's strongest score, and rank it."""
     records_by_id = {record.mal_id: record for record in records}
     supported_ids = {
-        record.mal_id for record in records if (record.anime_type or '').strip().casefold() in SUPPORTED_FRANCHISE_TYPES
+        record.mal_id for record in records if (record.anime_type or '').strip().upper() in SUPPORTED_FRANCHISE_TYPES
     }
     groups: dict[frozenset[int], list[CanonicalAnime]] = {}
     for record in records:
-        is_supported_type = (record.anime_type or '').strip().casefold() in SUPPORTED_FRANCHISE_TYPES
+        is_supported_type = (record.anime_type or '').strip().upper() in SUPPORTED_FRANCHISE_TYPES
         eligible_family = frozenset({record.mal_id})
         if is_supported_type and relationship_index is not None:
-            eligible_family = frozenset(records_by_id).intersection(relationship_index.excluded_ids(record.mal_id))
+            eligible_family = frozenset(records_by_id).intersection(relationship_index.franchise_members(record.mal_id))
             eligible_family &= supported_ids
         groups.setdefault(frozenset(eligible_family), []).append(record)
 
     ranked: list[tuple[float, int, AnimeCardMetadata]] = []
-    for member_ids, members in groups.items():
+    for members in groups.values():
         scored_members = [member for member in members if member.score is not None]
         scores = [member.score for member in scored_members if member.score is not None]
         if not scores:
             continue
         franchise_score = max(scores)
         representative = _select_representative(
-            scored_members,
-            member_ids=member_ids,
+            members,
+            strongest_member=min(scored_members, key=lambda member: (-(member.score or 0.0), member.mal_id)),
             relationship_index=relationship_index,
         )
         ranked.append(
@@ -100,17 +101,17 @@ def _rank_franchise_groups(
 def _select_representative(
     members: Sequence[CanonicalAnime],
     *,
-    member_ids: frozenset[int],
+    strongest_member: CanonicalAnime,
     relationship_index: RelationshipIndex | None,
 ) -> CanonicalAnime:
-    """Select the graph canonical origin, falling back to the lowest stable ID."""
+    """Select the strongest story's entrypoint, falling back to that title."""
     records_by_id = {member.mal_id: member for member in members}
     if relationship_index is not None:
-        canonical_id = relationship_index.canonical_id(min(member_ids))
-        canonical = records_by_id.get(canonical_id)
+        entrypoint_id = relationship_index.story_line_entrypoint(strongest_member.mal_id)
+        canonical = records_by_id.get(entrypoint_id)
         if canonical is not None:
             return canonical
-    return min(members, key=attrgetter('mal_id'))
+    return strongest_member
 
 
 def _validate_limit(limit: int) -> None:

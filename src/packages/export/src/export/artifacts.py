@@ -1,6 +1,7 @@
 """Domain-specific frontend artifact projections."""
 
 from collections.abc import Iterable, Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import msgspec
@@ -57,14 +58,19 @@ def write_search_metadata_chunks(
     if chunk_size < 1:
         raise ValueError('chunk_size must be positive')
     _validate_unique_ids((_metadata_id(item) for item in metadata), 'search metadata')
-    return tuple(
-        write_frontend_json(
+
+    buckets = _metadata_buckets(metadata, chunk_size)
+
+    def write_single_bucket(bucket_start: int, indexes: Sequence[int]) -> Path:
+        return write_frontend_json(
             f'anime-metadata-{bucket_start}-{bucket_start + chunk_size - 1}.json',
             {str(_metadata_id(metadata[index])): metadata[index] for index in indexes},
             output_dir=output_dir,
         )
-        for bucket_start, indexes in _metadata_buckets(metadata, chunk_size)
-    )
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = [executor.submit(write_single_bucket, bucket_start, indexes) for bucket_start, indexes in buckets]
+        return tuple(future.result() for future in futures)
 
 
 def write_filter_index(records: Sequence[CanonicalAnime], *, output_dir: Path) -> Path:
@@ -229,9 +235,9 @@ def _full_entry_payload(
         'synopsis': entry.synopsis,
         'images': msgspec.to_builtins(entry.images),
         'trailer': {'url': entry.trailer.url} if entry.trailer is not None else None,
-        'genres': _taxonomy_payload(entry.genres),
-        'themes': _taxonomy_payload(entry.themes),
-        'demographics': _taxonomy_payload(entry.demographics),
+        'genres': _taxonomy_payload(entry.genres or ()),
+        'themes': _taxonomy_payload(entry.themes or ()),
+        'demographics': _taxonomy_payload(entry.demographics or ()),
         'studios': _taxonomy_payload(entry.studios),
         'recommendations': list(dict.fromkeys(recommendations)),
     }

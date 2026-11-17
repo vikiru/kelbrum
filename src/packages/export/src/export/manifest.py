@@ -63,8 +63,6 @@ def validate_full_entries(entries: Sequence[TenraiAnimeEntry]) -> None:
     for entry in entries:
         if entry.mal_id <= 0 or not entry.title.strip():
             raise ValueError('full entries contain invalid identity fields')
-        if entry.type is None or entry.genres is None or entry.themes is None:
-            raise ValueError('full entries are missing required Tenrai fields')
 
 
 def validate_recommendation_manifest(

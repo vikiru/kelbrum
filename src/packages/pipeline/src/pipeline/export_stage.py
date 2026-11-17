@@ -1,5 +1,6 @@
 """Recommendation and frontend export stage for a completed pipeline run."""
 
+import shutil
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from config import bind_logger, derive_payload_identity
 from export.catalogue import write_catalogue_projections
 from export.contracts import FrontendProvenance
 from export.frontend import write_featured_artifacts
+from export.publication import create_staging_directory, publish_staged_directory, validate_staged_artifacts
 from fetch.contracts import TenraiAnimeEntry
 from graph import RelationshipIndex
 from pipeline.build import PipelineRun
@@ -47,30 +49,38 @@ def write_recommendation_artifacts(
         relationship_graph_fingerprint=run.recommender.relationship_fingerprint,
     )
 
-    featured_paths = write_featured_artifacts(
-        records,
-        output_dir=request.frontend_output_dir,
-        relationship_index=request.relationship_index,
-    )
-    projections = write_catalogue_projections(records, output_dir=request.frontend_output_dir)
-    write_recommendation_chunks(
-        run.recommender,
-        records,
-        RecommendationChunkRequest(
-            output_path=request.recommendation_path,
-            recommendation_config=request.recommendation_config,
-            source_identity=derive_payload_identity(resolved_provenance),
-            batch_size=request.recommendation_batch_size,
-            run_id=request.run_id,
-        ),
-    )
-    export_catalogue_stage(
-        records,
-        full_entries,
-        recommendation_path=request.recommendation_path,
-        output_dir=request.frontend_output_dir,
-        provenance=resolved_provenance,
-        featured_paths=featured_paths,
-        projections=projections,
-    )
+    staging = create_staging_directory(request.frontend_output_dir)
+    try:
+        featured_paths = write_featured_artifacts(
+            records,
+            output_dir=staging,
+            relationship_index=request.relationship_index,
+        )
+        projections = write_catalogue_projections(records, output_dir=staging)
+        write_recommendation_chunks(
+            run.recommender,
+            records,
+            RecommendationChunkRequest(
+                output_path=request.recommendation_path,
+                recommendation_config=request.recommendation_config,
+                source_identity=derive_payload_identity(resolved_provenance),
+                batch_size=request.recommendation_batch_size,
+                run_id=request.run_id,
+            ),
+        )
+        export_catalogue_stage(
+            records,
+            full_entries,
+            recommendation_path=request.recommendation_path,
+            output_dir=staging,
+            provenance=resolved_provenance,
+            featured_paths=featured_paths,
+            projections=projections,
+        )
+        validate_staged_artifacts(staging, len(records))
+        publish_staged_directory(staging, request.frontend_output_dir)
+    except Exception:
+        if staging.exists():
+            shutil.rmtree(staging, ignore_errors=True)
+        raise
     log.info('Exported recommendation chunks, homepage, Top 100, and catalogue artifacts.')
