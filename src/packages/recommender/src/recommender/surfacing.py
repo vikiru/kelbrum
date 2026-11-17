@@ -61,11 +61,11 @@ class SurfacingPolicy(msgspec.Struct, frozen=True):
 
         canonical_candidates: list[RawRecommendation] = []
         for canonical_id in original_order:
-            acc = storylines_by_canonical_id[canonical_id]
+            storyline_accumulator = storylines_by_canonical_id[canonical_id]
             canonical_candidates.append(
-                acc.to_raw_recommendation()
+                storyline_accumulator.to_raw_recommendation()
                 if self.canonical_entrypoint_surfacing
-                else acc.to_best_witness_recommendation()
+                else storyline_accumulator.to_best_witness_recommendation()
             )
 
         anchor_franchise = (
@@ -205,8 +205,10 @@ def collapse_to_franchise_containers(
     # 3. Assemble and rank franchise slots by peak similarity score
     franchise_slots: list[FranchiseRecommendationSlot] = []
     for franchise_key, accumulators in storylines_by_franchise_key.items():
-        accumulators.sort(key=lambda acc: acc.maximum_similarity_score, reverse=True)
-        top_entries = tuple(acc.to_canonical_entry() for acc in accumulators[:maximum_storylines_per_franchise])
+        accumulators.sort(key=lambda accumulator: accumulator.maximum_similarity_score, reverse=True)
+        top_entries = tuple(
+            accumulator.to_canonical_entry() for accumulator in accumulators[:maximum_storylines_per_franchise]
+        )
         representative_franchise_id = min(franchise_key)
         franchise_slots.append(
             FranchiseRecommendationSlot(
@@ -234,9 +236,9 @@ def _franchise_tiebreak_bonus(
         return 0.0
     bonus = 0.0
     if anchor_year is not None and year_by_id is not None:
-        cand_year = year_by_id.get(candidate_id)
-        if cand_year is not None:
-            bonus += 0.06 * max(0.0, 1.0 - abs(cand_year - anchor_year) / 20.0)
+        candidate_year = year_by_id.get(candidate_id)
+        if candidate_year is not None:
+            bonus += 0.06 * max(0.0, 1.0 - abs(candidate_year - anchor_year) / 20.0)
     if sequel_hops_by_id is not None:
         hops = sequel_hops_by_id.get(candidate_id)
         if hops is not None and 1 <= hops <= 3:
