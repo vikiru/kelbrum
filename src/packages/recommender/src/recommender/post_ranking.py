@@ -166,14 +166,22 @@ def compute_audience_adjustment(anchor: AnimePostRankingMetadata, candidate: Ani
     candidate_demographics = candidate.demographics or (
         (candidate.demographic,) if candidate.demographic not in ('Missing', 'Multiple') else ()
     )
-    anchor_demos = {parsed for d in anchor_demographics if (parsed := parse_demographic(d)) is not Demographic.UNKNOWN}
+    anchor_demos = {
+        parsed_demographic
+        for demographic in anchor_demographics
+        if (parsed_demographic := parse_demographic(demographic)) is not Demographic.UNKNOWN
+    }
     candidate_demos = {
-        parsed for d in candidate_demographics if (parsed := parse_demographic(d)) is not Demographic.UNKNOWN
+        parsed_demographic
+        for demographic in candidate_demographics
+        if (parsed_demographic := parse_demographic(demographic)) is not Demographic.UNKNOWN
     }
 
     if anchor_demos and candidate_demos:
         pairwise_compatibilities = [
-            DEMO_HYPOTHESIS.get((a_demo, c_demo), 0.0) for a_demo in anchor_demos for c_demo in candidate_demos
+            DEMO_HYPOTHESIS.get((anchor_demographic, candidate_demographic), 0.0)
+            for anchor_demographic in anchor_demos
+            for candidate_demographic in candidate_demos
         ]
         demographic_adjustment = max(pairwise_compatibilities) if pairwise_compatibilities else 0.0
 
@@ -380,9 +388,9 @@ def compute_metadata_multiplier(
     shared_hooks_count: int = 0,
 ) -> float:
     """Compute the combined bounded metadata multiplier with unified format commitment."""
-    delta_audience = compute_audience_adjustment(anchor, candidate) * WEIGHT_AUDIENCE
-    delta_commitment = compute_format_commitment_adjustment(anchor, candidate) * WEIGHT_FORMAT_COMMITMENT
-    delta_studio = (
+    audience_adjustment = compute_audience_adjustment(anchor, candidate) * WEIGHT_AUDIENCE
+    commitment_adjustment = compute_format_commitment_adjustment(anchor, candidate) * WEIGHT_FORMAT_COMMITMENT
+    studio_adjustment = (
         compute_studio_adjustment(
             anchor,
             candidate,
@@ -395,19 +403,19 @@ def compute_metadata_multiplier(
     raw_quality = compute_quality_adjustment(anchor, candidate, dense_cosine=dense_cosine)
     if raw_quality > 0.0:
         if dense_cosine < 0.38 and shared_hooks_count < 2:
-            qual_factor = max(0.0, (dense_cosine - 0.20) / (0.38 - 0.20))
-            raw_quality *= qual_factor
+            quality_factor = max(0.0, (dense_cosine - 0.20) / (0.38 - 0.20))
+            raw_quality *= quality_factor
         elif dense_cosine < 0.46 and shared_hooks_count == 0:
-            qual_factor = max(0.0, (dense_cosine - 0.38) / (0.46 - 0.38))
-            raw_quality *= qual_factor
+            quality_factor = max(0.0, (dense_cosine - 0.38) / (0.46 - 0.38))
+            raw_quality *= quality_factor
 
-    delta_quality = raw_quality * WEIGHT_QUALITY
+    quality_adjustment = raw_quality * WEIGHT_QUALITY
     if candidate.is_award_winning and dense_cosine >= 0.45:
-        delta_quality += 0.005 * WEIGHT_QUALITY
+        quality_adjustment += 0.005 * WEIGHT_QUALITY
 
-    delta_meta = delta_audience + delta_commitment + delta_studio + delta_quality
-    unclipped = 1.0 + MULTIPLIER_SCALE * delta_meta
-    multiplier = max(MIN_MULTIPLIER_BOUND, min(MAX_MULTIPLIER_BOUND, unclipped))
+    total_metadata_adjustment = audience_adjustment + commitment_adjustment + studio_adjustment + quality_adjustment
+    unclipped_multiplier = 1.0 + MULTIPLIER_SCALE * total_metadata_adjustment
+    multiplier = max(MIN_MULTIPLIER_BOUND, min(MAX_MULTIPLIER_BOUND, unclipped_multiplier))
 
     anchor_demographics = anchor.demographics or (
         (anchor.demographic,) if anchor.demographic not in ('Missing', 'Multiple') else ()
@@ -525,15 +533,15 @@ def build_mainline_runtime_index(
     if relations_frame is None or relations_frame.is_empty():
         return item_runtime, item_episodes
 
-    mainline_df = relations_frame.filter(
+    mainline_relations = relations_frame.filter(
         pl.col('relation_type').is_in(list(MAINLINE_RELATION_TYPES))
         & (pl.col('same_story_intent') == MAINLINE_CONTINUATION_INTENT)
     )
 
     adjacency: dict[int, list[int]] = {anime_id: [] for anime_id in item_runtime}
     for source_id, target_id in zip(
-        mainline_df.get_column('source_id').to_list(),
-        mainline_df.get_column('target_id').to_list(),
+        mainline_relations.get_column('source_id').to_list(),
+        mainline_relations.get_column('target_id').to_list(),
         strict=True,
     ):
         if source_id in adjacency and target_id in adjacency:
@@ -556,11 +564,11 @@ def build_mainline_runtime_index(
                 if neighbor not in visited:
                     visited.add(neighbor)
                     stack.append(neighbor)
-        comp_runtime = sum(item_runtime[m] for m in component)
-        comp_episodes = sum(item_episodes[m] for m in component)
-        for m in component:
-            mainline_runtimes[m] = comp_runtime
-            mainline_episodes[m] = comp_episodes
+        component_runtime = sum(item_runtime[anime_id] for anime_id in component)
+        component_episode_count = sum(item_episodes[anime_id] for anime_id in component)
+        for anime_id in component:
+            mainline_runtimes[anime_id] = component_runtime
+            mainline_episodes[anime_id] = component_episode_count
 
     return mainline_runtimes, mainline_episodes
 
@@ -618,9 +626,9 @@ def extract_post_ranking_metadata(
         fallback_runtime_minutes = float(episodes * duration_minutes)
         mainline_runtime_minutes = mainline_runtimes.get(anime_id, fallback_runtime_minutes)
         genres_list = raw_genres or ()
-        is_award = any(
-            g == Genre.AWARD_WINNING or str(g).strip().lower().replace(' ', '_') == Genre.AWARD_WINNING.value
-            for g in genres_list
+        is_award_winning = any(
+            genre == Genre.AWARD_WINNING or str(genre).strip().lower().replace(' ', '_') == Genre.AWARD_WINNING.value
+            for genre in genres_list
         )
 
         records[anime_id] = AnimePostRankingMetadata(
@@ -636,6 +644,6 @@ def extract_post_ranking_metadata(
             episodes=episodes,
             storyline_episodes=storyline_episode_count,
             duration_minutes=duration_minutes,
-            is_award_winning=is_award,
+            is_award_winning=is_award_winning,
         )
     return records
