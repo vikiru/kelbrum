@@ -119,7 +119,7 @@ body {
 }
 @supports (grid-template-columns: repeat(auto-fit, minmax(1px, 1fr))) {
   .anime-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   }
 }
 @media (min-width: 640px) {
