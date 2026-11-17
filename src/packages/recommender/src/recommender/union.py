@@ -1,10 +1,8 @@
-"""Evidence-preserving unique-ID Union for independent retrieval paths."""
+"""Candidate union and production retrieval-group reduction."""
 
-from collections.abc import Iterable, Sequence
-from enum import StrEnum
+from collections.abc import Iterable, Mapping, Sequence
 from heapq import nsmallest
 from math import isfinite
-from typing import Protocol
 
 import msgspec
 
@@ -17,6 +15,8 @@ class PathEvidence(msgspec.Struct, frozen=True):
     path: str
     rank: int
     score: float
+    post_reducer_position: int | None = None
+    witness_member_id: int | None = None
 
 
 class UnionCandidate(msgspec.Struct, frozen=True):
@@ -24,6 +24,13 @@ class UnionCandidate(msgspec.Struct, frozen=True):
 
     anime_id: int
     evidence: tuple[PathEvidence, ...]
+    witness_evidence: tuple[PathEvidence, ...] = ()
+    witness_member_id: int | None = None
+    score_multiplier: float = 1.0
+
+    def __post_init__(self) -> None:
+        if not isfinite(self.score_multiplier) or not 0.0 <= self.score_multiplier <= 1.0:
+            raise ValueError('candidate score multiplier must be finite and between 0 and 1')
 
     @property
     def source_count(self) -> int:
@@ -35,75 +42,28 @@ class UnionCandidate(msgspec.Struct, frozen=True):
 
     @property
     def path_count(self) -> int:
-        """Return the number of distinct retrieval paths supporting this candidate."""
         return len({item.path for item in self.evidence})
 
     @property
-    def family_count(self) -> int:
-        """Return the number of distinct retrieval families supporting this candidate."""
-        return len({PATH_FAMILIES[item.path] for item in self.evidence})
+    def retrieval_group_count(self) -> int:
+        return len({PATH_GROUPS[item.path] for item in self.evidence})
 
     @property
-    def evidence_families(self) -> tuple[str, ...]:
-        """Return distinct retrieval families in deterministic order."""
-        return tuple(sorted({PATH_FAMILIES[item.path] for item in self.evidence}))
+    def evidence_groups(self) -> tuple[str, ...]:
+        return tuple(sorted({PATH_GROUPS[item.path] for item in self.evidence}))
 
 
-class UnionPolicy(Protocol):
-    """Strategy for converting path-ranked candidates into scoring inputs."""
+class RetrievalGroupBudget(msgspec.Struct, frozen=True):
+    """Maximum candidate IDs retained from each retrieval group."""
 
-    name: str
-    identity: str
-
-    def merge(self, path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]]) -> tuple[UnionCandidate, ...]: ...
-
-
-class EvidenceUnion:
-    """Merge each candidate ID once while retaining every path nomination."""
-
-    name = 'evidence_union'
-    identity = 'evidence_union-v1'
-
-    def merge(self, path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]]) -> tuple[UnionCandidate, ...]:
-        return build_union(path_results)
-
-
-class NoUnion:
-    """Keep path nominations independent until the scoring stage."""
-
-    name = 'no_union'
-    identity = 'no_union-v1'
-
-    def merge(self, path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]]) -> tuple[UnionCandidate, ...]:
-        candidates: list[UnionCandidate] = []
-        for path, results in path_results:
-            if not path.strip():
-                raise ValueError('retrieval path name cannot be empty')
-            for rank, (anime_id, score) in enumerate(results, start=1):
-                if anime_id <= 0:
-                    raise ValueError('retrieval results require positive IDs')
-                candidates.append(UnionCandidate(anime_id, (PathEvidence(path, rank, score),)))
-        return tuple(candidates)
-
-
-class RetrievalMode(StrEnum):
-    """Select the candidate budget applied before frozen scoring."""
-
-    UNION = 'union'
-    FAMILY_REDUCED = 'family_reduced'
-
-
-class RetrievalFamilyBudget(msgspec.Struct, frozen=True):
-    """Maximum nominations retained from each retrieval family."""
-
-    semantic: int = 200
-    structured: int = 100
-    neighbourhood: int = 100
-    affinity: int = 50
+    semantic: int = 600
+    structured: int = 600
+    neighbourhood: int = 200
+    affinity: int = 60
 
     def __post_init__(self) -> None:
         if min(self.semantic, self.structured, self.neighbourhood, self.affinity) < 1:
-            raise ValueError('retrieval family budgets must be positive')
+            raise ValueError('retrieval group budgets must be positive')
 
 
 class RetrievalDiagnostics(msgspec.Struct, frozen=True):
@@ -112,46 +72,72 @@ class RetrievalDiagnostics(msgspec.Struct, frozen=True):
     source_count: int
     unbounded_candidate_count: int
     reduced_candidate_count: int
-    family_candidate_counts: dict[str, int]
+    retrieval_group_candidate_counts: dict[str, int]
     path_timings_ms: dict[str, float] = msgspec.field(default_factory=dict)
     path_candidate_counts: dict[str, int] = msgspec.field(default_factory=dict)
 
 
-PATH_FAMILIES = {
-    'bm25': 'semantic',
-    'lsa': 'semantic',
-    'embedding': 'semantic',
-    'genres': 'structured',
-    'themes': 'structured',
-    'tags': 'structured',
-    'conjunctions': 'structured',
-    'concepts': 'structured',
-    'weighted-v2': 'neighbourhood',
-    'direct-knn': 'neighbourhood',
-    'profile-knn': 'neighbourhood',
-    'demographic': 'affinity',
-    'studio': 'affinity',
-}
+class GroupSelection(msgspec.Struct, frozen=True):
+    """Candidate IDs retained through one retrieval group."""
+
+    group: str
+    candidate_ids: tuple[int, ...]
+
+
+class PathReduction(msgspec.Struct, frozen=True):
+    """Retained path evidence and the groups that selected each candidate."""
+
+    path_results: tuple[tuple[str, tuple[tuple[int, float], ...]], ...]
+    selected_by_group: tuple[GroupSelection, ...]
+    original_path_results: tuple[tuple[str, tuple[tuple[int, float], ...]], ...]
+
+
 AVAILABLE_RETRIEVAL_PATHS = (
     'weighted-v2',
     'genres',
     'themes',
     'tags',
     'bm25',
+    'char_3_5g_tfidf',
     'lsa',
     'embedding',
     'demographic',
     'studio',
 )
+PATH_GROUPS = {
+    'bm25': 'semantic',
+    'char_3_5g_tfidf': 'semantic',
+    'char_tfidf': 'semantic',
+    'char': 'semantic',
+    'lsa': 'semantic',
+    'embedding': 'semantic',
+    'genres': 'structured',
+    'themes': 'structured',
+    'tags': 'structured',
+    'weighted-v2': 'neighbourhood',
+    'demographic': 'affinity',
+    'studio': 'affinity',
+}
+DEFAULT_RETRIEVAL_PATHS = (
+    'embedding',
+    'weighted-v2',
+    'bm25',
+    'themes',
+    'genres',
+    'tags',
+    'lsa',
+)
+DEFAULT_PATH_LIMITS: dict[str, int] = {}
 RETRIEVAL_REDUCER_POLICY = {
-    'family_reduction': 'budgeted-path-evidence',
+    'group_reduction': 'raw-max-per-storyline-retrieval-group-budget-v2',
     'tie_break': 'candidate-id-ascending',
     'invalid_scores': 'discard-non-finite-and-non-positive',
 }
-RETRIEVAL_PATH_ORDER = tuple(PATH_FAMILIES)
+RETRIEVAL_PATH_ORDER = AVAILABLE_RETRIEVAL_PATHS
 SEMANTIC_EVIDENCE_PATHS = frozenset({'bm25', 'lsa', 'embedding'})
 CATEGORICAL_EVIDENCE_PATHS = frozenset({'genres', 'themes', 'tags', 'demographic', 'studio', 'weighted-v2'})
-DEFAULT_RETRIEVAL_FAMILY_BUDGET = RetrievalFamilyBudget()
+DEFAULT_RETRIEVAL_GROUP_BUDGET = RetrievalGroupBudget()
+UNION_POLICY_IDENTITY = 'evidence-union-v2'
 
 
 def validate_retrieval_paths(paths: Sequence[str]) -> tuple[str, ...]:
@@ -168,77 +154,143 @@ def validate_retrieval_paths(paths: Sequence[str]) -> tuple[str, ...]:
 def reduce_path_results(
     path_results: Sequence[tuple[str, Sequence[tuple[int, float]]]],
     *,
-    mode: RetrievalMode,
-    budgets: RetrievalFamilyBudget = DEFAULT_RETRIEVAL_FAMILY_BUDGET,
-) -> tuple[tuple[str, tuple[tuple[int, float], ...]], ...]:
-    """Apply family budgets while preserving original path evidence and order."""
+    budgets: RetrievalGroupBudget = DEFAULT_RETRIEVAL_GROUP_BUDGET,
+    story_line_entrypoint_by_id: Mapping[int, int] | None = None,
+) -> PathReduction:
+    """Apply group budgets by storyline while retaining each selected member's evidence."""
     for path, _ in path_results:
-        if path not in PATH_FAMILIES:
+        if path not in PATH_GROUPS:
             raise ValueError(f'unknown retrieval path: {path}')
-    if mode is RetrievalMode.UNION:
-        return tuple((path, tuple(results)) for path, results in path_results)
-    family_candidates: dict[str, dict[int, float]] = {}
-    for path, results in path_results:
-        family = PATH_FAMILIES[path]
-        candidates = family_candidates.setdefault(family, {})
-        for candidate_id, score in results:
-            candidates[candidate_id] = max(candidates.get(candidate_id, float('-inf')), score)
-    family_limits = {
+
+    group_scores = _collect_group_scores(path_results, story_line_entrypoint_by_id)
+    group_limits = {
         'semantic': budgets.semantic,
         'structured': budgets.structured,
         'neighbourhood': budgets.neighbourhood,
         'affinity': budgets.affinity,
     }
-
-    def _sort_candidate_score(item: tuple[int, float]) -> tuple[float, int]:
-        return (-item[1], item[0])
-
-    retained: set[int] = set()
-    for family, candidates in family_candidates.items():
-        ranked = nsmallest(family_limits[family], candidates.items(), key=_sort_candidate_score)
-        retained.update(candidate_id for candidate_id, _ in ranked)
-    return tuple(
-        (path, tuple((candidate_id, score) for candidate_id, score in results if candidate_id in retained))
+    selected_by_group = tuple(
+        GroupSelection(group, tuple(sorted(_top_candidate_ids(scores, group_limits[group]))))
+        for group, scores in sorted(group_scores.items())
+    )
+    selected_story_lines = {
+        story_line_id for selection in selected_by_group for story_line_id in selection.candidate_ids
+    }
+    retained_path_results = tuple(
+        (
+            path,
+            tuple(
+                (candidate_id, score)
+                for candidate_id, score in results
+                if _story_line_id(candidate_id, story_line_entrypoint_by_id) in selected_story_lines
+            ),
+        )
         for path, results in path_results
     )
+    original_results = tuple((path, tuple(results)) for path, results in path_results)
+    return PathReduction(retained_path_results, selected_by_group, original_results)
+
+
+def _collect_group_scores(
+    path_results: Sequence[tuple[str, Sequence[tuple[int, float]]]],
+    story_line_entrypoint_by_id: Mapping[int, int] | None,
+) -> dict[str, dict[int, float]]:
+    group_scores: dict[str, dict[int, float]] = {}
+    for path, results in path_results:
+        candidates = group_scores.setdefault(PATH_GROUPS[path], {})
+        max_score = max((score for _, score in results), default=1.0)
+        scale = max_score if max_score > 0.0 else 1.0
+        for candidate_id, score in results:
+            story_line_id = (
+                story_line_entrypoint_by_id.get(candidate_id, candidate_id)
+                if story_line_entrypoint_by_id is not None
+                else candidate_id
+            )
+            normalized_score = score / scale
+            candidates[story_line_id] = max(candidates.get(story_line_id, float('-inf')), normalized_score)
+    return group_scores
+
+
+def _story_line_id(candidate_id: int, story_line_entrypoint_by_id: Mapping[int, int] | None) -> int:
+    if story_line_entrypoint_by_id is None:
+        return candidate_id
+    return story_line_entrypoint_by_id.get(candidate_id, candidate_id)
+
+
+def _top_candidate_ids(
+    scores: dict[int, float],
+    limit: int,
+    *,
+    tie_breakers: Mapping[int, float] | None = None,
+) -> set[int]:
+    if tie_breakers is None:
+        return {
+            candidate_id for candidate_id, _ in nsmallest(limit, scores.items(), key=lambda item: (-item[1], item[0]))
+        }
+    return {
+        candidate_id
+        for candidate_id, _ in nsmallest(
+            limit,
+            scores.items(),
+            key=lambda item: (-item[1], -tie_breakers.get(item[0], 0.0), item[0]),
+        )
+    }
 
 
 def build_union(
     path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]],
+    *,
+    original_path_results: Iterable[tuple[str, Sequence[tuple[int, float]]]] | None = None,
 ) -> tuple[UnionCandidate, ...]:
     """Merge path results once by anime ID without mixing path scores."""
+    original_ranks: dict[str, dict[int, int]] = {}
+    for path, results in original_path_results or ():
+        ranks_for_path: dict[int, int] = {}
+        for rank, (anime_id, _score) in enumerate(results, start=1):
+            if anime_id not in ranks_for_path:
+                ranks_for_path[anime_id] = rank
+        original_ranks[path] = ranks_for_path
     collected: dict[int, list[PathEvidence]] = {}
     for path, results in path_results:
         if not path.strip():
             raise ValueError('retrieval path name cannot be empty')
-        unique_results: dict[int, tuple[int, float]] = {}
-        for rank, (anime_id, score) in enumerate(results, start=1):
+        path_ranks = original_ranks.get(path)
+        unique_results: dict[int, tuple[int, float, int]] = {}
+        for post_reducer_position, (anime_id, score) in enumerate(results, start=1):
+            rank = path_ranks.get(anime_id, post_reducer_position) if path_ranks is not None else post_reducer_position
             if anime_id <= 0 or rank <= 0:
                 raise ValueError('retrieval results require positive IDs and ranks')
             if not isfinite(score):
                 raise ValueError('retrieval scores must be finite')
             previous = unique_results.get(anime_id)
             if previous is None or score > previous[1]:
-                unique_results[anime_id] = (rank, score)
-        for anime_id, (rank, score) in unique_results.items():
-            collected.setdefault(anime_id, []).append(PathEvidence(path, rank, score))
-    candidates = [
-        UnionCandidate(anime_id, tuple(sorted(evidence, key=_evidence_order)))
-        for anime_id, evidence in collected.items()
-    ]
+                unique_results[anime_id] = (rank, score, post_reducer_position)
+        for anime_id, (rank, score, post_reducer_position) in unique_results.items():
+            collected.setdefault(anime_id, []).append(PathEvidence(path, rank, score, post_reducer_position))
+    candidates = []
+    for anime_id, evidence in collected.items():
+        ordered_evidence = tuple(sorted(evidence, key=_evidence_order))
+        witness_evidence = tuple(
+            PathEvidence(item.path, item.rank, item.score, item.post_reducer_position, anime_id)
+            for item in ordered_evidence
+        )
+        candidates.append(
+            UnionCandidate(
+                anime_id=anime_id,
+                evidence=ordered_evidence,
+                witness_evidence=witness_evidence,
+                witness_member_id=anime_id,
+            )
+        )
     return tuple(sorted(candidates, key=_candidate_order))
 
 
 def build_union_from_results(
     path_results: Iterable[tuple[str, RecommendationResult]],
 ) -> tuple[UnionCandidate, ...]:
-    """Adapt existing recommender results into one unique-ID Union."""
+    """Adapt existing recommender results into one unique-ID union."""
     return build_union(
-        (
-            path,
-            tuple((item.anime_id, item.score) for item in result.items),
-        )
-        for path, result in path_results
+        (path, tuple((item.anime_id, item.score) for item in result.items)) for path, result in path_results
     )
 
 
