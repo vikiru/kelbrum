@@ -10,12 +10,14 @@ STRONG_SAME_STORY_RELATIONS = frozenset(
         RelationType.FULL_STORY,
         RelationType.PREQUEL,
         RelationType.SEQUEL,
+        RelationType.SIDE_STORY,
         RelationType.SUMMARY,
         RelationType.PARENT_STORY,
     }
 )
 
-# Franchise membership is intentionally broader than same-story canonicalization.
-# A franchise can connect separate series through spin-offs, adaptations, and other
-# source-defined relation types without collapsing those series into one story family.
-FRANCHISE_RELATIONS = frozenset(RelationType)
+# Character appearances and 'Other' can bridge independent franchises via crossovers.
+FRANCHISE_RELATIONS = frozenset(RelationType) - {
+    RelationType.CHARACTER,
+    RelationType.OTHER,
+}
