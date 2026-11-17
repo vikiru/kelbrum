@@ -1,5 +1,5 @@
 import { ImageOff } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { AnimeCardItem } from '@/entities/anime/model/anime-schema';
 
@@ -37,13 +37,24 @@ export function AnimeImage({
   const webpUrl = webp?.large_image_url ?? webp?.image_url ?? null;
   const jpgUrl = jpg?.large_image_url ?? jpg?.image_url ?? null;
   const sourceKey = `${webpUrl ?? ''}|${jpgUrl ?? ''}`;
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const [imageState, setImageState] = useState<ImageState>(() => createImageState(sourceKey, webpUrl, jpgUrl));
 
-  if (imageState.sourceKey !== sourceKey) {
-    setImageState(createImageState(sourceKey, webpUrl, jpgUrl));
-  }
+  const currentImageState =
+    imageState.sourceKey === sourceKey ? imageState : createImageState(sourceKey, webpUrl, jpgUrl);
+  const { useWebp, failed, loaded } = currentImageState;
+  const activeSrc = (useWebp ? (webpUrl ?? jpgUrl) : (jpgUrl ?? webpUrl)) || undefined;
 
-  const { useWebp, failed, loaded } = imageState;
+  useEffect(() => {
+    const image = imageRef.current;
+    if (failed || !activeSrc || !image?.complete || image.naturalWidth <= 0) return;
+    setImageState((current) => {
+      if (current.sourceKey !== sourceKey) {
+        return { ...createImageState(sourceKey, webpUrl, jpgUrl), loaded: true };
+      }
+      return current.loaded ? current : { ...current, loaded: true };
+    });
+  }, [activeSrc, failed, jpgUrl, sourceKey, webpUrl]);
 
   if (failed)
     return (
@@ -62,10 +73,8 @@ export function AnimeImage({
       <picture className="block h-full w-full">
         {useWebp && webp && <source type="image/webp" srcSet={imageSrcSet(webp)} sizes={sizes} />}
         <img
-          ref={(image) => {
-            if (image?.complete && image.naturalWidth > 0) setImageState((current) => ({ ...current, loaded: true }));
-          }}
-          src={(useWebp ? (webpUrl ?? jpgUrl) : (jpgUrl ?? webpUrl)) || undefined}
+          ref={imageRef}
+          src={activeSrc}
           srcSet={useWebp ? imageSrcSet(webp) : imageSrcSet(jpg)}
           sizes={sizes}
           alt={alt}
@@ -73,11 +82,11 @@ export function AnimeImage({
           fetchPriority={fetchPriority}
           decoding="async"
           className={`${className ?? ''} ${loaded ? '' : 'opacity-0'}`}
-          onLoad={() => setImageState((current) => ({ ...current, loaded: true }))}
+          onLoad={() => setImageState({ sourceKey, useWebp, failed: false, loaded: true })}
           onError={() => {
             if (useWebp && jpgUrl) {
-              setImageState((current) => ({ ...current, useWebp: false, loaded: false }));
-            } else setImageState((current) => ({ ...current, failed: true }));
+              setImageState({ sourceKey, useWebp: false, failed: false, loaded: false });
+            } else setImageState({ sourceKey, useWebp, failed: true, loaded: false });
           }}
         />
       </picture>
@@ -89,7 +98,7 @@ function createImageState(sourceKey: string, webpUrl: string | null, jpgUrl: str
   return {
     sourceKey,
     useWebp: Boolean(webpUrl),
-    failed: !jpgUrl,
+    failed: !webpUrl && !jpgUrl,
     loaded: false,
   };
 }
