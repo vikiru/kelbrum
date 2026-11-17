@@ -2,6 +2,7 @@ import polars as pl
 import pytest
 
 from anime_catalogue import AnimeCatalogue, ids_with_genre, ids_with_theme, iter_entries
+from anime_catalogue.taxonomy import Genre, Theme
 
 
 def test_entry_view_exposes_local_semantics_without_changing_catalogue_alignment() -> None:
@@ -22,8 +23,10 @@ def test_entry_view_exposes_local_semantics_without_changing_catalogue_alignment
     entry = catalogue.entry_for_id(20)
 
     assert entry.preferred_title() == 'Example'
-    assert entry.genre_names() == ('Drama',)
-    assert entry.theme_names() == ('School',)
+    assert entry.genres == (Genre.DRAMA,)
+    assert entry.themes == (Theme.SCHOOL,)
+    assert entry.genre_names() == ('drama',)
+    assert entry.theme_names() == ('school',)
     assert entry.has_synopsis()
     assert catalogue.row_for_id(entry.anime_id) == 0
 
@@ -50,8 +53,8 @@ def test_catalogue_queries_preserve_stable_id_order() -> None:
     catalogue = AnimeCatalogue(
         anime_ids=(20, 10),
         titles=('Drama', 'Action'),
-        genres=(('Drama',), ('Drama', 'Action')),
-        themes=(('School',), ('Adventure',)),
+        genres=((Genre.DRAMA,), (Genre.DRAMA, Genre.ACTION)),
+        themes=((Theme.SCHOOL,), (Theme.ISEKAI,)),
         demographics=((), ()),
         ratings=('PG', 'G'),
         synopsis_features=('', ''),
@@ -60,4 +63,4 @@ def test_catalogue_queries_preserve_stable_id_order() -> None:
 
     assert tuple(entry.anime_id for entry in iter_entries(catalogue)) == (20, 10)
     assert ids_with_genre(catalogue, 'Drama') == (20, 10)
-    assert ids_with_theme(catalogue, 'Adventure') == (10,)
+    assert ids_with_theme(catalogue, Theme.ISEKAI) == (10,)
