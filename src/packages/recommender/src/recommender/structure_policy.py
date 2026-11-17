@@ -65,7 +65,7 @@ def resolve_narrative_structure(
     tags: frozenset[str] | set[str] | tuple[str, ...],
     synopsis: str | None = None,
 ) -> NarrativeStructure:
-    tag_set = {str(t).strip().casefold() for t in tags}
+    tag_set = {str(tag).strip().casefold() for tag in tags}
     if Tag.ANTHOLOGY in tag_set:
         return NarrativeStructure.ANTHOLOGY
     if Tag.EPISODIC in tag_set:
