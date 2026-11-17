@@ -74,14 +74,14 @@ def nominate_story_line_entrypoints(
     entrypoint_id -> tuple of member IDs that nominated it in stable sorted order.
     """
     if relationship_index is None:
-        return tuple(candidates), {c.anime_id: (c.anime_id,) for c in candidates}
+        return tuple(candidates), {candidate.anime_id: (candidate.anime_id,) for candidate in candidates}
 
-    retrieved_by_id = {c.anime_id: c for c in candidates}
+    retrieved_by_id = {candidate.anime_id: candidate for candidate in candidates}
     nominations: dict[int, set[int]] = {}
     same_story_excluded = relationship_index.same_story_exclusions(source_anime_id)
 
-    for c in candidates:
-        member_id = c.anime_id
+    for candidate in candidates:
+        member_id = candidate.anime_id
         entrypoint_id = relationship_index.story_line_entrypoint(member_id)
 
         if entrypoint_id == source_anime_id:
@@ -111,18 +111,18 @@ def nominate_story_line_entrypoints(
             if member_candidate is None:
                 continue
             for item in member_candidate.evidence:
-                ev = PathEvidence(
+                path_evidence = PathEvidence(
                     item.path,
                     item.rank,
                     item.score,
                     item.post_reducer_position,
                     member_id,
                 )
-                witness_list.append(ev)
+                witness_list.append(path_evidence)
                 key = (-item.score, item.rank, member_id)
-                prev = best_by_path.get(item.path)
-                if prev is None or key < prev[0]:
-                    best_by_path[item.path] = (key, ev)
+                previous_best_evidence = best_by_path.get(item.path)
+                if previous_best_evidence is None or key < previous_best_evidence[0]:
+                    best_by_path[item.path] = (key, path_evidence)
         if not witness_list:
             return UnionCandidate(entrypoint_id, ())
         ordered_evidence = tuple(best_by_path[path][1] for path in sorted(best_by_path))

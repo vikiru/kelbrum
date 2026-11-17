@@ -155,7 +155,9 @@ class RatingPolicy(msgspec.Struct, frozen=True):
         m_narrative = 1.00
         is_kids = False
         if candidate_demographics:
-            is_kids = any(parse_demographic(str(d)) is Demographic.KIDS for d in candidate_demographics)
+            is_kids = any(
+                parse_demographic(str(demographic)) is Demographic.KIDS for demographic in candidate_demographics
+            )
 
         if is_kids and parent in {RatingClass.PG_13, RatingClass.R, RatingClass.R_PLUS, RatingClass.R_X}:
             has_strong_narrative = (

@@ -103,11 +103,11 @@ def _rating_class(value: str) -> RatingClass:
 
 DEMOGRAPHIC_COMPATIBILITY: dict[str, dict[str, float]] = {
     **{
-        anchor.value: {cand.value: score for cand, score in targets.items()}
+        anchor.value: {candidate.value: score for candidate, score in targets.items()}
         for anchor, targets in DEMOGRAPHIC_AFFINITY.items()
     },
     **{
-        anchor.value.casefold(): {cand.value.casefold(): score for cand, score in targets.items()}
+        anchor.value.casefold(): {candidate.value.casefold(): score for candidate, score in targets.items()}
         for anchor, targets in DEMOGRAPHIC_AFFINITY.items()
     },
 }
@@ -228,9 +228,11 @@ def _prepare_catalogue(
     )
     synopses_by_id = {
         anime_id: (
-            str(raw_syn) if raw_syn is not None and str(raw_syn).strip() else (catalogue.synopsis_features[idx] or None)
+            str(raw_synopsis)
+            if raw_synopsis is not None and str(raw_synopsis).strip()
+            else (catalogue.synopsis_features[row_index] or None)
         )
-        for idx, (anime_id, raw_syn) in enumerate(zip(anime_ids, raw_synopses, strict=True))
+        for row_index, (anime_id, raw_synopsis) in enumerate(zip(anime_ids, raw_synopses, strict=True))
     }
     narrative_profiles_by_id = {
         anime_id: resolve_narrative_profile(
@@ -267,12 +269,12 @@ def _prepare_catalogue(
         content_severity_by_id[anime_id] = get_content_severity_level(ratings_by_id.get(anime_id, ''))
 
     rows_by_id = {row['mal_id']: row for row in ordered_frame.iter_rows(named=True)}
-    sim_tag_lists = tuple(similarity_tag_ids(t) for t in tags)
+    sim_tag_lists = tuple(similarity_tag_ids(tag_set) for tag_set in tags)
     tag_idf = idfs_by_property.get('tags')
     tag_salience_weights = {
         tag: get_tag_salience(tag) * (tag_idf.get(tag, 1.0) if tag_idf is not None else 1.0)
-        for tag_list in sim_tag_lists
-        for tag in tag_list
+        for similarity_tags in sim_tag_lists
+        for tag in similarity_tags
     }
     return _CatalogueState(
         frame=ordered_frame,
@@ -320,16 +322,19 @@ def _prepare_catalogue(
         parsed_themes_by_id=parsed_themes_by_id,
         tag_enums_by_id=tag_enums_by_id,
         clash_masks_by_id=clash_masks_by_id,
-        clash_masks_arr=np.array([int(clash_masks_by_id.get(aid, 0)) for aid in anime_ids], dtype=np.int64),
+        clash_masks_arr=np.array([int(clash_masks_by_id.get(anime_id, 0)) for anime_id in anime_ids], dtype=np.int64),
         tags_csr=build_idf_csr(sim_tag_lists, idf_map=tag_salience_weights),
         themes_csr=build_idf_csr(themes, idf_map=idfs_by_property.get('themes')),
         genres_csr=build_idf_csr(genres, idf_map=idfs_by_property.get('genres')),
         rating_classes_arr=np.array(
-            [int(normalize_rating(str(rows_by_id[aid].get('rating') or '')).value != '') for aid in anime_ids],
+            [
+                int(normalize_rating(str(rows_by_id[anime_id].get('rating') or '')).value != '')
+                for anime_id in anime_ids
+            ],
             dtype=np.int8,
         ),
         origin_langs_arr=np.array(
-            [hash(str(rows_by_id[aid].get('origin_language') or 'Japanese')) & 0x7F for aid in anime_ids],
+            [hash(str(rows_by_id[anime_id].get('origin_language') or 'Japanese')) & 0x7F for anime_id in anime_ids],
             dtype=np.int8,
         ),
         tonal_coordinate_by_id=tonal_coordinate_by_id,
@@ -626,34 +631,48 @@ class Recommender:
             manual_relationships=inputs.manual_relationships,
         )
         self._catalogue_state = state
-        self._hook_tags_by_id = {aid: tags & SPECIFIC_HOOK_AND_TONE_TAGS for aid, tags in state.tags_by_id.items()}
+        self._hook_tags_by_id = {
+            anime_id: tags & SPECIFIC_HOOK_AND_TONE_TAGS for anime_id, tags in state.tags_by_id.items()
+        }
         self._relationship_index = inputs.relationship_index
         self._relationship_policy_identity = plan.relationship_policy_identity
         self._ranking_policy = plan.ranking_policy
         self._scoring_paths = frozenset(plan.scoring_paths)
         self._scoring_properties = tuple(
             ScoringProperty(
-                name=p.name,
-                weight=p.weight,
+                name=scoring_property.name,
+                weight=scoring_property.weight,
                 metric=(
-                    make_salience_weighted_tag_metric(idf_map=state.idfs_by_property.get(p.name))
-                    if p.metric_identity
+                    make_salience_weighted_tag_metric(idf_map=state.idfs_by_property.get(scoring_property.name))
+                    if scoring_property.metric_identity
                     in (
                         'salience-weighted-tversky-82-v1',
                         'salience-weighted-tversky-82-content-v2',
                         'idf-tversky-82-v1',
                     )
-                    else make_idf_tversky(alpha=0.6, beta=0.4, idf_map=state.idfs_by_property.get(p.name))
-                    if p.metric_identity == 'idf-tversky-64-v1'
-                    else make_idf_tversky(alpha=0.75, beta=0.25, idf_map=state.idfs_by_property.get(p.name))
-                    if p.metric_identity == 'idf-tversky-7525-v1'
-                    else make_idf_tversky(alpha=0.7, beta=0.3, idf_map=state.idfs_by_property.get(p.name))
-                    if p.metric_identity == 'idf-tversky-73-v1'
-                    else p.metric
+                    else make_idf_tversky(
+                        alpha=0.6,
+                        beta=0.4,
+                        idf_map=state.idfs_by_property.get(scoring_property.name),
+                    )
+                    if scoring_property.metric_identity == 'idf-tversky-64-v1'
+                    else make_idf_tversky(
+                        alpha=0.75,
+                        beta=0.25,
+                        idf_map=state.idfs_by_property.get(scoring_property.name),
+                    )
+                    if scoring_property.metric_identity == 'idf-tversky-7525-v1'
+                    else make_idf_tversky(
+                        alpha=0.7,
+                        beta=0.3,
+                        idf_map=state.idfs_by_property.get(scoring_property.name),
+                    )
+                    if scoring_property.metric_identity == 'idf-tversky-73-v1'
+                    else scoring_property.metric
                 ),
-                metric_identity=p.metric_identity,
+                metric_identity=scoring_property.metric_identity,
             )
-            for p in plan.scoring_properties
+            for scoring_property in plan.scoring_properties
         )
         self._scoring_property_values = dict(inputs.scoring_property_values or {})
         self._availability_policy_identity = plan.availability_policy_identity
@@ -695,29 +714,42 @@ class Recommender:
         self._retrieval = retrieval_state.engine
         self._pairwise_dense_cosine_cache: dict[tuple[int, int], float] = {}
         self._source_dense_cosine_rows: dict[int, np.ndarray] = {}
-        self._post_ranking_meta_by_row = tuple(state.post_ranking_metadata_by_id.get(aid) for aid in state.anime_ids)
-        self._themes_by_row = tuple(state.themes_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._genres_by_row = tuple(state.genres_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._tags_by_row = tuple(state.tags_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._hook_tags_by_row = tuple(self._hook_tags_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._tonal_coordinate_by_row = tuple(state.tonal_coordinate_by_id.get(aid, 0.0) for aid in state.anime_ids)
-        self._content_severity_by_row = tuple(
-            state.content_severity_by_id.get(aid, ContentSeverityLevel.LEVEL_0_UNIVERSAL) for aid in state.anime_ids
+        self._post_ranking_meta_by_row = tuple(
+            state.post_ranking_metadata_by_id.get(anime_id) for anime_id in state.anime_ids
         )
-        self._ratings_by_row = tuple(state.ratings_by_id.get(aid) for aid in state.anime_ids)
-        self._demographics_by_row = tuple(state.demographics_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._parsed_genres_by_row = tuple(state.parsed_genres_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._parsed_themes_by_row = tuple(state.parsed_themes_by_id.get(aid, frozenset()) for aid in state.anime_ids)
-        self._tag_enums_by_row = tuple(state.tag_enums_by_id.get(aid, frozenset()) for aid in state.anime_ids)
+        self._themes_by_row = tuple(state.themes_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids)
+        self._genres_by_row = tuple(state.genres_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids)
+        self._tags_by_row = tuple(state.tags_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids)
+        self._hook_tags_by_row = tuple(self._hook_tags_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids)
+        self._tonal_coordinate_by_row = tuple(
+            state.tonal_coordinate_by_id.get(anime_id, 0.0) for anime_id in state.anime_ids
+        )
+        self._content_severity_by_row = tuple(
+            state.content_severity_by_id.get(anime_id, ContentSeverityLevel.LEVEL_0_UNIVERSAL)
+            for anime_id in state.anime_ids
+        )
+        self._ratings_by_row = tuple(state.ratings_by_id.get(anime_id) for anime_id in state.anime_ids)
+        self._demographics_by_row = tuple(
+            state.demographics_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids
+        )
+        self._parsed_genres_by_row = tuple(
+            state.parsed_genres_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids
+        )
+        self._parsed_themes_by_row = tuple(
+            state.parsed_themes_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids
+        )
+        self._tag_enums_by_row = tuple(state.tag_enums_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids)
         self._taxonomy_tokens_by_row = tuple(
-            state.taxonomy_tokens_by_id.get(aid, frozenset()) for aid in state.anime_ids
+            state.taxonomy_tokens_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids
         )
         self._thematic_leaf_tokens_by_row = tuple(
-            state.thematic_leaf_tokens_by_id.get(aid, frozenset()) for aid in state.anime_ids
+            state.thematic_leaf_tokens_by_id.get(anime_id, frozenset()) for anime_id in state.anime_ids
         )
-        self._narrative_profiles_by_row = tuple(state.narrative_profiles_by_id.get(aid) for aid in state.anime_ids)
-        self._synopses_by_row = tuple(state.synopses_by_id.get(aid) for aid in state.anime_ids)
-        self._languages_by_row = tuple(state.origin_language_by_id.get(aid) for aid in state.anime_ids)
+        self._narrative_profiles_by_row = tuple(
+            state.narrative_profiles_by_id.get(anime_id) for anime_id in state.anime_ids
+        )
+        self._synopses_by_row = tuple(state.synopses_by_id.get(anime_id) for anime_id in state.anime_ids)
+        self._languages_by_row = tuple(state.origin_language_by_id.get(anime_id) for anime_id in state.anime_ids)
 
     @property
     def relationship_fingerprint(self) -> str:
@@ -937,18 +969,18 @@ class Recommender:
             )
 
             canonical_eligibility_cache: dict[int, bool] = {}
-            src_exclusions = (
+            source_exclusions = (
                 self._relationship_index.same_story_exclusions(source_anime_id)
                 if self._relationship_index is not None
                 else frozenset()
             )
-            src_meta = self._catalogue_state.post_ranking_metadata_by_id.get(source_anime_id)
-            src_themes = self._catalogue_state.themes_by_id.get(source_anime_id, frozenset())
-            src_tags = self._hook_tags_by_id.get(source_anime_id, frozenset())
-            src_genres = self._catalogue_state.genres_by_id.get(source_anime_id, frozenset())
-            src_raw_tags = self._catalogue_state.tags_by_id.get(source_anime_id, frozenset())
-            src_tone = self._catalogue_state.tonal_coordinate_by_id.get(source_anime_id, 0.0)
-            src_content_level = self._catalogue_state.content_severity_by_id.get(
+            source_metadata = self._catalogue_state.post_ranking_metadata_by_id.get(source_anime_id)
+            source_themes = self._catalogue_state.themes_by_id.get(source_anime_id, frozenset())
+            source_hook_tags = self._hook_tags_by_id.get(source_anime_id, frozenset())
+            source_genres = self._catalogue_state.genres_by_id.get(source_anime_id, frozenset())
+            source_raw_tags = self._catalogue_state.tags_by_id.get(source_anime_id, frozenset())
+            source_tonal_coordinate = self._catalogue_state.tonal_coordinate_by_id.get(source_anime_id, 0.0)
+            source_content_level = self._catalogue_state.content_severity_by_id.get(
                 source_anime_id, ContentSeverityLevel.LEVEL_0_UNIVERSAL
             )
 
@@ -956,34 +988,34 @@ class Recommender:
                 candidate_id: int,
                 source_id: int = source_anime_id,
                 allowed_ids: frozenset[int] = eligible_ids,
-                cache: dict[int, bool] = canonical_eligibility_cache,
-                exclusions: frozenset[int] = src_exclusions,
-                meta: Any = src_meta,
-                themes: frozenset[Theme] = src_themes,
-                tags: frozenset[str] = src_tags,
-                genres: frozenset[Genre] = src_genres,
-                raw_tags: frozenset[str] = src_raw_tags,
-                tone: float = src_tone,
-                content_level: ContentSeverityLevel = src_content_level,
+                eligibility_cache: dict[int, bool] = canonical_eligibility_cache,
+                exclusions: frozenset[int] = source_exclusions,
+                source_metadata: Any = source_metadata,
+                source_themes: frozenset[Theme] = source_themes,
+                hook_tags: frozenset[str] = source_hook_tags,
+                source_genres: frozenset[Genre] = source_genres,
+                source_raw_tags: frozenset[str] = source_raw_tags,
+                tonal_coordinate: float = source_tonal_coordinate,
+                content_level: ContentSeverityLevel = source_content_level,
             ) -> bool:
-                cached_res = cache.get(candidate_id)
-                if cached_res is not None:
-                    return cached_res
-                is_eligible_res = self._canonical_candidate_is_eligible(
+                cached_eligibility = eligibility_cache.get(candidate_id)
+                if cached_eligibility is not None:
+                    return cached_eligibility
+                is_candidate_eligible = self._canonical_candidate_is_eligible(
                     source_id,
                     candidate_id,
                     allowed_ids,
                     source_exclusions=exclusions,
-                    source_meta=meta,
-                    source_themes=themes,
-                    source_tags=tags,
-                    source_genres=genres,
-                    source_raw_tags=raw_tags,
-                    source_tone=tone,
+                    source_meta=source_metadata,
+                    source_themes=source_themes,
+                    source_tags=hook_tags,
+                    source_genres=source_genres,
+                    source_raw_tags=source_raw_tags,
+                    source_tone=tonal_coordinate,
                     source_content_level=content_level,
                 )
-                cache[candidate_id] = is_eligible_res
-                return is_eligible_res
+                eligibility_cache[candidate_id] = is_candidate_eligible
+                return is_candidate_eligible
 
             qualified = qualify_candidates(
                 source_anime_id,
@@ -1015,43 +1047,50 @@ class Recommender:
                 and hasattr(synopsis_ranker, 'pairwise_dense_similarities')
                 and scoring_candidates
             ):
-                target_indices = [self._catalogue_state.index_by_id[c.anime_id] for c in scoring_candidates]
-                fitted = getattr(synopsis_ranker, 'fitted_paths', ())
-                active_scoring_paths = tuple(path for path in self._scoring_paths if path in fitted)
-                b_sims = (
+                target_indices = [
+                    self._catalogue_state.index_by_id[candidate.anime_id] for candidate in scoring_candidates
+                ]
+                fitted_paths = getattr(synopsis_ranker, 'fitted_paths', ())
+                active_scoring_paths = tuple(path for path in self._scoring_paths if path in fitted_paths)
+                bm25_similarities = (
                     synopsis_ranker.pairwise_dense_similarities('bm25', source_index, target_indices)
-                    if 'bm25' in self._scoring_paths and 'bm25' in fitted
+                    if 'bm25' in self._scoring_paths and 'bm25' in fitted_paths
                     else np.zeros(len(target_indices), dtype=np.float32)
                 )
-                l_sims = (
+                lsa_similarities = (
                     synopsis_ranker.pairwise_dense_similarities('lsa', source_index, target_indices)
-                    if 'lsa' in self._scoring_paths and 'lsa' in fitted
+                    if 'lsa' in self._scoring_paths and 'lsa' in fitted_paths
                     else np.zeros(len(target_indices), dtype=np.float32)
                 )
-                if 'embedding' in self._scoring_paths and 'embedding' in fitted:
-                    e_sims = synopsis_ranker.pairwise_dense_similarities('embedding', source_index, target_indices)
+                if 'embedding' in self._scoring_paths and 'embedding' in fitted_paths:
+                    embedding_similarities = synopsis_ranker.pairwise_dense_similarities(
+                        'embedding', source_index, target_indices
+                    )
                     rating_embedding_cosine = {}
-                    for candidate, similarity in zip(scoring_candidates, e_sims, strict=True):
-                        sim_val = float(similarity)
-                        rating_embedding_cosine[candidate.anime_id] = sim_val
+                    for candidate, similarity in zip(scoring_candidates, embedding_similarities, strict=True):
+                        similarity_value = float(similarity)
+                        rating_embedding_cosine[candidate.anime_id] = similarity_value
                         if np.isfinite(similarity):
-                            self._pairwise_dense_cosine_cache[(source_anime_id, candidate.anime_id)] = sim_val
-                    sigmoid_weights = 1.0 / (1.0 + np.exp(-SIGMOID_GATE_SLOPE * (e_sims - SIGMOID_GATE_CENTER)))
-                    ge_sims = np.where(
-                        np.isfinite(e_sims) & (e_sims > 0.0),
-                        sigmoid_weights * e_sims,
+                            self._pairwise_dense_cosine_cache[(source_anime_id, candidate.anime_id)] = similarity_value
+                    sigmoid_weights = 1.0 / (
+                        1.0 + np.exp(-SIGMOID_GATE_SLOPE * (embedding_similarities - SIGMOID_GATE_CENTER))
+                    )
+                    gated_embedding_similarities = np.where(
+                        np.isfinite(embedding_similarities) & (embedding_similarities > 0.0),
+                        sigmoid_weights * embedding_similarities,
                         0.0,
                     ).astype(np.float32)
                 else:
-                    ge_sims = np.zeros(len(target_indices), dtype=np.float32)
-                ble_sims = fuse_synopsis_vectors(
-                    b_sims,
-                    l_sims,
-                    ge_sims,
+                    gated_embedding_similarities = np.zeros(len(target_indices), dtype=np.float32)
+                fused_synopsis_similarities = fuse_synopsis_vectors(
+                    bm25_similarities,
+                    lsa_similarities,
+                    gated_embedding_similarities,
                     active_paths=active_scoring_paths,
                 )
                 synopsis_pairwise_dense = {
-                    c.anime_id: float(s) for c, s in zip(scoring_candidates, ble_sims, strict=True)
+                    candidate.anime_id: float(similarity)
+                    for candidate, similarity in zip(scoring_candidates, fused_synopsis_similarities, strict=True)
                 }
 
             results[source_anime_id] = score_candidates(
@@ -1117,13 +1156,13 @@ class Recommender:
         if source_rows is not None:
             cached_row = source_rows.get(source_anime_id)
             if cached_row is not None:
-                val = float(cached_row[candidate_index])
-                return val if np.isfinite(val) else fallback
+                cached_similarity = float(cached_row[candidate_index])
+                return cached_similarity if np.isfinite(cached_similarity) else fallback
 
         if hasattr(self, '_pairwise_dense_cosine_cache'):
-            cached_val = self._pairwise_dense_cosine_cache.get((source_anime_id, candidate_id))
-            if cached_val is not None:
-                return cached_val
+            cached_similarity = self._pairwise_dense_cosine_cache.get((source_anime_id, candidate_id))
+            if cached_similarity is not None:
+                return cached_similarity
 
         synopsis_ranker = getattr(getattr(self, '_retrieval', None), 'synopsis', None)
         fitted_paths = getattr(synopsis_ranker, 'fitted_paths', ())
@@ -1135,21 +1174,21 @@ class Recommender:
             return fallback
 
         if source_rows is not None and hasattr(synopsis_ranker, 'pairwise_dense_similarities'):
-            row = synopsis_ranker.pairwise_dense_similarities(
+            source_similarities = synopsis_ranker.pairwise_dense_similarities(
                 'embedding',
                 source_index,
                 range(len(self._catalogue_state.anime_ids)),
             )
-            source_rows[source_anime_id] = row
-            val = float(row[candidate_index])
-            return val if np.isfinite(val) else fallback
+            source_rows[source_anime_id] = source_similarities
+            candidate_similarity = float(source_similarities[candidate_index])
+            return candidate_similarity if np.isfinite(candidate_similarity) else fallback
 
         similarities = synopsis_ranker.pairwise_dense_similarities('embedding', source_index, [candidate_index])
         if len(similarities) > 0 and np.isfinite(similarities[0]):
-            val = float(similarities[0])
+            candidate_similarity = float(similarities[0])
             if hasattr(self, '_pairwise_dense_cosine_cache'):
-                self._pairwise_dense_cosine_cache[(source_anime_id, candidate_id)] = val
-            return val
+                self._pairwise_dense_cosine_cache[(source_anime_id, candidate_id)] = candidate_similarity
+            return candidate_similarity
         return fallback
 
     def _canonical_candidate_is_eligible(
@@ -1183,12 +1222,12 @@ class Recommender:
 
         if source_meta is None:
             source_meta = self._catalogue_state.post_ranking_metadata_by_id.get(source_anime_id)
-        cand_idx = (
+        candidate_row_index = (
             self._catalogue_state.index_by_id.get(candidate_id) if hasattr(self, '_post_ranking_meta_by_row') else None
         )
         candidate_meta = (
-            self._post_ranking_meta_by_row[cand_idx]
-            if cand_idx is not None
+            self._post_ranking_meta_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._catalogue_state.post_ranking_metadata_by_id.get(candidate_id)
         )
         if source_meta is None or candidate_meta is None:
@@ -1197,15 +1236,15 @@ class Recommender:
         if source_themes is None:
             source_themes = self._catalogue_state.themes_by_id.get(source_anime_id, frozenset())
         candidate_themes = (
-            self._themes_by_row[cand_idx]
-            if cand_idx is not None
+            self._themes_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._catalogue_state.themes_by_id.get(candidate_id, frozenset())
         )
         if source_tags is None:
             source_tags = self._hook_tags_by_id.get(source_anime_id, frozenset())
         candidate_tags = (
-            self._hook_tags_by_row[cand_idx]
-            if cand_idx is not None
+            self._hook_tags_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._hook_tags_by_id.get(candidate_id, frozenset())
         )
         shared_themes = source_themes & candidate_themes
@@ -1214,23 +1253,23 @@ class Recommender:
         if source_genres is None:
             source_genres = self._catalogue_state.genres_by_id.get(source_anime_id, frozenset())
         candidate_genres = (
-            self._genres_by_row[cand_idx]
-            if cand_idx is not None
+            self._genres_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._catalogue_state.genres_by_id.get(candidate_id, frozenset())
         )
         if source_raw_tags is None:
             source_raw_tags = self._catalogue_state.tags_by_id.get(source_anime_id, frozenset())
         candidate_raw_tags = (
-            self._tags_by_row[cand_idx]
-            if cand_idx is not None
+            self._tags_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._catalogue_state.tags_by_id.get(candidate_id, frozenset())
         )
 
         if source_tone is None:
             source_tone = self._catalogue_state.tonal_coordinate_by_id.get(source_anime_id, 0.0)
         candidate_tone = (
-            self._tonal_coordinate_by_row[cand_idx]
-            if cand_idx is not None
+            self._tonal_coordinate_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._catalogue_state.tonal_coordinate_by_id.get(candidate_id, 0.0)
         )
         if source_content_level is None:
@@ -1238,8 +1277,8 @@ class Recommender:
                 source_anime_id, ContentSeverityLevel.LEVEL_0_UNIVERSAL
             )
         candidate_content_level = (
-            self._content_severity_by_row[cand_idx]
-            if cand_idx is not None
+            self._content_severity_by_row[candidate_row_index]
+            if candidate_row_index is not None
             else self._catalogue_state.content_severity_by_id.get(candidate_id, ContentSeverityLevel.LEVEL_0_UNIVERSAL)
         )
 
@@ -1257,14 +1296,14 @@ class Recommender:
         ):
             return False
 
-        source_demo = parse_demographic(source_meta.demographic or '')
-        candidate_demo = parse_demographic(candidate_meta.demographic or '')
-        source_demos = {parse_demographic(d) for d in source_meta.demographics}
-        candidate_demos = {parse_demographic(d) for d in candidate_meta.demographics}
+        source_demographic = parse_demographic(source_meta.demographic or '')
+        candidate_demographic = parse_demographic(candidate_meta.demographic or '')
+        source_demos = {parse_demographic(demographic) for demographic in source_meta.demographics}
+        candidate_demos = {parse_demographic(demographic) for demographic in candidate_meta.demographics}
 
         if (
-            source_demo not in (Demographic.KIDS, Demographic.UNKNOWN)
-            and candidate_demo is Demographic.KIDS
+            source_demographic not in (Demographic.KIDS, Demographic.UNKNOWN)
+            and candidate_demographic is Demographic.KIDS
             and not shared_themes
             and not shared_hooks
         ):
@@ -1286,7 +1325,7 @@ class Recommender:
             Demographic.SEINEN in source_demos
         )
         is_candidate_children = (
-            candidate_rating in (RatingClass.G, RatingClass.PG) or candidate_demo is Demographic.KIDS
+            candidate_rating in (RatingClass.G, RatingClass.PG) or candidate_demographic is Demographic.KIDS
         )
         if is_source_mature and is_candidate_children and not has_corroboration:
             return False
@@ -1430,26 +1469,26 @@ class Recommender:
         has_dense_sims = synopsis_ranker is not None and 'embedding' in fitted_paths
 
         dense_cos_by_id: dict[int, float] = {}
-        source_row = getattr(self, '_source_dense_cosine_rows', {}).get(source_id)
+        source_cosine_row = getattr(self, '_source_dense_cosine_rows', {}).get(source_id)
         index_by_id = getattr(self._catalogue_state, 'index_by_id', {})
-        cache = getattr(self, '_pairwise_dense_cosine_cache', {})
+        pairwise_cosine_cache = getattr(self, '_pairwise_dense_cosine_cache', {})
         uncached_candidates: list[tuple[int, int]] = []
         for candidate in candidates:
             entity_id = candidate.recommendation_entity_id
-            if source_row is not None:
-                cand_idx = index_by_id.get(entity_id)
-                if cand_idx is not None:
-                    val = float(source_row[cand_idx])
-                    if np.isfinite(val):
-                        dense_cos_by_id[entity_id] = val
+            if source_cosine_row is not None:
+                candidate_index = index_by_id.get(entity_id)
+                if candidate_index is not None:
+                    cosine_similarity = float(source_cosine_row[candidate_index])
+                    if np.isfinite(cosine_similarity):
+                        dense_cos_by_id[entity_id] = cosine_similarity
                         continue
-            cached_val = cache.get((source_id, entity_id))
-            if cached_val is not None:
-                dense_cos_by_id[entity_id] = cached_val
+            cached_similarity = pairwise_cosine_cache.get((source_id, entity_id))
+            if cached_similarity is not None:
+                dense_cos_by_id[entity_id] = cached_similarity
             elif has_dense_sims:
-                cand_idx = index_by_id.get(entity_id)
-                if cand_idx is not None:
-                    uncached_candidates.append((candidate.recommendation_entity_id, cand_idx))
+                candidate_index = index_by_id.get(entity_id)
+                if candidate_index is not None:
+                    uncached_candidates.append((candidate.recommendation_entity_id, candidate_index))
 
         if uncached_candidates and has_dense_sims:
             source_index = getattr(self._catalogue_state, 'index_by_id', {}).get(source_id)
@@ -1460,9 +1499,9 @@ class Recommender:
                 )
                 for entity_id, similarity in zip(candidate_ids, batch_similarities, strict=True):
                     if np.isfinite(similarity):
-                        val = float(similarity)
-                        dense_cos_by_id[entity_id] = val
-                        cache[(source_id, entity_id)] = val
+                        cosine_similarity = float(similarity)
+                        dense_cos_by_id[entity_id] = cosine_similarity
+                        pairwise_cosine_cache[(source_id, entity_id)] = cosine_similarity
 
         adjusted: list[ScoredCandidate] = []
         for candidate in candidates:
