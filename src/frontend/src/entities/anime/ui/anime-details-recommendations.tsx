@@ -76,7 +76,10 @@ export function AnimeDetailsRecommendations({
             </CarouselItem>
           ) : (
             items.map((item) => (
-              <CarouselItem key={item.malId} className="basis-full pl-3 min-[480px]:basis-1/2 md:basis-1/3">
+              <CarouselItem
+                key={item.malId}
+                className="basis-full pl-3 min-[480px]:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+              >
                 <AnimeCard item={item} />
               </CarouselItem>
             ))
