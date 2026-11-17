@@ -2663,19 +2663,19 @@ def validate_tags_against_taxonomy(tags: Iterable[TagDefinition], taxonomy: Mapp
 def _build_tag_salience_mapping() -> dict[str, float]:
     mapping: dict[str, float] = {}
     for tag in Tag:
-        val = tag.value
+        tag_value = tag.value
         if tag in NARRATIVE_POLICY_TAGS:
-            mapping[val] = 0.0
+            mapping[tag_value] = 0.0
         elif tag in PERSONA_CAST_TAGS:
-            mapping[val] = TagSalienceTier.PERSONA_CAST.value
+            mapping[tag_value] = TagSalienceTier.PERSONA_CAST.value
         elif tag in CORE_HOOK_TAGS:
-            mapping[val] = TagSalienceTier.CORE_HOOK.value
+            mapping[tag_value] = TagSalienceTier.CORE_HOOK.value
         elif tag in TONE_ATMOSPHERE_TAGS:
-            mapping[val] = TagSalienceTier.TONE_ATMOSPHERE.value
+            mapping[tag_value] = TagSalienceTier.TONE_ATMOSPHERE.value
         elif tag in SETTING_BACKDROP_TAGS:
-            mapping[val] = TagSalienceTier.SETTING_BACKDROP.value
+            mapping[tag_value] = TagSalienceTier.SETTING_BACKDROP.value
         else:
-            mapping[val] = TagSalienceTier.MOTIF_ORGANISM.value
+            mapping[tag_value] = TagSalienceTier.MOTIF_ORGANISM.value
     return mapping
 
 

@@ -35,7 +35,7 @@ class _TokenLookup[V](Mapping[TaxonomyToken, V]):
 
     @override
     def __iter__(self) -> Iterator[TaxonomyToken]:
-        return (token for _, token in self._by_key)
+        return (token for token_type, token in self._by_key)
 
     @override
     def __len__(self) -> int:
@@ -377,10 +377,10 @@ def _build_ancestors_by_key(
         visited: set[TokenKey] = set()
         stack = list(direct_parents[child_key])
         while stack:
-            curr = stack.pop()
-            if curr not in visited:
-                visited.add(curr)
-                stack.extend(direct_parents.get(curr, ()))
+            current_token_key = stack.pop()
+            if current_token_key not in visited:
+                visited.add(current_token_key)
+                stack.extend(direct_parents.get(current_token_key, ()))
         ancestors_lookup[child_key] = frozenset(visited)
     return ancestors_lookup
 
@@ -389,10 +389,10 @@ _DIRECT_PARENTS_BY_KEY: Final[dict[TokenKey, set[TokenKey]]] = _build_direct_par
 _ANCESTORS_BY_KEY: Final[dict[TokenKey, frozenset[TokenKey]]] = _build_ancestors_by_key(_DIRECT_PARENTS_BY_KEY)
 
 ANCESTORS_BY_TOKEN: Final[Mapping[TaxonomyToken, frozenset[TaxonomyToken]]] = _TokenLookup(
-    {key: frozenset(token for _, token in anc_keys) for key, anc_keys in _ANCESTORS_BY_KEY.items()}
+    {key: frozenset(token for token_type, token in ancestor_keys) for key, ancestor_keys in _ANCESTORS_BY_KEY.items()}
 )
 ALL_ANCESTOR_TOKENS: Final[frozenset[TaxonomyToken]] = frozenset(
-    token for anc_keys in _ANCESTORS_BY_KEY.values() for _, token in anc_keys
+    token for ancestor_keys in _ANCESTORS_BY_KEY.values() for token_type, token in ancestor_keys
 )
 
 # Orthogonal protagonist demographics and delivery format tags.
@@ -466,12 +466,14 @@ def _build_sibling_lookup() -> dict[TokenKey, dict[TokenKey, TaxonomyToken]]:
                 key=lambda key: (-_depth(key), key[0].__name__, key[1].value),
             )
             lca_key: TokenKey | None = None
-            for cand in sorted_common:
+            for common_ancestor_key in sorted_common:
                 is_parent = any(
-                    cand in _ANCESTORS_BY_KEY.get(other, frozenset()) for other in sorted_common if other != cand
+                    common_ancestor_key in _ANCESTORS_BY_KEY.get(other, frozenset())
+                    for other in sorted_common
+                    if other != common_ancestor_key
                 )
                 if not is_parent:
-                    lca_key = cand
+                    lca_key = common_ancestor_key
                     break
             if lca_key is None:
                 lca_key = sorted_common[0]
