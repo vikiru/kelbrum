@@ -35,6 +35,7 @@ def load_or_process_records(
         policy=policy,
         theme_additions=curation.theme_additions,
         theme_removals=curation.theme_removals,
+        genre_additions=curation.genre_additions,
         tagged_anime_ids=curation.tagged_anime_ids,
         curation_identity=curation.identity,
         run_id=run_id,
@@ -63,6 +64,7 @@ def _processed_cache_matches(audit_path: Path, source_path: Path, policy: Eligib
         policy,
         theme_additions=curation.theme_additions,
         theme_removals=curation.theme_removals,
+        genre_additions=curation.genre_additions,
         tagged_anime_ids=curation.tagged_anime_ids,
         curation_identity=curation.identity,
     )

@@ -50,6 +50,7 @@ def prepare_embedding_cache(
     config: FeatureConfig,
     cache_path: Path | None,
     source_artifact_sha256: str | None,
+    model_path: Path | None = None,
 ) -> EmbeddingMatrix | None:
     """Reuse or generate embeddings when the feature configuration enables them."""
     if config.embedding is None:
@@ -95,7 +96,7 @@ def prepare_embedding_cache(
         ),
     )
     reusable = _load_reusable_rows(cache_path, config=config) if cache_path is not None else None
-    values = _build_embedding_matrix(clean_texts, row_keys, reusable, config=config)
+    values = _build_embedding_matrix(clean_texts, row_keys, reusable, config=config, model_path=model_path)
     if cache_path is not None:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         write_array(cache_path, values)
@@ -119,6 +120,7 @@ def _build_embedding_matrix(
     reusable: _ReusableEmbeddingRows | None,
     *,
     config: FeatureConfig,
+    model_path: Path | None = None,
 ) -> EmbeddingMatrix:
     """Reuse unchanged rows and encode only new or changed synopsis text."""
     model = _configured_model(config)
@@ -128,6 +130,8 @@ def _build_embedding_matrix(
             model_name=model.identifier,
             revision=model.revision,
             local_only=model.local_only,
+            batch_size=config.embedding_batch_size,
+            model_path=model_path,
         )
 
     values = np.empty((len(texts), reusable.values.shape[1]), dtype=np.float32)
@@ -147,6 +151,8 @@ def _build_embedding_matrix(
             model_name=model.identifier,
             revision=model.revision,
             local_only=model.local_only,
+            batch_size=config.embedding_batch_size,
+            model_path=model_path,
         )
         if generated.shape[1] != values.shape[1]:
             raise ValueError('embedding cache dimensions do not match the current model')

@@ -11,8 +11,9 @@ from config import LogEvent, bind_logger, derive_payload_identity, emit_event, t
 from export.contracts import FrontendProvenance
 from features.config import FeatureConfig  # noqa: TC001
 from fetch.contracts import TenraiAnimeEntry  # noqa: TC001
-from graph import RelationshipIndex  # noqa: TC001
+from graph import RelationshipIndex, load_manual_relationships
 from pipeline.build import PipelineRun, SnapshotBuildRequest, build_from_snapshot, build_pipeline, write_manifest
+from pipeline.code_identity import current_implementation_identity
 from pipeline.contracts import CatalogueProfilePaths, PipelineRunRequest  # noqa: TC001
 from pipeline.export_stage import (
     DEFAULT_RECOMMENDATION_BATCH_SIZE,
@@ -88,7 +89,9 @@ def _build_pipeline(
             full_artifact=request.profile_paths.full_artifact,
             entrypoint_snapshot=request.profile_paths.snapshot,
             embedding_cache=request.embedding_cache,
+            embedding_model_path=request.embedding_model_path,
             relationship_graph_path=request.relationship_graph_path,
+            manual_relationships=load_manual_relationships(),
             processing_policy=request.processing_policy,
             run_id=execution_id,
         )
@@ -176,6 +179,7 @@ def _build_provenance(
         union_identity=run.recommender.union_identity,
         ranking_identity=run.recommender.ranking_identity,
         recommender_policy_identity=run.recommender.policy_identity,
+        implementation_identity=current_implementation_identity(),
     )
 
 

@@ -11,7 +11,7 @@ from config import LogEvent, bind_logger, derive_payload_identity, emit_event, p
 from export.contracts import RecommendationChunkManifest
 from processing.contracts import CanonicalAnime
 from recommender.contracts import RecommendationConfig
-from recommender.frozen_pipeline import Recommender
+from recommender.pipeline import Recommender
 from storage.errors import StorageError
 from storage.hashing import sha256_file
 from storage.json_io import read_json, write_json

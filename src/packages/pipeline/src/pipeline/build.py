@@ -1,18 +1,22 @@
 """Build in-memory feature and recommendation stages from canonical data."""
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
 import msgspec
+import numpy as np
 import polars as pl
+from numpy.typing import NDArray
 
 from anime_catalogue import order_catalogue_frame
 from config import derive_payload_identity
 from features.assemble import FeatureAssemblyRequest, assemble_features
 from features.blocks import FeatureBundle
 from features.config import FeatureConfig
+from features.constants import default_embedding_gate
 from features.synopsis import LatentConfig, TfidfConfig
-from graph import RelationshipIndex
+from graph import ManualRelationshipRow, RelationshipIndex, load_manual_relationships
 from pipeline.contracts import PipelineManifest
 from pipeline.embedding_cache import prepare_embedding_cache
 from pipeline.input_stages import validate_entrypoint_pair
@@ -23,10 +27,10 @@ from processing.build import canonical_frame
 from processing.contracts import CanonicalAnime
 from processing.eligibility import EligibilityPolicy
 from recommender.contracts import RecommendationConfig, RecommendationItem, RecommendationResult
-from recommender.frozen_pipeline import Recommender
 from recommender.inputs import RecommenderInputs
+from recommender.pipeline import Recommender
 from recommender.plan import RecommenderPlan
-from recommender.union import AVAILABLE_RETRIEVAL_PATHS
+from recommender.union import DEFAULT_RETRIEVAL_PATHS
 from storage.hashing import sha256_file
 from storage.json_io import write_json
 
@@ -43,7 +47,9 @@ class SnapshotBuildRequest(msgspec.Struct, frozen=True):
     full_artifact: Path | None = None
     entrypoint_snapshot: Path | None = None
     embedding_cache: Path | None = None
+    embedding_model_path: Path | None = None
     relationship_graph_path: Path | None = None
+    manual_relationships: Sequence[ManualRelationshipRow] | None = None
     processing_policy: EligibilityPolicy | None = None
     run_id: str = '-'
 
@@ -88,6 +94,7 @@ def build_pipeline(
         config=plan.feature_config,
         cache_path=inputs.embedding_cache,
         source_artifact_sha256=inputs.source_artifact_sha256,
+        model_path=inputs.embedding_model_path,
     )
     bundle = assemble_features(
         ordered_frame,
@@ -106,8 +113,10 @@ def build_pipeline(
         feature_config=plan.feature_config,
         plan=active_plan,
         relationship_index=inputs.relationship_index,
+        manual_relationships=inputs.manual_relationships,
         synopsis_tfidf_config=synopsis_tfidf_config,
         synopsis_latent_config=synopsis_latent_config,
+        synopsis_embedding_matrix=cached_embeddings,
     )
     manifest = PipelineManifest(
         schema_version='kelbrum-pipeline-v1',
@@ -120,7 +129,7 @@ def build_pipeline(
 
 
 def _default_recommender_plan(feature_config: FeatureConfig) -> RecommenderPlan:
-    """Translate feature flags into the default retrieval composition."""
+    """Translate feature flags into the default retrieval composition and calibrated embedding gates."""
     disabled_paths = {
         path
         for path, enabled in (
@@ -129,8 +138,15 @@ def _default_recommender_plan(feature_config: FeatureConfig) -> RecommenderPlan:
         )
         if not enabled
     }
-    paths = tuple(path for path in AVAILABLE_RETRIEVAL_PATHS if path not in disabled_paths)
-    return RecommenderPlan(retrieval_paths=paths)
+    paths = tuple(path for path in DEFAULT_RETRIEVAL_PATHS if path not in disabled_paths)
+    model_identifier = feature_config.embedding.identifier if feature_config.embedding is not None else None
+    tau_low, tau_high = default_embedding_gate(model_identifier)
+    return RecommenderPlan(
+        retrieval_paths=paths,
+        embedding_gate_low=tau_low,
+        embedding_gate_high=tau_high,
+        metadata_post_ranking=True,
+    )
 
 
 def _build_recommender(
@@ -142,14 +158,22 @@ def _build_recommender(
     relationship_index: RelationshipIndex | None,
     synopsis_tfidf_config: TfidfConfig,
     synopsis_latent_config: LatentConfig,
+    manual_relationships: Sequence[ManualRelationshipRow] = (),
+    synopsis_embedding_matrix: NDArray[np.floating] | None = None,
 ) -> Recommender:
     """Build the recommender through the plan seam when one is supplied."""
     feature_identity = derive_payload_identity(feature_config)
+    embedding_block = bundle.block('synopsis-embedding')
+    embedding_matrix = None if embedding_block is None else np.asarray(embedding_block.values, dtype=np.float32)
+    if embedding_matrix is None and synopsis_embedding_matrix is not None:
+        embedding_matrix = np.asarray(synopsis_embedding_matrix, dtype=np.float32)
     return Recommender(
         RecommenderInputs(
             frame,
             bundle,
             relationship_index=relationship_index,
+            manual_relationships=manual_relationships,
+            synopsis_embedding_matrix=embedding_matrix,
             synopsis_tfidf_config=synopsis_tfidf_config,
             synopsis_latent_config=synopsis_latent_config,
             feature_configuration_identity=feature_identity,
@@ -180,12 +204,17 @@ def build_from_snapshot(
         records,
         run_id=request.run_id,
     )
+    manual_relationships = (
+        load_manual_relationships() if request.manual_relationships is None else request.manual_relationships
+    )
     run = build_pipeline(
         PipelineInputs(
             frame=canonical_frame(records),
             fetched_date=generated_at,
             embedding_cache=request.embedding_cache,
+            embedding_model_path=request.embedding_model_path,
             relationship_index=relationship_index,
+            manual_relationships=manual_relationships,
             source_artifact_sha256=sha256_file(request.parquet_path),
             run_id=request.run_id,
         ),
