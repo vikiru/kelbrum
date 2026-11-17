@@ -263,11 +263,7 @@ def _prepare_catalogue(
                 | tags_by_id.get(anime_id, frozenset())
             )
         )
-        tonal_coordinate_by_id[anime_id] = compute_tonal_coordinate(
-            genres_by_id.get(anime_id, frozenset())
-            | themes_by_id.get(anime_id, frozenset())
-            | tags_by_id.get(anime_id, frozenset())
-        )
+        tonal_coordinate_by_id[anime_id] = compute_tonal_coordinate(taxonomy_tokens_by_id[anime_id])
         content_severity_by_id[anime_id] = get_content_severity_level(ratings_by_id.get(anime_id, ''))
 
     rows_by_id = {row['mal_id']: row for row in ordered_frame.iter_rows(named=True)}
@@ -1163,7 +1159,7 @@ class Recommender:
         eligible_ids: frozenset[int],
         *,
         source_exclusions: frozenset[int] | None = None,
-        source_meta=None,
+        source_meta: AnimePostRankingMetadata | None = None,
         source_themes: frozenset[Theme] | None = None,
         source_tags: frozenset[str] | None = None,
         source_genres: frozenset[Genre] | None = None,

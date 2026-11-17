@@ -576,7 +576,7 @@ def extract_post_ranking_metadata(
     anime_ids = frame.get_column('mal_id').to_list()
     row_count = len(anime_ids)
 
-    def _column_values(name: str) -> list:
+    def _column_values(name: str) -> list[object]:
         return frame.get_column(name).to_list() if name in frame.columns else [None] * row_count
 
     for (
