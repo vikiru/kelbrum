@@ -3,11 +3,14 @@
 from collections.abc import Mapping, Sequence
 from functools import lru_cache
 from importlib import import_module
+from pathlib import Path
 from re import split
 from typing import Protocol, cast
 
 import numpy as np
 from numpy.typing import NDArray
+
+from features.constants import default_embedding_batch_size
 
 
 class _CudaModule(Protocol):
@@ -54,7 +57,7 @@ class _SentenceTransformer(Protocol):
     ) -> NDArray[np.floating]: ...
 
 
-EMBEDDING_BATCH_SIZE = 128
+EMBEDDING_INPUT_WINDOW_SIZE = 128
 
 
 def encode_synopsis_embeddings(
@@ -63,13 +66,19 @@ def encode_synopsis_embeddings(
     model_name: str,
     revision: str | None = None,
     local_only: bool = True,
+    batch_size: int | None = None,
+    model_path: str | Path | None = None,
 ) -> NDArray[np.float32]:
     """Encode synopsis text; callers own caching and artifact persistence."""
     if not model_name.strip():
         raise ValueError('embedding model name cannot be empty')
     clean = [' '.join((text or '').split()) for text in texts]
-    model = _embedding_model(model_name, revision, local_only, _embedding_device())
-    return _encode_in_batches(model, clean)
+    model_target = str(model_path) if model_path is not None else model_name
+    model = _embedding_model(model_target, revision, local_only, _embedding_device())
+    resolved_batch_size = batch_size or default_embedding_batch_size(model_name)
+    if resolved_batch_size < 1:
+        raise ValueError('embedding batch size must be positive')
+    return _encode_in_batches(model, clean, resolved_batch_size)
 
 
 def _embedding_device() -> str:
@@ -86,11 +95,24 @@ def _embedding_model(
     device: str,
 ) -> _SentenceTransformer:
     module = cast('_SentenceTransformersModule', import_module('sentence_transformers'))
-    model_kwargs = {'local_files_only': True} if local_only else None
-    return module.SentenceTransformer(model_name, revision=revision, model_kwargs=model_kwargs, device=device)
+    model_kwargs: dict[str, object] = {}
+    if local_only:
+        model_kwargs['local_files_only'] = True
+    if device == 'cuda':
+        model_kwargs['torch_dtype'] = 'float16'
+    return module.SentenceTransformer(
+        model_name,
+        revision=revision,
+        model_kwargs=model_kwargs or None,
+        device=device,
+    )
 
 
-def _encode_in_batches(model: _SentenceTransformer, texts: Sequence[str]) -> NDArray[np.float32]:
+def _encode_in_batches(
+    model: _SentenceTransformer,
+    texts: Sequence[str],
+    batch_size: int,
+) -> NDArray[np.float32]:
     """Encode sentence-aware token chunks and mean-pool each synopsis."""
     if not texts:
         dimension = model.get_embedding_dimension() or 0
@@ -106,13 +128,16 @@ def _encode_in_batches(model: _SentenceTransformer, texts: Sequence[str]) -> NDA
     dimension = model.get_embedding_dimension() or 0
     if not chunks:
         return np.zeros((len(texts), dimension), dtype=np.float32)
+    order = sorted(range(len(chunks)), key=lambda index: len(chunks[index]))
+    chunks = [chunks[index] for index in order]
+    owners = [owners[index] for index in order]
     pooled = np.zeros((len(texts), dimension), dtype=np.float32)
     counts = np.zeros(len(texts), dtype=np.int32)
-    for start in range(0, len(chunks), EMBEDDING_BATCH_SIZE):
-        stop = start + EMBEDDING_BATCH_SIZE
+    for start in range(0, len(chunks), EMBEDDING_INPUT_WINDOW_SIZE):
+        stop = start + EMBEDDING_INPUT_WINDOW_SIZE
         encoded = model.encode(
             chunks[start:stop],
-            batch_size=EMBEDDING_BATCH_SIZE,
+            batch_size=batch_size,
             normalize_embeddings=True,
             convert_to_numpy=True,
             show_progress_bar=False,
