@@ -8,6 +8,8 @@ from storage.json_io import write_json
 
 
 class FakeCatalogueClient:
+    route_name = 'fixture-route'
+
     def __init__(self, entries: list[TenraiAnimeEntry]) -> None:
         self.entries = entries
         self.catalogue_calls: list[tuple[Path, Path]] = []

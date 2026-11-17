@@ -1,3 +1,5 @@
+import hashlib
+import json
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -15,6 +17,10 @@ from storage.json_io import read_json, write_json
 class FakePipelineClient:
     def __init__(self, entries: Sequence[TenraiAnimeEntry]) -> None:
         self.entries = list(entries)
+
+    @property
+    def route_name(self) -> str:
+        return 'fixture'
 
     def catalogue(
         self,
@@ -36,8 +42,27 @@ class FakePipelineClient:
         overwrite: bool,
         profile: str | None,
     ) -> Sequence[TenraiAnimeEntry]:
-        del anime_ids, overwrite, profile
+        del overwrite
         write_json(output_path, self.entries)
+        requested_ids = tuple(sorted(anime_ids))
+        digest = hashlib.sha256(output_path.read_bytes()).hexdigest()
+        manifest_path = output_path.with_name(f'{output_path.stem}.manifest.json')
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    'schema_version': 'tenrai-full-v3',
+                    'route': self.route_name,
+                    'profile': profile or '-',
+                    'requested_ids': requested_ids,
+                    'requested_count': len(requested_ids),
+                    'covered_ids': requested_ids,
+                    'record_count': len(self.entries),
+                    'complete': True,
+                    'artifact_sha256': digest,
+                }
+            ),
+            encoding='utf-8',
+        )
         return self.entries
 
 

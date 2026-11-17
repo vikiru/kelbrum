@@ -144,8 +144,15 @@ def test_embedding_cache_reuses_unchanged_rows_after_catalogue_changes(
 ) -> None:
     encoded_batches: list[list[str]] = []
 
-    def encode(texts: list[str], *, model_name: str, revision: str | None, local_only: bool) -> np.ndarray:
-        del model_name, revision, local_only
+    def encode(
+        texts: list[str],
+        *,
+        model_name: str,
+        revision: str | None,
+        local_only: bool,
+        **kwargs: object,
+    ) -> np.ndarray:
+        del model_name, revision, local_only, kwargs
         encoded_batches.append(texts)
         return np.asarray([[float(len(text)), float(index)] for index, text in enumerate(texts)], dtype=np.float32)
 
