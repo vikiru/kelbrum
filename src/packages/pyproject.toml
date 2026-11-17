@@ -161,11 +161,16 @@ executionEnvironments = [
 ]
 
 [tool.poe.tasks]
-format = "ruff format ."
-lint = "ruff check ."
-typecheck = "pyrefly check"
-ty = "ty check"
+format = "uv run ruff format ."
+lint = "uv run ruff check ."
+typecheck = "uv run pyrefly check"
+ty = "uv run ty check"
 fetch-entries = "uv run --package fetch python -m fetch"
-download-minilm = "uv run --package features python -m features.model_download"
+update-entries = "uv run --package fetch python -m fetch --update"
+update-pipeline = "uv run --package pipeline python -m pipeline --update"
+update-ids = "uv run --package fetch python -m fetch --update-ids"
+download-model = "uv run --package features python -m features.model_download"
+download-mpnet = "uv run --package features python -m features.model_download"
+download-minilm = "uv run --package features python -m features.model_download --model sentence-transformers/all-MiniLM-L6-v2"
 run-pipeline = "uv run --package pipeline python -m pipeline"
-test = "uv run --package kelbrum-tests pytest -q tests --tb=short"
+test = "uv run --package kelbrum-tests pytest -q tests/src/tests --tb=short"

@@ -5,6 +5,7 @@ description = "Dedicated Kelbrum unit and integration test suite"
 requires-python = ">=3.13"
 dependencies = [
   "export",
+  "fetch",
   "pipeline",
   "config",
   "processing",
@@ -14,7 +15,7 @@ dependencies = [
   "graph",
   "storage",
   "numpy>=2.0",
-  "polars>=1.0",
+  "polars>=2.0.0",
   "scipy>=1.14",
   "pytest>=8.0",
 ]

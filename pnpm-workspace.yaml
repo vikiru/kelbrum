@@ -35,6 +35,8 @@ minimumReleaseAgeExclude:
   - '@tanstack/start-server-core@1.169.32'
   - '@tanstack/start-storage-context@1.167.30'
   - 'rolldown@1.2.7'
+  - minimatch@11.0.1
+  - '@isaacs/nonrecursive-glob-match@1.0.1'
 
 allowBuilds:
   '@firebase/util': true
@@ -49,4 +51,34 @@ onlyBuiltDependencies:
   - lefthook
 
 overrides:
+  '@hono/node-server@>=1.19.10 <2.1.3': ^2.1.3
+  '@hono/node-server@>=2.0.0 <2.1.6': ^2.1.6
+  '@modelcontextprotocol/sdk@<1.32.0': ^1.32.0
+  '@tanstack/react-start@>=1.143.12 <1.168.60': ^1.168.60
+  '@tanstack/start-server-core@>=1.143.12 <1.169.39': ^1.169.39
+  body-parser@>=2.0.0 <2.4.0: ^2.4.0
+  brace-expansion@>=4.0.0 <5.0.12: ^5.0.12
+  fast-uri@>=3.0.0 <3.1.8: ^3.1.8
+  fast-uri@>=3.0.0 <3.1.9: ^3.1.9
+  handlebars@>=3.0.0 <=4.7.9: ^4.7.10
+  hono@<4.13.16: ^4.13.16
+  hono@>=4.12.4 <4.13.11: ^4.13.11
+  ip-address@<=10.7.3: ^10.7.4
+  launch-editor@<=2.14.1: ^2.14.2
+  minimatch@<11.0.1: ^11.0.1
+  proxy-addr@>=1.1.0 <2.0.8: ^2.0.8
+  qs@>=6.7.0 <=6.16.0: ^6.16.1
+  seroval@<=1.6.2: ^1.6.3
+  seroval@<=1.6.7: ^1.6.8
+  seroval@>=1.5.5 <1.6.10: ^1.6.10
+  seroval@>=1.6.0 <1.6.11: ^1.6.11
+  shell-quote@>=1.8.4 <1.11.0: ^1.11.0
+  smol-toml@<=1.8.0: ^1.9.0
+  source-map-js@>=1.0.0 <1.2.2: ^1.2.2
+  systeminformation@<5.33.16: ^5.33.16
+  tinypool@<2.1.2: ^2.1.2
   undici@<6.23.0: '>=6.23.0'
+  undici@>=4.0.0 <6.29.1: ^6.29.1
+  undici@>=7.0.0 <7.30.1: ^7.30.1
+  vite@>=8.3.0 <=8.3.2: ^8.3.3
+  zod@<4.6.6: ^4.6.6

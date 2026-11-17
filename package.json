@@ -1,17 +1,8 @@
 {
   "name": "kelbrum",
-  "description": "An anime recommendation system designed to recommend anime that is similar to user-selected anime.",
   "version": "2.0.0",
   "private": true,
-  "license": "MIT",
-  "author": "Visakan Kirubakaran",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vikiru/kelbrum"
-  },
-  "bugs": {
-    "url": "https://github.com/vikiru/kelbrum/issues"
-  },
+  "description": "An anime recommendation system designed to recommend anime that is similar to user-selected anime.",
   "keywords": [
     "anime",
     "daisyui",
@@ -26,6 +17,41 @@
     "tailwindcss",
     "tensorflow"
   ],
+  "bugs": {
+    "url": "https://github.com/vikiru/kelbrum/issues"
+  },
+  "license": "MIT",
+  "author": "Visakan Kirubakaran",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vikiru/kelbrum"
+  },
+  "scripts": {
+    "start": "pnpm --dir src/frontend dev",
+    "build": "pnpm --dir src/frontend build",
+    "preview": "pnpm --dir src/frontend preview",
+    "lint": "pnpm --dir src/frontend lint",
+    "lint:typecheck": "pnpm --dir src/frontend lint:typecheck",
+    "format": "oxfmt --write",
+    "format:check": "pnpm --dir src/frontend format:check",
+    "typecheck": "pnpm --dir src/frontend typecheck",
+    "unused": "knip",
+    "postinstall": "lefthook install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/npm": "^13.2.0",
+    "knip": "^5.88.1",
+    "lefthook": "^2.2.2",
+    "oxfmt": "^0.78.0",
+    "oxlint": "^1.93.0",
+    "oxlint-tailwindcss": "^1.17.1",
+    "oxlint-tsgolint": "^7.0.2006",
+    "semantic-release": "^25.0.9",
+    "typescript": "^5.9.3"
+  },
   "browserslist": {
     "production": [
       "defaults",
@@ -45,32 +71,6 @@
       "last 2 firefox version",
       "last 2 safari version"
     ]
-  },
-  "scripts": {
-    "start": "pnpm --dir src/frontend dev",
-    "build": "pnpm --dir src/frontend build",
-    "preview": "pnpm --dir src/frontend preview",
-    "lint": "pnpm --dir src/frontend lint",
-    "lint:typecheck": "pnpm --dir src/frontend lint:typecheck",
-    "format": "oxfmt --write",
-    "format:check": "pnpm --dir src/frontend format:check",
-    "typecheck": "pnpm --dir src/frontend typecheck",
-    "unused": "knip",
-    "postinstall": "lefthook install"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^20.5.3",
-    "@commitlint/config-conventional": "^20.5.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/npm": "^13.1.5",
-    "knip": "^5.88.1",
-    "lefthook": "^2.1.12",
-    "oxfmt": "^0.63.0",
-    "oxlint": "^1.82.0",
-    "oxlint-tailwindcss": "^1.11.0",
-    "oxlint-tsgolint": "^7.0.2001",
-    "semantic-release": "^25.0.9",
-    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=22.12"

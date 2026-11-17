@@ -11,8 +11,10 @@ dependencies = [
   "config",
   "msgspec>=0.18",
   "numpy>=2.0",
+  "polars>=2.0.0",
   "scipy>=1.14",
   "scikit-learn>=1.5",
+  "torch>=2.0",
 ]
 
 [build-system]
