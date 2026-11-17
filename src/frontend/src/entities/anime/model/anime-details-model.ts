@@ -1,17 +1,19 @@
 import type { AnimeEntry } from '@/entities/anime/model/anime-schema';
 
-import { ANIME_TYPES } from '@/entities/anime/model/anime-constants';
+import { normalizeAnimeType } from '@/entities/anime/model/anime-type';
+import { ANIME_GENRE_LABELS } from '@/entities/anime/model/genres';
+import { ANIME_THEME_LABELS } from '@/entities/anime/model/themes';
 
 export interface AnimePageModel {
   title: string;
   englishTitle: string;
   japaneseTitle: string;
   synopsis: string;
-  score: number;
-  year: number;
+  score: number | null;
+  year: number | null;
   status: string;
   type: string;
-  episodes: number;
+  episodes: number | null;
   duration: string;
   source: string;
   rating: string;
@@ -27,6 +29,11 @@ export interface AnimeDetailField {
   value: string;
 }
 
+const TAXONOMY_LABELS: Record<string, string> = {
+  ...ANIME_GENRE_LABELS,
+  ...ANIME_THEME_LABELS,
+};
+
 export function getPreferredAnimeTitle(entry: Pick<AnimeEntry, 'title' | 'title_english'>): string {
   const titles = [entry.title, entry.title_english?.trim()].filter((title): title is string => Boolean(title));
   return titles.toSorted((a, b) => a.length - b.length)[0] ?? entry.title;
@@ -38,11 +45,11 @@ export function createAnimePageModel(entry: AnimeEntry): AnimePageModel {
     englishTitle: entry.title_english ?? entry.title,
     japaneseTitle: entry.title_japanese ?? '',
     synopsis: entry.synopsis ?? 'No synopsis is available for this title yet.',
-    score: entry.score ?? 0,
-    year: entry.year ?? 0,
+    score: entry.score,
+    year: entry.year,
     status: entry.status ?? 'Unknown status',
     type: entry.type ?? 'Unknown format',
-    episodes: entry.episodes ?? 0,
+    episodes: entry.episodes,
     duration: entry.duration ?? 'Unknown duration',
     source: entry.source ?? 'Unknown source',
     rating: entry.rating ?? 'Unrated',
@@ -54,18 +61,20 @@ export function createAnimePageModel(entry: AnimeEntry): AnimePageModel {
   };
 }
 
-export function formatAnimeType(type: string, episodes: number): string {
-  return type.toUpperCase() === ANIME_TYPES.MOVIE || episodes <= 0 ? type : `${type} · ${episodes} episodes`;
+export function formatAnimeType(type: string, episodes: number | null): string {
+  if (normalizeAnimeType(type) === 'MOVIE') return type;
+  if (episodes === null) return `${type} · N/A episodes`;
+  return episodes <= 0 ? type : `${type} · ${episodes} episodes`;
 }
 
 export function formatTaxonomyLabel(value: string): string {
-  return value.replaceAll('_', ' ').replace(/\b\w/g, (character) => character.toUpperCase());
+  return TAXONOMY_LABELS[value] ?? value.replaceAll('_', ' ').replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 export function createAnimeDetailFields(anime: AnimePageModel): AnimeDetailField[] {
   return [
     anime.season && { label: 'Season', value: anime.season },
-    anime.year > 0 && { label: 'Year', value: String(anime.year) },
+    { label: 'Year', value: anime.year !== null ? String(anime.year) : 'N/A' },
     { label: 'Format', value: formatAnimeType(anime.type, anime.episodes) },
     anime.duration && { label: 'Duration', value: anime.duration },
     anime.demographics.length > 0 && {

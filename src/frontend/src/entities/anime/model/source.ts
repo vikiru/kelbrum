@@ -1,0 +1,41 @@
+export const ANIME_SOURCES = [
+  '4-koma manga',
+  'Book',
+  'Card game',
+  'Game',
+  'Light novel',
+  'Manga',
+  'Mixed media',
+  'Music',
+  'Novel',
+  'Original',
+  'Other',
+  'Picture book',
+  'Radio',
+  'Unknown',
+  'Visual novel',
+  'Web manga',
+  'Web novel',
+] as const;
+
+export type AnimeSource = (typeof ANIME_SOURCES)[number];
+
+export const ANIME_SOURCE_LABELS: Record<AnimeSource, string> = {
+  '4-koma manga': '4-koma manga',
+  Book: 'Book',
+  'Card game': 'Card game',
+  Game: 'Game',
+  'Light novel': 'Light novel',
+  Manga: 'Manga',
+  'Mixed media': 'Mixed media',
+  Music: 'Music',
+  Novel: 'Novel',
+  Original: 'Original',
+  Other: 'Other',
+  'Picture book': 'Picture book',
+  Radio: 'Radio',
+  Unknown: 'Unknown',
+  'Visual novel': 'Visual novel',
+  'Web manga': 'Web manga',
+  'Web novel': 'Web novel',
+};
