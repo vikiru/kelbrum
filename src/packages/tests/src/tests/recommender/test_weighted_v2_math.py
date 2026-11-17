@@ -6,7 +6,7 @@ import pytest
 from features.blocks import FeatureBlock, FeatureBundle
 from recommender.metrics import Similarity, similarity_score
 from recommender.properties import SimilarityProperty
-from recommender.ranking import ScoreDescending
+from recommender.ranking import ScoredCandidate, ScoreDescending
 from recommender.weighted_v2 import WeightedV2Index, weighted_similarity
 
 
@@ -31,6 +31,46 @@ def _weighted_properties() -> tuple[SimilarityProperty, ...]:
     return (
         SimilarityProperty('first', 0.25, contributes_to_content=True),
         SimilarityProperty('second', 0.75, contributes_to_content=True),
+    )
+
+
+def _semantic_synopsis_fixture() -> FeatureBundle:
+    available = np.asarray([True, True, False, False], dtype=bool)
+    return FeatureBundle(
+        np.asarray([10, 20, 30, 40], dtype=np.int64),
+        (
+            FeatureBlock(
+                'synopsis-tfidf',
+                'dense',
+                np.asarray([[1.0, 0.0], [0.9, np.sqrt(0.19)], [0.8, 0.6], [1.0, 0.0]]),
+                ('x', 'y'),
+                ('tfidf',),
+            ),
+            FeatureBlock(
+                'synopsis-bm25',
+                'dense',
+                np.asarray([[1.0, 0.0], [1.0, 0.0], [0.8, 0.6], [0.0, 0.0]]),
+                ('x', 'y'),
+                ('bm25',),
+                row_available=np.asarray([True, True, True, False], dtype=bool),
+            ),
+            FeatureBlock(
+                'synopsis-lsa',
+                'dense',
+                np.asarray([[1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 0.0]]),
+                ('x', 'y'),
+                ('lsa',),
+                row_available=available,
+            ),
+            FeatureBlock(
+                'synopsis-embedding',
+                'dense',
+                np.asarray([[1.0, 0.0], [0.0, 1.0], [0.8, 0.6], [0.0, 0.0]]),
+                ('x', 'y'),
+                ('embedding',),
+                row_available=np.asarray([True, True, True, False], dtype=bool),
+            ),
+        ),
     )
 
 
@@ -64,6 +104,19 @@ def test_streaming_rank_matches_direct_rank_scores_and_order() -> None:
     assert tuple(score for _, score in streaming) == pytest.approx(tuple(score for _, score in direct))
 
 
+def test_synopsis_semantic_weight_uses_zero_padded_mean_paths() -> None:
+    properties = (SimilarityProperty('synopsis-semantic', 1.0, contributes_to_content=True),)
+    index = WeightedV2Index(_semantic_synopsis_fixture(), properties=properties)
+
+    direct = index.rank(0, limit=3)
+    streaming = index.rank_many_streaming((0,), limit=3, candidate_batch_size=2)[0]
+
+    assert direct == ((30, pytest.approx(0.8)), (20, pytest.approx(1.0 / 3.0)))
+    assert tuple(anime_id for anime_id, _ in streaming) == tuple(anime_id for anime_id, _ in direct)
+    assert tuple(score for _, score in streaming) == pytest.approx(tuple(score for _, score in direct))
+    assert weighted_similarity(_semantic_synopsis_fixture(), 0, 2, properties=properties) == pytest.approx(0.8)
+
+
 def test_missing_feature_weight_is_renormalized() -> None:
     bundle = FeatureBundle(
         np.asarray([10, 20], dtype=np.int64),
@@ -91,23 +144,56 @@ def test_missing_feature_weight_is_renormalized() -> None:
     )
     index = WeightedV2Index(bundle, properties=properties)
 
+    zero_padded_default = index.rank(0, limit=1, require_content=False)
     renormalized = index.rank(0, limit=1, require_content=False, renormalize_available=True)
-    unrenormalized = index.rank(0, limit=1, require_content=False, renormalize_available=False)
+    fixed_denominator = index.rank(0, limit=1, require_content=False, renormalize_available=False)
 
+    assert zero_padded_default == ((20, pytest.approx(0.2)),)
     assert renormalized == ((20, pytest.approx(0.8)),)
-    assert unrenormalized == ((20, pytest.approx(0.2)),)
+    assert fixed_denominator == ((20, pytest.approx(0.2)),)
+
+
+def test_pairwise_weighted_similarity_zero_pads_a_missing_property() -> None:
+    bundle = FeatureBundle(
+        np.asarray([10, 20], dtype=np.int64),
+        (
+            FeatureBlock(
+                'first',
+                'dense',
+                np.asarray([[1.0, 0.0], [0.8, 0.6]]),
+                ('x', 'y'),
+                ('first',),
+            ),
+            FeatureBlock(
+                'second',
+                'dense',
+                np.asarray([[1.0, 0.0], [0.0, 0.0]]),
+                ('x', 'y'),
+                ('second',),
+                row_available=np.asarray([True, False], dtype=bool),
+            ),
+        ),
+    )
+    properties = (
+        SimilarityProperty('first', 0.4, contributes_to_content=True),
+        SimilarityProperty('second', 0.6, contributes_to_content=True),
+    )
+
+    score = weighted_similarity(bundle, 0, 1, properties=properties)
+
+    assert score == pytest.approx(0.4 * 0.8)
 
 
 def test_score_descending_uses_anime_id_as_tie_breaker() -> None:
     candidates = (
-        (30, 0, 0.8, ()),
-        (10, 0, 0.8, ()),
-        (20, 0, 0.6, ()),
+        ScoredCandidate(30, 0, 0.8, ()),
+        ScoredCandidate(10, 0, 0.8, ()),
+        ScoredCandidate(20, 0, 0.6, ()),
     )
 
     ranked = ScoreDescending().rank(candidates)
 
-    assert tuple(candidate[0] for candidate in ranked) == (10, 30, 20)
+    assert tuple(candidate.recommendation_entity_id for candidate in ranked) == (10, 30, 20)
 
 
 @pytest.mark.parametrize(
