@@ -508,16 +508,16 @@ def evaluate_compiled_clash_rules(
     dense_cosine: float,
     anchor_mask: ClashFlag | int = 0,
 ) -> float:
-    cand_int = int(candidate_mask)
-    if not cand_int:
+    candidate_mask_value = int(candidate_mask)
+    if not candidate_mask_value:
         return 1.0
     penalty = 1.0
     for req_mask, rule_penalty, max_dense_cosine in compiled_rules:
-        if (cand_int & req_mask) and (max_dense_cosine is None or dense_cosine < max_dense_cosine):
+        if (candidate_mask_value & req_mask) and (max_dense_cosine is None or dense_cosine < max_dense_cosine):
             penalty = min(penalty, rule_penalty)
     if penalty < 1.0:
         return penalty
-    shared_hooks = (int(anchor_mask) & cand_int & _NARRATIVE_HOOK_INT).bit_count()
+    shared_hooks = (int(anchor_mask) & candidate_mask_value & _NARRATIVE_HOOK_INT).bit_count()
     return 1.0 + min(0.12, 0.06 * shared_hooks) if shared_hooks else 1.0
 
 
@@ -527,8 +527,8 @@ def evaluate_compiled_clash_rules_batch(
     dense_cosines: 'np.ndarray',
     anchor_mask: int = 0,
 ) -> 'np.ndarray':
-    n = len(candidate_masks)
-    penalties = np.ones(n, dtype=np.float64)
+    candidate_count = len(candidate_masks)
+    penalties = np.ones(candidate_count, dtype=np.float64)
     nonzero = candidate_masks != 0
     if not np.any(nonzero):
         return penalties

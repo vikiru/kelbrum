@@ -140,23 +140,23 @@ def idf_tversky(
     """Return IDF-weighted asymmetric Tversky similarity for categorical labels."""
     if not source or not candidate:
         return 0.0
-    c_set = candidate if isinstance(candidate, (frozenset, set)) else frozenset(candidate)
-    s_set = source if isinstance(source, (frozenset, set)) else frozenset(source)
+    candidate_set = candidate if isinstance(candidate, (frozenset, set)) else frozenset(candidate)
+    source_set = source if isinstance(source, (frozenset, set)) else frozenset(source)
 
-    inter = s_set & c_set
-    if not inter:
+    intersection = source_set & candidate_set
+    if not intersection:
         return 0.0
     if idf_map is None:
-        inter_w = float(len(inter))
-        source_only_w = float(len(s_set) - len(inter))
-        cand_only_w = float(len(c_set) - len(inter))
+        intersection_weight = float(len(intersection))
+        source_only_weight = float(len(source_set) - len(intersection))
+        candidate_only_weight = float(len(candidate_set) - len(intersection))
     else:
-        get_w = idf_map.get
-        inter_w = sum(get_w(term, 1.0) for term in inter)
-        source_only_w = sum(get_w(term, 1.0) for term in (s_set - inter))
-        cand_only_w = sum(get_w(term, 1.0) for term in (c_set - inter))
-    denominator = inter_w + alpha * source_only_w + beta * cand_only_w
-    return inter_w / denominator if denominator else 0.0
+        get_weight = idf_map.get
+        intersection_weight = sum(get_weight(term, 1.0) for term in intersection)
+        source_only_weight = sum(get_weight(term, 1.0) for term in (source_set - intersection))
+        candidate_only_weight = sum(get_weight(term, 1.0) for term in (candidate_set - intersection))
+    denominator = intersection_weight + alpha * source_only_weight + beta * candidate_only_weight
+    return intersection_weight / denominator if denominator else 0.0
 
 
 def build_idf_csr(
@@ -169,8 +169,8 @@ def build_idf_csr(
     indices: list[int] = []
     data: list[float] = []
     row_totals = np.zeros(len(label_lists), dtype=np.float64)
-    get_w = idf_map.get if idf_map is not None else None
-    for row_idx, labels in enumerate(label_lists):
+    get_weight = idf_map.get if idf_map is not None else None
+    for row_index, labels in enumerate(label_lists):
         seen: set[int] = set()
         total = 0.0
         for label in labels:
@@ -180,17 +180,17 @@ def build_idf_csr(
                 vocab[label] = col
             if col not in seen:
                 seen.add(col)
-                w = float(get_w(label, 1.0)) if get_w is not None else 1.0
+                label_weight = float(get_weight(label, 1.0)) if get_weight is not None else 1.0
                 indices.append(col)
-                data.append(w)
-                total += w
-        row_totals[row_idx] = total
+                data.append(label_weight)
+                total += label_weight
+        row_totals[row_index] = total
         indptr.append(len(indices))
-    mat = csr_matrix(
+    weighted_matrix = csr_matrix(
         (np.array(data, dtype=np.float64), np.array(indices, dtype=np.int32), np.array(indptr, dtype=np.int32)),
         shape=(len(label_lists), len(vocab)),
     )
-    return mat, vocab, row_totals
+    return weighted_matrix, vocab, row_totals
 
 
 def _manhattan_score(left: NDArray[np.floating], right: NDArray[np.floating]) -> float:

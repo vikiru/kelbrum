@@ -450,7 +450,7 @@ class _PreparedBlock:
                 ),
             )
         if metric is Similarity.COSINE:
-            source_norm = self.row_norms[source_index]
+            source_vector_norm = self.row_norms[source_index]
             values = (
                 np.asarray((cast('csr_matrix', candidate_values) @ cast('csr_matrix', source).T).toarray()).ravel()
                 if isinstance(self.values, csr_matrix)
@@ -461,7 +461,7 @@ class _PreparedBlock:
                 SimilarityOperands(
                     intersections=values,
                     left_norms=self.row_norms[start:stop],
-                    right_norms=source_norm,
+                    right_norms=source_vector_norm,
                 ),
             ).ravel()
         raise ValueError(f'unsupported v2 similarity metric: {metric}')
@@ -482,29 +482,31 @@ class _PreparedBlock:
                 dense_candidates = np.asarray(candidates)
             num_sources = dense_sources.shape[0]
             num_candidates = dense_candidates.shape[0]
-            out = np.zeros((num_sources, num_candidates), dtype=np.float32)
+            similarity_scores = np.zeros((num_sources, num_candidates), dtype=np.float32)
             if self.dimension_available is not None:
-                src_avail = self.dimension_available[list(source_indices)]
-                cand_avail = self.dimension_available[start:stop]
-                for row_idx in range(num_sources):
-                    diffs = np.abs(dense_candidates - dense_sources[row_idx])
-                    shared_row = cand_avail & src_avail[row_idx]
-                    out[row_idx] = vectorized_similarity(
-                        metric, SimilarityOperands(differences=diffs, shared=shared_row)
+                source_availability = self.dimension_available[list(source_indices)]
+                candidate_availability = self.dimension_available[start:stop]
+                for source_row_index in range(num_sources):
+                    differences = np.abs(dense_candidates - dense_sources[source_row_index])
+                    shared_dimensions = candidate_availability & source_availability[source_row_index]
+                    similarity_scores[source_row_index] = vectorized_similarity(
+                        metric, SimilarityOperands(differences=differences, shared=shared_dimensions)
                     )
             else:
-                for row_idx in range(num_sources):
-                    diffs = np.abs(dense_candidates - dense_sources[row_idx])
-                    out[row_idx] = vectorized_similarity(metric, SimilarityOperands(differences=diffs))
-            return out
+                for source_row_index in range(num_sources):
+                    differences = np.abs(dense_candidates - dense_sources[source_row_index])
+                    similarity_scores[source_row_index] = vectorized_similarity(
+                        metric, SimilarityOperands(differences=differences)
+                    )
+            return similarity_scores
         if isinstance(self.values, csr_matrix):
             candidate_matrix = cast('csr_matrix', candidates)
             source_matrix = cast('csr_matrix', sources)
             intersections = np.asarray((source_matrix @ candidate_matrix.T).toarray())
         else:
-            dense_src = cast('np.ndarray', sources)
-            dense_cand = cast('np.ndarray', candidates)
-            intersections = np.asarray(dense_src @ dense_cand.T)
+            dense_source_matrix = cast('np.ndarray', sources)
+            dense_candidate_matrix = cast('np.ndarray', candidates)
+            intersections = np.asarray(dense_source_matrix @ dense_candidate_matrix.T)
         candidate_sizes = self.row_sizes[start:stop]
         source_sizes = self.row_sizes[list(source_indices)]
         if metric is Similarity.JACCARD:

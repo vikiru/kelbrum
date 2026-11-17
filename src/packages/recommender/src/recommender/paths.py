@@ -181,14 +181,14 @@ class SynopsisPathIndex:
         indices = self._validate_source_indices(source_indices)
         _validate_excluded_ids(excluded_ids_by_source, len(indices))
         if isinstance(normalized, csr_matrix):
-            sub_norm = cast('csr_matrix', normalized[list(indices)])
-            products = sub_norm @ normalized.T
+            normalized_source_matrix = cast('csr_matrix', normalized[list(indices)])
+            products = normalized_source_matrix @ normalized.T
         elif _CUDA_AVAILABLE and torch is not None:
             if path not in self._cuda_tensors:
                 self._cuda_tensors[path] = torch.from_numpy(normalized).cuda()
-            gpu_mat = self._cuda_tensors[path]
-            gpu_sources = gpu_mat[list(indices)]
-            products = torch.matmul(gpu_sources, gpu_mat.T).cpu().numpy()
+            gpu_matrix = self._cuda_tensors[path]
+            gpu_source_matrix = gpu_matrix[list(indices)]
+            products = torch.matmul(gpu_source_matrix, gpu_matrix.T).cpu().numpy()
         else:
             products = normalized[list(indices)] @ normalized.T
         output: list[tuple[tuple[int, float], ...]] = []
@@ -220,7 +220,10 @@ class SynopsisPathIndex:
                 ranked = available[selected_positions]
                 ranked_scores = available_scores[selected_positions]
                 output.append(
-                    tuple((int(self.anime_ids[idx]), float(sc)) for idx, sc in zip(ranked, ranked_scores, strict=True))
+                    tuple(
+                        (int(self.anime_ids[anime_index]), float(similarity_score))
+                        for anime_index, similarity_score in zip(ranked, ranked_scores, strict=True)
+                    )
                 )
                 continue
             scores = np.asarray(products[row_number]).ravel().astype(np.float32, copy=False)
@@ -288,15 +291,15 @@ class SynopsisPathIndex:
         )
         top_scores = np.full((len(sources), limit), -np.inf, dtype=np.float32)
         top_indices = np.full((len(sources), limit), -1, dtype=np.int32)
-        gpu_mat = None
-        gpu_src = None
+        gpu_matrix = None
+        gpu_source_matrix = None
         if not isinstance(normalized, csr_matrix) and _CUDA_AVAILABLE and torch is not None:
             if path not in self._cuda_tensors:
                 self._cuda_tensors[path] = torch.from_numpy(normalized).cuda()
-            gpu_mat = self._cuda_tensors[path]
-            gpu_src = gpu_mat[list(sources)]
+            gpu_matrix = self._cuda_tensors[path]
+            gpu_source_matrix = gpu_matrix[list(sources)]
         excluded_tuples = (
-            tuple(tuple(ex) if ex else () for ex in excluded_ids_by_source)
+            tuple(tuple(excluded_ids) if excluded_ids else () for excluded_ids in excluded_ids_by_source)
             if excluded_ids_by_source is not None
             else None
         )
@@ -305,9 +308,9 @@ class SynopsisPathIndex:
             if isinstance(normalized, csr_matrix):
                 sub_candidates = cast('csr_matrix', normalized[start:stop])
                 block = sub_sources @ sub_candidates.T
-            elif gpu_mat is not None and gpu_src is not None and torch is not None:
-                gpu_cand = gpu_mat[start:stop]
-                block = torch.matmul(gpu_src, gpu_cand.T).cpu().numpy()
+            elif gpu_matrix is not None and gpu_source_matrix is not None and torch is not None:
+                gpu_candidate_matrix = gpu_matrix[start:stop]
+                block = torch.matmul(gpu_source_matrix, gpu_candidate_matrix.T).cpu().numpy()
             else:
                 block = sub_sources @ normalized[start:stop].T
             values_block = block.toarray() if isinstance(block, csr_matrix) else np.asarray(block)
@@ -325,12 +328,12 @@ class SynopsisPathIndex:
                     values[row_number, excluded_mask] = -np.inf
             values[values <= 0.0] = -np.inf
             for row_number in range(len(sources)):
-                row_vals = values[row_number]
-                pos_mask = np.isfinite(row_vals) & (row_vals > 0.0)
-                if not pos_mask.any():
+                row_similarities = values[row_number]
+                positive_similarity_mask = np.isfinite(row_similarities) & (row_similarities > 0.0)
+                if not positive_similarity_mask.any():
                     continue
-                combined_scores = np.concatenate((top_scores[row_number], row_vals[pos_mask]))
-                combined_indices = np.concatenate((top_indices[row_number], block_indices[pos_mask]))
+                combined_scores = np.concatenate((top_scores[row_number], row_similarities[positive_similarity_mask]))
+                combined_indices = np.concatenate((top_indices[row_number], block_indices[positive_similarity_mask]))
                 selection = _select_top_indices(combined_indices, combined_scores, limit, self.anime_ids)
                 top_scores[row_number] = -np.inf
                 top_indices[row_number] = -1
@@ -461,9 +464,9 @@ class CategoricalPathIndex:
             col_indices: list[int] = []
             data_values: list[float] = []
 
-            for row_idx, row in enumerate(self._values):
+            for row_index, row in enumerate(self._values):
                 for label in row:
-                    row_indices.append(row_idx)
+                    row_indices.append(row_index)
                     col_indices.append(self._label_to_col[label])
                     weight = weights.get(label, 1.0) if weights is not None else 1.0
                     data_values.append(weight)
@@ -542,11 +545,13 @@ class CategoricalPathIndex:
             if use_tversky:
                 left_diff = source_total_weight - intersections
                 right_diff = candidate_total_weights - intersections
-                denom = intersections + alpha * left_diff + beta * right_diff
-                scores = np.divide(intersections, denom, out=np.zeros_like(intersections), where=denom > 0)
+                denominator = intersections + alpha * left_diff + beta * right_diff
+                scores = np.divide(intersections, denominator, out=np.zeros_like(intersections), where=denominator > 0)
             else:
-                denom = source_total_weight + candidate_total_weights
-                scores = np.divide(2.0 * intersections, denom, out=np.zeros_like(intersections), where=denom > 0)
+                denominator = source_total_weight + candidate_total_weights
+                scores = np.divide(
+                    2.0 * intersections, denominator, out=np.zeros_like(intersections), where=denominator > 0
+                )
 
             valid_scores_mask = scores > 0.0
             if not np.any(valid_scores_mask):
@@ -594,15 +599,15 @@ class AffinityPathIndex:
         self._compatibility_one_hot: np.ndarray | None = None
         self._compatibility_matrix: np.ndarray | None = None
         if not self._compatibility and postings:
-            vocab = {value: col_idx for col_idx, value in enumerate(postings)}
-            rows_idx: list[int] = []
-            cols_idx: list[int] = []
-            for row_idx, row in enumerate(self._values):
+            vocab = {value: column_index for column_index, value in enumerate(postings)}
+            row_indices: list[int] = []
+            column_indices: list[int] = []
+            for row_index, row in enumerate(self._values):
                 for value in row:
-                    rows_idx.append(row_idx)
-                    cols_idx.append(vocab[value])
-            data = np.ones(len(rows_idx), dtype=np.float32)
-            self._matrix = csr_matrix((data, (rows_idx, cols_idx)), shape=(len(self._values), len(vocab)))
+                    row_indices.append(row_index)
+                    column_indices.append(vocab[value])
+            data = np.ones(len(row_indices), dtype=np.float32)
+            self._matrix = csr_matrix((data, (row_indices, column_indices)), shape=(len(self._values), len(vocab)))
             self._row_sizes = np.asarray(self._matrix.getnnz(axis=1), dtype=np.float64)
         elif self._compatibility and postings:
             vocabulary = tuple(sorted(set(postings) | set(self._compatibility)))
@@ -742,8 +747,8 @@ class AffinityPathIndex:
         if scores:
             return max(scores)
         inter = len(source & candidate)
-        denom = len(source) + len(candidate)
-        return (2.0 * inter / denom) if denom > 0 else 0.0
+        denominator = len(source) + len(candidate)
+        return (2.0 * inter / denominator) if denominator > 0 else 0.0
 
 
 def _validate_limit(limit: int) -> None:
