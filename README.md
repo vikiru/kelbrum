@@ -30,9 +30,9 @@
 
 Catalogue metadata is fetched from the [Tenrai API](https://tenrai.org/) using [msgspec](https://github.com/jcrist/msgspec) schemas with checkpointed pagination, normalized into canonical records, and supplemented with version-controlled manual overrides for missing metadata (such as missing relationships and themes) and tags that add another layer of narrative similarity. The relationship engine models these records into a deterministic graph that clusters same-story families (collapsing sequels, prequels, and summaries) while preserving remakes, franchise spin-offs, and side stories.
 
-Feature engineering constructs aligned numeric, categorical, and semantic text representations for each anime entry in the catalogue, using [MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) for synopsis embeddings. Recommendations are generated through multi-path retrieval across feature similarity, taxonomy alignment, graph connections, and semantic embeddings. Candidates from each retrieval path are merged into a single pool, filtered for content rating compatibility, scored across matching attributes, and ranked into a deduplicated recommendation list with similarity score breakdowns.
+Feature engineering constructs aligned numeric, categorical, and semantic text representations for each anime entry in the catalogue, using [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) (with [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) as a lightweight alternative) for synopsis embeddings. Recommendations are generated through multi-path retrieval across dense synopsis embeddings, lexical/latent text (`BM25` and `LSA/SVD`), [salience-](./src/packages/catalogue/src/anime_catalogue/tags.py) and [IDF-weighted](./src/packages/recommender/src/recommender/scoring.py) `tags`, `themes`, and `genres`, and relationship-graph connections. Candidates are merged, gated by [`ClashFlag`](./src/packages/recommender/src/recommender/clash_rules.py) contradiction guards, [DAG subsumption](./src/packages/catalogue/src/anime_catalogue/subsumption.py) (ensuring the most specific narrative component takes precedence and avoiding double-counting the same evidence), and demographic/age-rating policies, and refined by a post-ranker (format, narrative-structure, runtime, and quality alignment) into a deduplicated recommendation list.
 
-All catalogue entries, search indexes, and recommendation batches are precomputed into static JSON artifacts with cryptographic checksums and loaded directly by the frontend. The original v1 release relied on k-means clustering with a custom weighted Manhattan and Dice similarity function; version 2 replaces this with multi-path retrieval and a relationship-aware recommendation engine.
+All catalogue entries, search indexes, and recommendation batches are precomputed into static JSON artifacts with cryptographic checksums and loaded directly by the frontend. The original v1 release relied on k-means clustering with a custom weighted Manhattan and Dice similarity function; version 2 replaces this with multi-path retrieval, taxonomy-aware subsumption and tonal/clash guards, demographic and age-rating policies, post-ranking alignment, and same-story/distinct relationship-aware surfacing.
 
 > [!IMPORTANT]
 >
@@ -58,7 +58,7 @@ All catalogue entries, search indexes, and recommendation batches are precompute
 
 ## 🌟 Features
 
-- **Recommendations**: Generates up to 100 recommendations for each anime, avoiding redundant same-story entries, preserving distinct franchise exploration, and remaining demographic-aware - see the [recommender package](./src/packages/recommender).
+- **Recommendations**: Generates up to 100 recommendations per anime using multi-path retrieval (MPNet/MiniLM synopsis embeddings, `BM25`, `LSA/SVD`, salience-weighted tags/themes/genres, and graph connections), shaped by [DAG subsumption](./src/packages/catalogue/src/anime_catalogue/subsumption.py) (ensuring the most specific narrative component takes precedence and avoiding double-counting the same evidence), [`ClashFlag`](./src/packages/recommender/src/recommender/clash_rules.py) tonal/setting guards, demographic and age-rating compatibility, post-ranker format/runtime/quality alignment, and same-story vs. franchise surfacing - see the [recommender package](./src/packages/recommender).
 - **Top 100**: Browse the highest-rated anime across the catalogue with same-story entries collapsed to representative titles (using the maximum score across TV, movie, and ONA formats) - see the [top-100 page](./src/frontend/src/pages/top).
 - **Search and Filtering**: Search anime by original, English, and Japanese titles with [FlexSearch](https://github.com/nextapps-de/flexsearch), with filtering by media type, content rating, demographic, genres, themes, score range, release year, and episode count - see the [search feature](./src/frontend/src/features/search).
 - **Manual Corrections**: An iteratively growing collection of version-controlled manual overrides and corrections addressing missing metadata such as relationships, themes, and genres - see the [curation resources](./src/packages/pipeline/src/pipeline/curation.py).
@@ -99,7 +99,7 @@ kelbrum/
 
 - **Frontend**: [TypeScript](https://www.typescriptlang.org/), [React](https://react.dev/), [TanStack Start](https://tanstack.com/start), [TanStack Router](https://tanstack.com/router), [TanStack Query](https://tanstack.com/query), [Vite](https://vite.dev/), [Tailwind CSS](https://tailwindcss.com/), [Base UI](https://base-ui.com/), [shadcn/ui](https://ui.shadcn.com/), [FlexSearch](https://github.com/nextapps-de/flexsearch), [Zod](https://zod.dev/), [Lucide React](https://lucide.dev/), [React Icons](https://react-icons.github.io/react-icons/).
 
-- **Data & Recommendation Pipeline**: [Python](https://www.python.org/), [Polars](https://pola.rs/), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [scikit-learn](https://scikit-learn.org/), [Sentence Transformers](https://www.sbert.net/), [MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), [msgspec](https://github.com/jcrist/msgspec), [Niquests](https://niquests.readthedocs.io/), [Loguru](https://loguru.readthedocs.io/).
+- **Data & Recommendation Pipeline**: [Python](https://www.python.org/), [Polars](https://pola.rs/), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [scikit-learn](https://scikit-learn.org/), [Sentence Transformers](https://www.sbert.net/), [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2), [msgspec](https://github.com/jcrist/msgspec), [Niquests](https://niquests.readthedocs.io/), [Loguru](https://loguru.readthedocs.io/).
 
 - **Documentation**: [Astro](https://astro.build/), [Starlight](https://starlight.astro.build/), [GitHub Pages](https://pages.github.com/).
 
@@ -137,10 +137,12 @@ pnpm install
 uv --directory src/packages sync --all-packages --dev
 ```
 
-4. Download the [MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) Sentence Transformer model:
+4. Download the [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) Sentence Transformer model:
 
 ```bash
-uv --directory src/packages run poe download-minilm
+uv --directory src/packages run poe download-model
+# Or specify another model (e.g. MiniLM):
+uv --directory src/packages run poe download-model --model sentence-transformers/all-MiniLM-L6-v2
 ```
 
 The model weights will be downloaded from Hugging Face and cached locally within `src/packages/data/models/huggingface/`.
@@ -263,7 +265,15 @@ uv --directory src/packages run poe run-pipeline --profile r-plus
 uv --directory src/packages run poe run-pipeline --profile all
 ```
 
-5. Run the Python automated test suite:
+5. Incrementally update fetched snapshots, specific anime IDs, or run an incremental fetch and full pipeline:
+
+```bash
+uv --directory src/packages run poe update-entries
+uv --directory src/packages run poe update-ids 1 5114
+uv --directory src/packages run poe update-pipeline
+```
+
+6. Run the Python automated test suite:
 
 ```bash
 uv --directory src/packages run poe test
