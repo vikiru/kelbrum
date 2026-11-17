@@ -7,6 +7,7 @@ import msgspec
 
 from anime_catalogue import order_catalogue_frame
 from fetch.contracts import AnimeRelation, ExternalLink, Images, NamedResource, Taxonomy, Trailer
+from normalization.metadata import MetadataState
 from processing.build import ProcessingResult, canonical_frame
 from processing.constants import PROCESSING_AUDIT_SCHEMA_VERSION
 from processing.contracts import CanonicalAnime
@@ -53,6 +54,7 @@ def write_processing_outputs(
             'rejected_ids': result.audit.rejected_ids,
             'reasons_by_rule': result.audit.reasons_by_rule,
             'reasons_by_id': result.audit.reasons_by_id,
+            'missing_duration_ids': result.audit.missing_duration_ids,
             'duplicate_ids': result.duplicate_ids,
         },
     )
@@ -63,7 +65,7 @@ def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
         encoded = row.get(f'{field}_json')
         if isinstance(encoded, str):
             return msgspec.json.decode(encoded.encode(), type=tuple[Taxonomy, ...])
-        values = cast('list[object] | None', row[field]) or []
+        values = cast('list[object] | None', row.get(field)) or []
         return tuple(Taxonomy(0, str(value)) for value in values)
 
     def decoded(field: str, target: type[Decoded], fallback: Decoded) -> Decoded:
@@ -71,11 +73,11 @@ def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
         return msgspec.json.decode(encoded.encode(), type=target) if isinstance(encoded, str) else fallback
 
     def optional_int(field: str) -> int | None:
-        value = row[field]
+        value = row.get(field)
         return int(value) if isinstance(value, (int, float, str)) else None
 
     def optional_float(field: str) -> float | None:
-        value = row[field]
+        value = row.get(field)
         return float(value) if isinstance(value, (int, float, str)) else None
 
     def optional_str(field: str) -> str | None:
@@ -116,7 +118,25 @@ def _canonical_from_row(row: dict[str, object]) -> CanonicalAnime:
         themes=names('themes'),
         demographics=names('demographics'),
         relations=decoded('relations_json', tuple[AnimeRelation, ...], ()),
+        manual_tags=tuple(str(value) for value in (cast('list[object] | None', row.get('manual_tags')) or [])),
+        origin_language=optional_str('origin_language'),
+        synopsis_state=_metadata_state(row.get('synopsis_state')),
+        genres_state=_metadata_state(row.get('genres_state')),
+        themes_state=_metadata_state(row.get('themes_state')),
+        tags_state=_metadata_state(row.get('tags_state')),
+        demographics_state=_metadata_state(row.get('demographics_state')),
+        type_state=_metadata_state(row.get('type_state')),
+        rating_state=_metadata_state(row.get('rating_state')),
     )
+
+
+def _metadata_state(value: object) -> MetadataState:
+    if not isinstance(value, str):
+        return MetadataState.UNKNOWN
+    try:
+        return MetadataState(value)
+    except ValueError:
+        return MetadataState.UNKNOWN
 
 
 def _decode_images(images_json: str | None) -> Images | None:
