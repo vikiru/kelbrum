@@ -2,19 +2,12 @@
 
 import re
 from collections.abc import Mapping
-from enum import StrEnum
 
 import msgspec
 
 from fetch.contracts import TenraiAnimeEntry
-
-
-class OriginLanguage(StrEnum):
-    CHINESE = 'zh'
-    ENGLISH = 'en'
-    FRENCH = 'fr'
-    JAPANESE = 'ja'
-    KOREAN = 'ko'
+from normalization.metadata import OriginLanguage as OriginLanguage
+from normalization.metadata import RelationMediaType
 
 
 class OriginEvidence(msgspec.Struct, frozen=True):
@@ -55,12 +48,12 @@ def _relation_evidence(entry: TenraiAnimeEntry) -> list[OriginEvidence]:
     for relation in entry.relations:
         for target in relation.entry:
             name = target.name or ''
-            media_type = (target.media_type or '').casefold()
-            if media_type == 'manhwa':
+            media_type = (target.media_type or target.type or '').casefold()
+            if media_type == RelationMediaType.MANHWA:
                 evidence.append(OriginEvidence(OriginLanguage.KOREAN, 'relation', name, 1.0))
-            elif media_type == 'manhua':
+            elif media_type == RelationMediaType.MANHUA:
                 evidence.append(OriginEvidence(OriginLanguage.CHINESE, 'relation', name, 1.0))
-            elif media_type == 'manga' or (not media_type and target.type and target.type.casefold() == 'manga'):
+            elif media_type == RelationMediaType.MANGA:
                 evidence.append(OriginEvidence(OriginLanguage.JAPANESE, 'relation', name, 1.0))
     return evidence
 
