@@ -35,30 +35,30 @@ def load_manual_relationships(
     if not path.is_file():
         return ()
     rows: list[ManualRelationshipRow] = []
-    with path.open(newline='', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
+    with path.open(newline='', encoding='utf-8-sig') as csv_file:
+        reader = csv.DictReader(csv_file)
         required = {'source_id', 'target_id', 'same_story_intent', 'traversal_mode', 'identity_intent'}
         if not required.issubset(reader.fieldnames or ()):
             raise ValueError(f'manual relations CSV missing required columns: {path}')
-        for r in reader:
-            source_id = int(r['source_id'])
-            target_id = int(r['target_id'])
+        for row in reader:
+            source_id = int(row['source_id'])
+            target_id = int(row['target_id'])
             if source_id <= 0 or target_id <= 0 or source_id == target_id:
                 raise ValueError(f'invalid endpoints in manual relations CSV: {source_id} -> {target_id}')
-            intent_str = r['same_story_intent'].strip().replace('_', '-')
-            traversal_str = r['traversal_mode'].strip().replace('_', '-')
-            identity_str = r['identity_intent'].strip().replace('_', '-')
+            intent_str = row['same_story_intent'].strip().replace('_', '-')
+            traversal_str = row['traversal_mode'].strip().replace('_', '-')
+            identity_str = row['identity_intent'].strip().replace('_', '-')
             rows.append(
                 ManualRelationshipRow(
                     source_id=source_id,
-                    source_title=r.get('source_title', '').strip(),
+                    source_title=row.get('source_title', '').strip(),
                     target_id=target_id,
-                    target_title=r.get('target_title', '').strip(),
-                    relation_type=r.get('relation_type', 'Manual').strip(),
+                    target_title=row.get('target_title', '').strip(),
+                    relation_type=row.get('relation_type', 'Manual').strip(),
                     same_story_intent=SameStoryIntent(intent_str),
                     traversal_mode=TraversalMode(traversal_str),
                     identity_intent=IdentityIntent(identity_str),
-                    provenance=r.get('provenance', 'manual').strip(),
+                    provenance=row.get('provenance', 'manual').strip(),
                 )
             )
     return tuple(rows)

@@ -332,13 +332,15 @@ def _build_story_line_index(
     # Sequel: source -> target
     # Prequel: target -> source
     # Manual with SameStoryIntent.CONTINUATION: source -> target (direction defined in CSV)
-    manual_dir_cont = {
-        (p.source_id, p.target_id) for p in manual_edge_policies if p.same_story_intent is SameStoryIntent.CONTINUATION
+    manual_direct_continuations = {
+        (policy.source_id, policy.target_id)
+        for policy in manual_edge_policies
+        if policy.same_story_intent is SameStoryIntent.CONTINUATION
     }
-    manual_undir_cont = {
-        frozenset((p.source_id, p.target_id))
-        for p in manual_edge_policies
-        if p.same_story_intent is SameStoryIntent.CONTINUATION
+    manual_undirected_continuations = {
+        frozenset((policy.source_id, policy.target_id))
+        for policy in manual_edge_policies
+        if policy.same_story_intent is SameStoryIntent.CONTINUATION
     }
 
     continuation_edges: set[tuple[int, int]] = set()
@@ -350,8 +352,8 @@ def _build_story_line_index(
         ):
             continue
         pair = (assertion.source_id, assertion.target_id)
-        if frozenset(pair) in manual_undir_cont:
-            if pair in manual_dir_cont:
+        if frozenset(pair) in manual_undirected_continuations:
+            if pair in manual_direct_continuations:
                 continuation_edges.add(pair)
             continue
         if assertion.relation_type is RelationType.PREQUEL:
@@ -360,8 +362,8 @@ def _build_story_line_index(
             continuation_edges.add((assertion.source_id, assertion.target_id))
 
     reverse_adjacency: dict[int, set[int]] = {}
-    for u, v in continuation_edges:
-        reverse_adjacency.setdefault(v, set()).add(u)
+    for source_id, target_id in continuation_edges:
+        reverse_adjacency.setdefault(target_id, set()).add(source_id)
 
     roots_cache: dict[int, frozenset[int]] = {}
 
@@ -370,45 +372,47 @@ def _build_story_line_index(
         if cached is not None:
             return cached
         if not reverse_adjacency.get(node):
-            res = frozenset((node,))
-            roots_cache[node] = res
-            return res
-        anc: set[int] = set()
+            root_ids = frozenset((node,))
+            roots_cache[node] = root_ids
+            return root_ids
+        ancestor_ids: set[int] = set()
         queue = deque((node,))
         visited = {node}
         while queue:
-            curr = queue.popleft()
-            for parent in reverse_adjacency.get(curr, ()):
+            current_id = queue.popleft()
+            for parent in reverse_adjacency.get(current_id, ()):
                 if parent not in visited:
                     visited.add(parent)
-                    anc.add(parent)
+                    ancestor_ids.add(parent)
                     queue.append(parent)
-        res = frozenset(a for a in anc if not reverse_adjacency.get(a))
-        roots_cache[node] = res
-        return res
+        root_ids = frozenset(ancestor_id for ancestor_id in ancestor_ids if not reverse_adjacency.get(ancestor_id))
+        roots_cache[node] = root_ids
+        return root_ids
 
     # Media type preference order: TV (0) > ONA (1) > Movie (2) > other (3)
     type_priority = {'tv': 0, 'ona': 1, 'movie': 2}
 
     def root_sort_key(node_id: int) -> tuple[int, int]:
-        m_type = (node_by_id[node_id].media_type or '').casefold() if node_by_id and node_id in node_by_id else ''
-        prio = type_priority.get(m_type, 3)
-        return prio, node_id
+        media_type = (node_by_id[node_id].media_type or '').casefold() if node_by_id and node_id in node_by_id else ''
+        media_type_priority = type_priority.get(media_type, 3)
+        return media_type_priority, node_id
 
     entrypoint_by_id: dict[int, int] = {}
     members_by_entrypoint: dict[int, set[int]] = {}
     for anime_id in sorted(catalogue_ids):
         roots = get_ancestor_roots(anime_id)
         if len(roots) == 1:
-            ep = next(iter(roots))
+            entrypoint_id = next(iter(roots))
         elif len(roots) > 1:
-            ep = min(roots, key=root_sort_key)
+            entrypoint_id = min(roots, key=root_sort_key)
         else:
-            ep = anime_id
-        entrypoint_by_id[anime_id] = ep
-        members_by_entrypoint.setdefault(ep, set()).add(anime_id)
+            entrypoint_id = anime_id
+        entrypoint_by_id[anime_id] = entrypoint_id
+        members_by_entrypoint.setdefault(entrypoint_id, set()).add(anime_id)
 
-    members_by_id: dict[int, frozenset[int]] = {ep: frozenset(members) for ep, members in members_by_entrypoint.items()}
+    members_by_id: dict[int, frozenset[int]] = {
+        entrypoint_id: frozenset(members) for entrypoint_id, members in members_by_entrypoint.items()
+    }
     return entrypoint_by_id, members_by_id
 
 
