@@ -91,6 +91,7 @@ class MinMaxScaler(BaseScaler):
         state = self._require_state()
         array = _validate(values)
         width = len(state.parameters) // 2
+        _validate_fitted_width(array, width, type(self).__name__)
         minimum = np.asarray(state.parameters[:width])
         scale = np.asarray(state.parameters[width:]) - minimum
         scale = np.where(scale == 0, 1.0, scale)
@@ -113,6 +114,7 @@ class RobustScaler(BaseScaler):
         state = self._require_state()
         array = _validate(values)
         width = len(state.parameters) // 3
+        _validate_fitted_width(array, width, type(self).__name__)
         median = np.asarray(state.parameters[:width])
         q1 = np.asarray(state.parameters[width : 2 * width])
         q3 = np.asarray(state.parameters[2 * width :])
@@ -137,6 +139,7 @@ class StandardScaler(BaseScaler):
         state = self._require_state()
         array = _validate(values)
         width = len(state.parameters) // 2
+        _validate_fitted_width(array, width, type(self).__name__)
         return ((array - np.asarray(state.parameters[:width])) / np.asarray(state.parameters[width:])).astype(
             np.float64, copy=False
         )
@@ -155,7 +158,9 @@ class MaxAbsScaler(BaseScaler):
     @override
     def transform(self, values: FloatArray) -> FloatArray:
         state = self._require_state()
-        return (_validate(values) / np.asarray(state.parameters)).astype(np.float64, copy=False)
+        array = _validate(values)
+        _validate_fitted_width(array, len(state.parameters), type(self).__name__)
+        return (array / np.asarray(state.parameters)).astype(np.float64, copy=False)
 
 
 def log1p(values: FloatArray) -> FloatArray:
@@ -220,6 +225,11 @@ def _validate(values: FloatArray) -> FloatArray:
 
 def _python_floats(values: np.ndarray) -> tuple[float, ...]:
     return tuple(float(value) for value in values.ravel())
+
+
+def _validate_fitted_width(array: FloatArray, fitted_width: int, scaler_name: str) -> None:
+    if array.shape[1] != fitted_width:
+        raise ValueError(f'{scaler_name} expected {fitted_width} features, got {array.shape[1]}')
 
 
 TRANSFORM_REGISTRY: dict[TransformName, TransformDefinition] = {
