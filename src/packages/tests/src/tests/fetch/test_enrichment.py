@@ -65,3 +65,11 @@ def test_enrichment_resumes_from_completed_partial_records(tmp_path: Path) -> No
 
     assert tuple(entry.mal_id for entry in result) == (10, 20)
     assert resumed_source.requested_ids == [20]
+    assert read_json(output.with_name('full.manifest.json'), dict[str, object])['failed_ids'] == []
+
+
+def test_enrichment_rejects_a_wrong_returned_id(tmp_path: Path) -> None:
+    source = FakeFullEntrySource({10: TenraiAnimeEntry(mal_id=20, title='Wrong')})
+
+    with pytest.raises(ValueError, match='returned ID 20 for requested ID 10'):
+        enrich_entries(source, [10], tmp_path / 'full.json')
