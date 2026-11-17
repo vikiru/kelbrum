@@ -2,10 +2,10 @@ import { Link } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 
 import homepage from '@/data/homepage.json';
+import { useRandomRecommendations } from '@/entities/anime/hooks/use-random-recommendations';
 import { AnimeCardItemsSchema, type AnimeCardItem } from '@/entities/anime/model/anime-schema';
 import { AnimeCard } from '@/entities/anime/ui/anime-card';
 import { AnimeImage } from '@/entities/anime/ui/anime-image';
-import { Navbar } from '@/shared/components/navbar';
 import { PageContainer } from '@/shared/components/page-container';
 import { Button } from '@/shared/components/ui/button';
 import { slugify } from '@/shared/lib/slugify';
@@ -14,11 +14,10 @@ const animeEntries = AnimeCardItemsSchema.parse(homepage);
 const highRatedAnime = animeEntries.filter((item) => item.score !== null && item.score >= 8);
 
 export function HomePage() {
-  const featuredRecommendations = highRatedAnime.slice(0, 10);
+  const featuredRecommendations = useRandomRecommendations(highRatedAnime, 10);
 
   return (
     <main id="main-content" className="min-h-screen bg-background text-foreground">
-      <Navbar />
       <section className="border-b bg-muted/30" aria-labelledby="home-hero-heading">
         <PageContainer className="grid gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-28">
           <div>
@@ -79,7 +78,7 @@ export function HomePage() {
               Explore more <ArrowRight data-icon="inline-end" />
             </Button>
           </div>
-          <ul className="anime-card-grid below-fold-content mt-8 gap-4">
+          <ul className="anime-card-grid anime-card-grid--five-column below-fold-content mt-8 gap-4">
             {featuredRecommendations.map((item) => (
               <li key={item.malId}>
                 <AnimeCard item={item} />
