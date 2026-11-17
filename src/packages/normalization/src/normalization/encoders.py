@@ -49,7 +49,7 @@ def bucketize(
     )
     col_indices: list[int] = []
     for value in values:
-        if value is None or not math.isfinite(value) or value < missing_below:
+        if value is None or not math.isfinite(value) or value < boundaries[0] or value < missing_below:
             col_indices.append(0)
             continue
         index = max(index for index, start in enumerate(boundaries) if value >= start)
