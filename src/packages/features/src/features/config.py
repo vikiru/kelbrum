@@ -9,6 +9,7 @@ from features.constants import (
     DEFAULT_EPISODE_BOUNDARIES,
     DEFAULT_SCORE_BOUNDARIES,
     DEFAULT_YEAR_BOUNDARIES,
+    default_embedding_batch_size,
 )
 from normalization.policy import MissingPolicy
 
@@ -55,6 +56,7 @@ class FeatureConfig(msgspec.Struct, frozen=True):
     """Behavioral choices that identify a feature bundle."""
 
     embedding: EmbeddingModel | None = None
+    embedding_batch_size: int | None = None
     source_snapshot_id: str | None = None
     include_studios: bool = False
     include_quality_features: bool = False
@@ -88,6 +90,10 @@ class FeatureConfig(msgspec.Struct, frozen=True):
                 raise ValueError('bucket boundaries must be sorted, unique, and non-empty')
         if self.synopsis_min_df < 1 or self.synopsis_max_features < 1:
             raise ValueError('synopsis limits must be positive')
+        if self.embedding_batch_size is not None and self.embedding_batch_size < 1:
+            raise ValueError('embedding batch size must be positive')
+        if self.embedding is not None and self.embedding_batch_size is None:
+            object.__setattr__(self, 'embedding_batch_size', default_embedding_batch_size(self.embedding.identifier))
         if not 0.0 < self.synopsis_max_df <= 1.0 or self.latent_dimensions < 1 or self.latent_max_iter < 1:
             raise ValueError('invalid synopsis configuration')
         self._validate_numeric_transforms(self.numeric_transforms)
