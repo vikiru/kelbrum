@@ -17,6 +17,7 @@ from fetch.profiles import CatalogueProfile  # noqa: TC001
 from fetch.quality import CatalogueAcceptancePolicy
 from fetch.routes import CatalogueRoute  # noqa: TC001
 from fetch.transport import TenraiTransport
+from fetch.updates import UpdateResult, update_anime_records, update_profile_catalogue
 
 
 class _FetchLoggerAdapter:
@@ -25,6 +26,9 @@ class _FetchLoggerAdapter:
 
     def info(self, message: str, *args: object) -> None:
         self._logger.info(message, *args)
+
+    def warning(self, message: str, *args: object) -> None:
+        self._logger.warning(message, *args)
 
 
 class TenraiClient:
@@ -97,6 +101,48 @@ class TenraiClient:
     ) -> tuple[TenraiAnimeEntry, ...]:
         """Fetch and persist a deterministic merged full catalogue for explicit IDs."""
         return enrich_entries(self, anime_ids, output_path, overwrite=overwrite, profile=profile)
+
+    def update_records(
+        self,
+        anime_ids: Sequence[int],
+        *,
+        snapshot_path: Path,
+        full_artifact_path: Path | None = None,
+        acceptance_policy: CatalogueAcceptancePolicy | None = None,
+    ) -> UpdateResult:
+        """Fetch new or updated anime records by ID and integrate them into existing catalogue artifacts."""
+        policy = acceptance_policy or (self._profile.acceptance_policy if self._profile else None)
+        return update_anime_records(
+            self,
+            anime_ids,
+            snapshot_path=snapshot_path,
+            full_artifact_path=full_artifact_path,
+            acceptance_policy=policy,
+            log=_FetchLoggerAdapter(self._log),
+        )
+
+    def update_catalogue(
+        self,
+        *,
+        snapshot_path: Path,
+        last_page: int | None = None,
+        filters: CatalogueFilters | None = None,
+        full_artifact_path: Path | None = None,
+        acceptance_policy: CatalogueAcceptancePolicy | None = None,
+    ) -> UpdateResult:
+        """Scan catalogue pages (1..x) with profile filters, updating records and enriching only new IDs."""
+        active_filters = self._resolve_filters(filters)
+        policy = acceptance_policy or self._resolve_acceptance_policy(active_filters)
+        return update_profile_catalogue(
+            self,
+            snapshot_path=snapshot_path,
+            filters=active_filters,
+            last_page=last_page,
+            full_artifact_path=full_artifact_path,
+            acceptance_policy=policy,
+            profile_name=self._profile_name,
+            log=_FetchLoggerAdapter(self._log),
+        )
 
     def catalogue(
         self,

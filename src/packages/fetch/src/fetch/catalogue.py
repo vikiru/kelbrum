@@ -75,9 +75,7 @@ def acquire_catalogue(
     if start_page == 1:
         first_response = source.catalogue_page(start_page, filters=filters)
     last_page, total_anime = _resolve_pagination(first_response, checkpoint, last_page, total_anime)
-    if last_page < start_page:
-        if checkpoint and start_page == last_page + 1:
-            return entries, FetchSummary(last_page, 0, len(entries), (), 0.0)
+    if last_page < start_page and (checkpoint is None or start_page != last_page + 1):
         raise ValueError('last_page cannot precede the checkpoint page')
     started_at = monotonic()
     log.info('Starting catalogue fetch from page {} through {} into {}.', start_page, last_page, entries_path)
@@ -160,7 +158,14 @@ def _prepare_snapshot(
         _validate_checkpoint(checkpoint, filters, entries_path, source.route_name, profile_name)
         if not raw_entries_path.is_file():
             raise ValueError('checkpoint exists but its snapshot is missing')
-    return checkpoint, raw_entries_path, _load_entries(raw_entries_path) if checkpoint else []
+    entries: list[TenraiAnimeEntry] = _load_entries(raw_entries_path) if checkpoint else []
+    if checkpoint is not None:
+        if checkpoint.completed_pages != tuple(range(1, checkpoint.next_page)):
+            raise ValueError('checkpoint completed pages are inconsistent with its next page')
+        ids = [entry.mal_id for entry in entries]
+        if len(ids) != len(set(ids)):
+            raise ValueError('checkpoint raw snapshot contains duplicate IDs')
+    return checkpoint, raw_entries_path, entries
 
 
 def _resolve_pagination(
@@ -196,6 +201,8 @@ def _load_entries(path: Path) -> list[TenraiAnimeEntry]:
 def _validate_catalogue(entries: list[TenraiAnimeEntry], total_anime: int, last_page: int, start_page: int) -> None:
     if start_page == 1 and len(entries) != total_anime:
         raise FetchError(f'Fetched {len(entries)} entries but the API reported {total_anime}')
+    if start_page > last_page and len(entries) != total_anime:
+        raise FetchError(f'Resumed snapshot contains {len(entries)} entries but the API reported {total_anime}')
     ids = [entry.mal_id for entry in entries]
     if len(ids) != len(set(ids)):
         raise FetchError(f'Fetched duplicate MAL IDs through page {last_page}')

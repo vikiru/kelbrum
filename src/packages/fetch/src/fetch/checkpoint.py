@@ -27,6 +27,9 @@ class EnrichmentCheckpoint(msgspec.Struct, frozen=True):
     completed_ids: tuple[int, ...] = ()
     failed_ids: tuple[int, ...] = ()
     partial_output_path: str | None = None
+    route: str = 'tenrai-anime'
+    profile: str = '-'
+    schema_version: str = ''
     updated_at: str = msgspec.field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
@@ -68,3 +71,8 @@ def load_enrichment_checkpoint(path: Path) -> EnrichmentCheckpoint:
 def save_manifest(path: Path, manifest: SnapshotManifest) -> None:
     """Persist the completed snapshot manifest atomically as JSON."""
     write_json(path, manifest)
+
+
+def load_manifest(path: Path) -> SnapshotManifest:
+    """Load and validate completed snapshot manifest from JSON."""
+    return read_json(path, SnapshotManifest)
