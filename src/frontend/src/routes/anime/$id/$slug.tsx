@@ -1,6 +1,9 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute, notFound, Outlet } from '@tanstack/react-router';
 
-import { getAnimeDetailsQueryOptions, getAnimeRecommendationsQueryOptions } from '@/entities/anime/api/anime-queries';
+import {
+  getAnimeDetailsQueryOptions,
+  getAnimeRecommendationBatchesQueryOptions,
+} from '@/entities/anime/api/anime-queries';
 import { LoadingScreen } from '@/shared/components/loading-screen';
 
 export const Route = createFileRoute('/anime/$id/$slug')({
@@ -8,8 +11,14 @@ export const Route = createFileRoute('/anime/$id/$slug')({
   pendingComponent: () => <LoadingScreen label="Loading anime details" />,
   loader: async ({ context, params }) => {
     const animeId = Number(params.id);
+    if (!Number.isInteger(animeId) || animeId <= 0) {
+      throw notFound();
+    }
     const entry = await context.queryClient.ensureQueryData(getAnimeDetailsQueryOptions(animeId));
-    void context.queryClient.prefetchQuery(getAnimeRecommendationsQueryOptions(animeId, 10, entry));
+    if (!entry) {
+      throw notFound();
+    }
+    void context.queryClient.prefetchInfiniteQuery(getAnimeRecommendationBatchesQueryOptions(animeId, entry));
     return entry;
   },
   component: AnimeDetailsLayout,
