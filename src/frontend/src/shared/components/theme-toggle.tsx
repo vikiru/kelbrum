@@ -15,6 +15,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={`Switch to ${nextTheme} theme`}
       title={`Switch to ${nextTheme} theme`}
+      aria-pressed={displayedTheme === 'dark'}
       className="inline-flex size-11 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-[background-color,color,box-shadow] hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none motion-reduce:transition-none"
     >
       {displayedTheme === 'dark' ? (

@@ -44,15 +44,17 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  addonAriaLabel,
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean;
   showClear?: boolean;
+  addonAriaLabel?: string;
 }) {
   return (
     <InputGroup className={cn('w-auto', className)}>
       <ComboboxPrimitive.Input render={<InputGroupInput disabled={disabled} />} {...props} />
-      <InputGroupAddon align="inline-end">
+      <InputGroupAddon align="inline-end" aria-label={addonAriaLabel}>
         {showTrigger && (
           <InputGroupButton
             size="icon-xs"
