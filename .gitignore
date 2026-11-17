@@ -6,7 +6,12 @@ plans
 public/data/*.json
 src/data/*.json
 experiments/
-src/packages/data/
+src/packages/data/cache.db
+src/packages/data/source/
+src/packages/data/pipeline/
+src/packages/data/embeddings/
+src/packages/data/manual/*.json
+src/packages/data/manual/__pycache__/
 build
 
 todos.md
@@ -17,6 +22,7 @@ dist
 .history/
 build/
 *.csv
+!src/packages/data/manual/*.csv
 *.npy
 *.npz
 *.npy.manifest.json
