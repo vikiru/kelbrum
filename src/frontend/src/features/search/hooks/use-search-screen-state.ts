@@ -15,8 +15,8 @@ export function useSearchScreenState() {
   const paginationState = useSearchPagination();
   const viewState = useSearchViewState();
   const [sort, setSort] = useState<SearchSort>('score-desc');
-  const searchIndex = useSearchIndex(queryState.deferredQuery);
   const catalogueState = useSearchCatalogue();
+  const searchIndex = useSearchIndex(queryState.deferredQuery, catalogueState.catalogue.length);
   const { setQuery: updateQuery, resetQuery } = queryState;
   const { setFilters: updateFilters, updateFilter: updateFilterState, resetFilters } = filterState;
   const { resetPage, setPageSize: updatePageSize } = paginationState;

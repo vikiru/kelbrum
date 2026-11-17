@@ -5,6 +5,7 @@ import { Search as SearchIcon, X } from 'lucide-react';
 
 import type { AnimeCardItem } from '@/entities/anime/model/anime-schema';
 
+import { normalizeSearchText } from '@/features/search/search-config';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/shared/components/ui/input-group';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { deduplicateAnimeTitles } from '@/shared/lib/anime-title-deduplication';
@@ -51,7 +52,7 @@ export function SearchHeader({
                 value={query}
                 role="combobox"
                 aria-autocomplete="list"
-                aria-controls="search-suggestions"
+                aria-controls={suggestions.length > 0 ? 'search-suggestions' : undefined}
                 aria-expanded={suggestions.length > 0}
                 aria-activedescendant={
                   suggestions[activeSuggestionIndex]
@@ -98,6 +99,7 @@ export function SearchHeader({
             </InputGroup>
             {suggestions.length > 0 && (
               <SearchSuggestions
+                query={query}
                 items={suggestions}
                 activeIndex={activeSuggestionIndex}
                 onActiveChange={onActiveSuggestionChange}
@@ -112,45 +114,73 @@ export function SearchHeader({
 }
 
 interface SearchSuggestionsProps {
+  query: string;
   items: readonly AnimeCardItem[];
   activeIndex: number;
   onActiveChange: (index: number) => void;
 }
 
-function SearchSuggestions({ items, activeIndex, onActiveChange }: SearchSuggestionsProps) {
+function SearchSuggestions({ query, items, activeIndex, onActiveChange }: SearchSuggestionsProps) {
   return (
-    <ScrollArea
-      id="search-suggestions"
-      role="listbox"
-      aria-label="Search suggestions"
-      className="absolute top-full right-0 left-0 z-50 mt-2 h-80 overflow-hidden rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg"
-    >
-      {items.map((item, index) => {
-        const title = item.titleEnglish?.trim() || item.title;
-        const alternateTitles = deduplicateAnimeTitles([item.title, item.titleEnglish, item.titleJapanese]).filter(
-          (value) => value !== title,
-        );
-        return (
-          <Link
-            key={item.malId}
-            id={`search-suggestion-${item.malId}`}
-            role="option"
-            aria-selected={index === activeIndex}
-            to="/anime/$id/$slug"
-            params={{ id: String(item.malId), slug: slugify(title) }}
-            onMouseEnter={() => onActiveChange(index)}
-            className={`flex min-h-10 items-center justify-between gap-4 rounded-lg px-3 py-1.5 text-left text-sm transition-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${index === activeIndex ? 'bg-muted' : ''}`}
-          >
-            <span className="min-w-0 truncate text-sm font-medium">
-              {title}
-              {alternateTitles.length > 0 && (
-                <span className="ml-2 font-normal text-muted-foreground">{alternateTitles.join(' · ')}</span>
-              )}
-            </span>
-            <span className="shrink-0 text-xs text-muted-foreground">{item.year ?? '—'}</span>
-          </Link>
-        );
-      })}
+    <ScrollArea className="absolute top-full right-0 left-0 z-50 mt-2 h-80 overflow-hidden rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg">
+      <div id="search-suggestions" role="listbox" aria-label="Search suggestions">
+        {items.map((item, index) => {
+          const title = item.titleEnglish?.trim() || item.title;
+          const alternateTitles = deduplicateAnimeTitles([item.title, item.titleEnglish, item.titleJapanese]).filter(
+            (value) => value !== title,
+          );
+          return (
+            <Link
+              key={item.malId}
+              id={`search-suggestion-${item.malId}`}
+              role="option"
+              aria-selected={index === activeIndex}
+              to="/anime/$id/$slug"
+              params={{ id: String(item.malId), slug: slugify(title) }}
+              onMouseEnter={() => onActiveChange(index)}
+              className={`flex min-h-10 items-center justify-between gap-4 rounded-lg px-3 py-1.5 text-left text-sm transition-none hover:bg-muted focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${index === activeIndex ? 'bg-accent text-accent-foreground ring-1 ring-ring/60' : ''}`}
+            >
+              <span className="min-w-0 truncate text-sm font-medium">
+                {highlightSearchMatches(title, query)}
+                {alternateTitles.length > 0 && (
+                  <span
+                    className={`ml-2 font-normal ${index === activeIndex ? 'text-accent-foreground/80' : 'text-muted-foreground'}`}
+                  >
+                    {alternateTitles.join(' · ')}
+                  </span>
+                )}
+              </span>
+              <span className="shrink-0 text-xs text-muted-foreground">{item.year ?? '—'}</span>
+            </Link>
+          );
+        })}
+      </div>
     </ScrollArea>
   );
+}
+
+function highlightSearchMatches(title: string, query: string): ReactNode {
+  const terms = [
+    ...new Set(
+      normalizeSearchText(query)
+        .split(' ')
+        .filter((term) => term.length > 1),
+    ),
+  ];
+  if (terms.length === 0) return title;
+
+  const pattern = new RegExp(`(${terms.map(escapeRegExp).join('|')})`, 'giu');
+  return title.split(pattern).map((part, index) =>
+    terms.some((term) => normalizeSearchText(part) === term) ? (
+      <mark key={`${part}-${index}`} className="rounded-sm bg-primary/20 px-0.5 text-inherit">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

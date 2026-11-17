@@ -1,17 +1,7 @@
-import {
-  ArrowDown01,
-  ArrowDownAZ,
-  ArrowDownWideNarrow,
-  ArrowUp01,
-  ArrowUpAZ,
-  ArrowUpWideNarrow,
-  SlidersHorizontal,
-} from 'lucide-react';
-import { useId } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
+import { memo, useId } from 'react';
 
-import type { SearchSort } from '@/features/search/model/search-types';
-
-import { ANIME_TYPES } from '@/entities/anime/model/anime-constants';
+import { ANIME_TYPES } from '@/entities/anime/model/anime-type';
 import { formatFilterValue } from '@/features/search/lib/search-filter-formatting';
 import {
   FILTER_EPISODES_MAX,
@@ -55,7 +45,10 @@ export interface SearchFilterOptions {
   demographics: readonly string[];
 }
 
-export function SearchFilters({ options, ...props }: SearchFiltersProps & { options: SearchFilterOptions }) {
+export const SearchFilters = memo(function SearchFilters({
+  options,
+  ...props
+}: SearchFiltersProps & { options: SearchFilterOptions }) {
   return (
     <section aria-labelledby="search-filters-heading" className="flex flex-col gap-7">
       <div className="flex items-start gap-4">
@@ -77,7 +70,7 @@ export function SearchFilters({ options, ...props }: SearchFiltersProps & { opti
           label="Type"
           value={props.typeFilter}
           onChange={props.onTypeChange}
-          options={['all', ANIME_TYPES.TV, ANIME_TYPES.MOVIE, ANIME_TYPES.ONA]}
+          options={['all', ...ANIME_TYPES]}
         />
         <FilterField
           label="Rating"
@@ -103,6 +96,7 @@ export function SearchFilters({ options, ...props }: SearchFiltersProps & { opti
             </div>
             <Slider
               aria-label="Score range"
+              thumbLabels={['Minimum score', 'Maximum score']}
               value={props.scoreRange}
               min={FILTER_SCORE_MIN}
               max={FILTER_SCORE_MAX}
@@ -151,50 +145,7 @@ export function SearchFilters({ options, ...props }: SearchFiltersProps & { opti
       </div>
     </section>
   );
-}
-
-export function SortSelect({ value, onChange }: { value: SearchSort; onChange: (value: SearchSort) => void }) {
-  return (
-    <Select
-      value={value}
-      onValueChange={(nextValue) => {
-        if (
-          nextValue === 'title-asc' ||
-          nextValue === 'title-desc' ||
-          nextValue === 'score-asc' ||
-          nextValue === 'score-desc' ||
-          nextValue === 'year-asc' ||
-          nextValue === 'year-desc'
-        )
-          onChange(nextValue);
-      }}
-    >
-      <SelectTrigger className="h-11 min-w-44" aria-label="Sort results">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent className="z-[60]">
-        <SelectItem value="title-asc">
-          <ArrowDownAZ data-icon="inline-start" /> Title A–Z
-        </SelectItem>
-        <SelectItem value="title-desc">
-          <ArrowUpAZ data-icon="inline-start" /> Title Z–A
-        </SelectItem>
-        <SelectItem value="score-desc">
-          <ArrowDownWideNarrow data-icon="inline-start" /> Score high to low
-        </SelectItem>
-        <SelectItem value="score-asc">
-          <ArrowUpWideNarrow data-icon="inline-start" /> Score low to high
-        </SelectItem>
-        <SelectItem value="year-desc">
-          <ArrowDown01 data-icon="inline-start" /> Year newest first
-        </SelectItem>
-        <SelectItem value="year-asc">
-          <ArrowUp01 data-icon="inline-start" /> Year oldest first
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  );
-}
+});
 
 function FilterField({
   label,
@@ -216,7 +167,7 @@ function FilterField({
           if (nextValue) onChange(nextValue);
         }}
       >
-        <SelectTrigger className="h-10 w-full">
+        <SelectTrigger className="h-10 w-full" aria-label={label}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -293,7 +244,12 @@ function TaxonomyField({
           if (Array.isArray(nextValue)) onChange(nextValue);
         }}
       >
-        <ComboboxInput showTrigger={false} placeholder={`Search ${label.toLowerCase()}`} />
+        <ComboboxInput
+          showTrigger={false}
+          placeholder={`Search ${label.toLowerCase()}`}
+          aria-label={`Search ${label.toLowerCase()}`}
+          addonAriaLabel={`${label} controls`}
+        />
         <ComboboxContent>
           <ComboboxList>
             {options.map((option) => (

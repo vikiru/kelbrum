@@ -2,7 +2,7 @@ import type { Document } from 'flexsearch';
 
 import { z } from 'zod';
 
-import { searchIndexOptions, type AnimeSearchHit } from '@/features/search/search-config';
+import { normalizeSearchText, searchIndexOptions, type AnimeSearchHit } from '@/features/search/search-config';
 
 let searchIndexPromise: Promise<Document<AnimeSearchHit>> | undefined;
 const searchIndexUrls = import.meta.glob<string>('/src/data/search/flexsearch-index.json', {
@@ -28,7 +28,9 @@ async function fetchSearchIndex() {
   return z.object({ shards: z.record(z.string(), z.string()) }).parse(await response.json());
 }
 
-export async function findAnimeIdsByQuery(query: string): Promise<string[]> {
+export async function findAnimeIdsByQuery(query: string, limit: number): Promise<string[]> {
   const searchIndexClient = await loadSearchIndex();
-  return searchIndexClient.search(query).flatMap((field) => field.result.map(String));
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery || limit <= 0) return [];
+  return searchIndexClient.search(normalizedQuery, { limit }).flatMap((field) => field.result.map(String));
 }

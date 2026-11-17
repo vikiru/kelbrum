@@ -1,6 +1,10 @@
 import filterIndexData from '@/data/filter-index.json';
 import { AnimeFilterIndexSchema } from '@/entities/anime/model/anime-schema';
-import { formatFilterValue } from '@/features/search/lib/search-filter-formatting';
+import {
+  formatIndexRatingKey,
+  formatIndexTaxonomyKey,
+  formatIndexTypeKey,
+} from '@/features/search/lib/search-filter-formatting';
 
 const filterIndex = AnimeFilterIndexSchema.parse(filterIndexData);
 const filterIndexPositionById = new Map(filterIndex.ids.map((id, index) => [id, index]));
@@ -21,6 +25,52 @@ export {
   FILTER_YEAR_MIN,
 };
 
+export interface NumericFilterRange {
+  field: 'score' | 'year' | 'episodes';
+  minimum: number;
+  maximum: number;
+  enabled: boolean;
+}
+
+function parseNumericBound(raw: string, fallback: number): number {
+  const trimmed = raw.trim();
+  if (!trimmed) return fallback;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export function resolveNumericFilterRanges(
+  scoreRange: readonly [number, number],
+  yearRange: readonly [string, string],
+  episodeRange: readonly [string, string],
+): readonly [NumericFilterRange, NumericFilterRange, NumericFilterRange] {
+  return [
+    {
+      field: 'score',
+      minimum: scoreRange[0],
+      maximum: scoreRange[1],
+      enabled: scoreRange[0] !== FILTER_SCORE_MIN || scoreRange[1] !== FILTER_SCORE_MAX,
+    },
+    {
+      field: 'year',
+      minimum: parseNumericBound(yearRange[0], 0),
+      maximum: parseNumericBound(yearRange[1], Number.POSITIVE_INFINITY),
+      enabled: yearRange.some((bound) => bound.trim().length > 0),
+    },
+    {
+      field: 'episodes',
+      minimum: parseNumericBound(episodeRange[0], 0),
+      maximum: parseNumericBound(episodeRange[1], Number.POSITIVE_INFINITY),
+      enabled: episodeRange.some((bound) => bound.trim().length > 0),
+    },
+  ];
+}
+
+export function matchesNumericRange(value: number | null, minimum: number, maximum: number, enabled: boolean): boolean {
+  if (!enabled) return true;
+  return value !== null && value >= minimum && value <= maximum;
+}
+
 export function getIndexedFilterIds(
   type: string,
   rating: string,
@@ -33,25 +83,19 @@ export function getIndexedFilterIds(
 ): Set<number> {
   let ids = new Set(filterIndex.ids);
   const categories: Array<[string, string]> = [];
-  if (type !== 'all') categories.push(['anime_type', type.toUpperCase()]);
-  if (rating !== 'all') categories.push(['rating', rating.toUpperCase()]);
-  if (demographic !== 'all') categories.push(['demographic', formatFilterValue(demographic)]);
-  genres.forEach((genre) => categories.push(['genre', formatFilterValue(genre)]));
-  themes.forEach((theme) => categories.push(['theme', formatFilterValue(theme)]));
+  if (type !== 'all') categories.push(['anime_type', formatIndexTypeKey(type)]);
+  if (rating !== 'all') categories.push(['rating', formatIndexRatingKey(rating)]);
+  if (demographic !== 'all') categories.push(['demographic', formatIndexTaxonomyKey(demographic)]);
+  genres.forEach((genre) => categories.push(['genre', formatIndexTaxonomyKey(genre)]));
+  themes.forEach((theme) => categories.push(['theme', formatIndexTaxonomyKey(theme)]));
+
   for (const [field, value] of categories) {
     const postings = filterIndex.categorical[field]?.[value];
-    if (postings) ids = intersectIds(ids, postings);
+    if (postings === undefined) return new Set();
+    ids = intersectIds(ids, postings);
   }
-  for (const [field, minimum, maximum, enabled] of [
-    ['score', scoreRange[0], scoreRange[1], scoreRange[0] !== 0 || scoreRange[1] !== 10],
-    ['year', Number(yearRange[0]) || 0, Number(yearRange[1]) || Number.POSITIVE_INFINITY, yearRange.some(Boolean)],
-    [
-      'episodes',
-      Number(episodeRange[0]) || 0,
-      Number(episodeRange[1]) || Number.POSITIVE_INFINITY,
-      episodeRange.some(Boolean),
-    ],
-  ] as const) {
+
+  for (const { field, minimum, maximum, enabled } of resolveNumericFilterRanges(scoreRange, yearRange, episodeRange)) {
     if (!enabled) continue;
     const values = filterIndex.numeric[field];
     if (!values) continue;
@@ -59,8 +103,7 @@ export function getIndexedFilterIds(
       [...ids].filter((id) => {
         const index = filterIndexPositionById.get(id);
         if (index === undefined) return false;
-        const value = values[index];
-        return value !== null && value >= minimum && value <= maximum;
+        return matchesNumericRange(values[index] ?? null, minimum, maximum, enabled);
       }),
     );
   }

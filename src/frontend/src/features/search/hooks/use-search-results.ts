@@ -5,7 +5,12 @@ import type { SearchFilters } from '@/features/search/hooks/use-search-filters';
 import type { SearchCatalogueItem } from '@/features/search/model/search-catalogue';
 import type { SearchSort } from '@/features/search/model/search-types';
 
-import { getIndexedFilterIds, intersectIds } from '@/features/search/lib/search-filter-index';
+import {
+  getIndexedFilterIds,
+  intersectIds,
+  matchesNumericRange,
+  resolveNumericFilterRanges,
+} from '@/features/search/lib/search-filter-index';
 
 interface SearchResultsOptions {
   catalogue: readonly SearchCatalogueItem[];
@@ -37,10 +42,11 @@ export function useSearchResults(options: SearchResultsOptions): SearchResultSet
       filters.episodeRange,
     );
     const candidateIds = matchingIds ? intersectIds(filterIds, matchingIds) : filterIds;
-    const minYear = Number(filters.yearRange[0]) || 0;
-    const maxYear = Number(filters.yearRange[1]) || Number.POSITIVE_INFINITY;
-    const minEpisodes = Number(filters.episodeRange[0]) || 0;
-    const maxEpisodes = Number(filters.episodeRange[1]) || Number.POSITIVE_INFINITY;
+    const [scoreFilter, yearFilter, episodesFilter] = resolveNumericFilterRanges(
+      filters.scoreRange,
+      filters.yearRange,
+      filters.episodeRange,
+    );
 
     const results = [...candidateIds]
       .map((id) => catalogueById.get(id))
@@ -52,12 +58,9 @@ export function useSearchResults(options: SearchResultsOptions): SearchResultSet
           (filters.demographic === 'all' || item.demographics.includes(filters.demographic)) &&
           filters.genres.every((value) => item.genres.includes(value)) &&
           filters.themes.every((value) => item.themes.includes(value)) &&
-          (item.score ?? 0) >= filters.scoreRange[0] &&
-          (item.score ?? 0) <= filters.scoreRange[1] &&
-          (item.year ?? 0) >= minYear &&
-          (item.year ?? 0) <= maxYear &&
-          (item.episodes ?? 0) >= minEpisodes &&
-          (item.episodes ?? 0) <= maxEpisodes,
+          matchesNumericRange(item.score, scoreFilter.minimum, scoreFilter.maximum, scoreFilter.enabled) &&
+          matchesNumericRange(item.year, yearFilter.minimum, yearFilter.maximum, yearFilter.enabled) &&
+          matchesNumericRange(item.episodes, episodesFilter.minimum, episodesFilter.maximum, episodesFilter.enabled),
       )
       .toSorted((a, b) => compareAnime(a, b, sort));
 
@@ -68,6 +71,13 @@ export function useSearchResults(options: SearchResultsOptions): SearchResultSet
 function compareAnime(a: AnimeCardItem, b: AnimeCardItem, sort: SearchSort): number {
   const direction = sort.endsWith('asc') ? 1 : -1;
   if (sort.startsWith('title')) return direction * a.title.localeCompare(b.title);
-  if (sort.startsWith('year')) return direction * ((a.year ?? 0) - (b.year ?? 0));
-  return direction * ((a.score ?? 0) - (b.score ?? 0));
+  if (sort.startsWith('year')) return compareNullableNumber(a.year, b.year, direction);
+  return compareNullableNumber(a.score, b.score, direction);
+}
+
+function compareNullableNumber(a: number | null, b: number | null, direction: 1 | -1): number {
+  if (a === null && b === null) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return direction * (a - b);
 }
