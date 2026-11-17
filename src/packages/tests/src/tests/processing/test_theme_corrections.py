@@ -11,4 +11,4 @@ def test_theme_corrections_remove_before_adding() -> None:
 
     corrected = _apply_theme_corrections(entry, ('Workplace',), ('School',))
 
-    assert [theme.name for theme in corrected.themes] == ['workplace']
+    assert [theme.name for theme in corrected.themes or ()] == ['workplace']

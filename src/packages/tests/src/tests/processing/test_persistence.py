@@ -3,6 +3,7 @@ from pathlib import Path
 import msgspec
 
 from fetch.contracts import AnimeRelation, NamedResource, RelationEntry, Taxonomy
+from normalization.metadata import MetadataState
 from processing.build import ProcessingResult, canonical_frame
 from processing.contracts import CanonicalAnime
 from processing.eligibility import EligibilityAudit
@@ -40,6 +41,10 @@ def _record(anime_id: int) -> CanonicalAnime:
         themes=(),
         demographics=(),
         relations=(),
+        synopsis_state=MetadataState.OBSERVED,
+        genres_state=MetadataState.OBSERVED_ABSENT,
+        themes_state=MetadataState.UNKNOWN,
+        tags_state=MetadataState.UNKNOWN,
     )
 
 
