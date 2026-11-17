@@ -37,22 +37,22 @@ class NarrativeStructurePolicy(msgspec.Struct, frozen=True):
             source_structure = source_structure.structure
         if isinstance(candidate_structure, NarrativeProfile):
             candidate_structure = candidate_structure.structure
-        s_s = str(source_structure or '').strip().upper()
-        c_s = str(candidate_structure or '').strip().upper()
+        source_structure = str(source_structure or '').strip().upper()
+        candidate_structure = str(candidate_structure or '').strip().upper()
 
-        if s_s == NarrativeStructure.ANTHOLOGY:
-            if c_s == NarrativeStructure.ANTHOLOGY:
+        if source_structure == NarrativeStructure.ANTHOLOGY:
+            if candidate_structure == NarrativeStructure.ANTHOLOGY:
                 return self.anthology_to_anthology_boost
-            if c_s == NarrativeStructure.EPISODIC:
+            if candidate_structure == NarrativeStructure.EPISODIC:
                 return self.anthology_to_episodic_boost
-            if c_s == NarrativeStructure.SERIALIZED:
+            if candidate_structure == NarrativeStructure.SERIALIZED:
                 return self.anthology_to_serialized_dampen
 
-        elif s_s == NarrativeStructure.EPISODIC:
-            if c_s in (NarrativeStructure.EPISODIC, NarrativeStructure.ANTHOLOGY):
+        elif source_structure == NarrativeStructure.EPISODIC:
+            if candidate_structure in (NarrativeStructure.EPISODIC, NarrativeStructure.ANTHOLOGY):
                 return self.episodic_to_episodic_boost
 
-        elif s_s == NarrativeStructure.SERIALIZED and c_s == NarrativeStructure.ANTHOLOGY:
+        elif source_structure == NarrativeStructure.SERIALIZED and candidate_structure == NarrativeStructure.ANTHOLOGY:
             return self.serialized_to_anthology_dampen
 
         return 1.0
