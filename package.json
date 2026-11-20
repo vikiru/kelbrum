@@ -48,7 +48,7 @@
     "oxfmt": "^0.78.0",
     "oxlint": "^1.93.0",
     "oxlint-tailwindcss": "^1.17.1",
-    "oxlint-tsgolint": "^7.0.2006",
+    "oxlint-tsgolint": "^7.0.2007",
     "semantic-release": "^25.0.9",
     "typescript": "^5.9.3"
   },
